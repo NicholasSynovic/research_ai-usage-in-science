@@ -178,3 +178,4 @@ build-docs/*
 *.sqlite
 *.png
 !images/*
+!.rad.json
