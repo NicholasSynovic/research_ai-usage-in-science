@@ -1,1 +1,1 @@
-FROM alpine:latest
+FROM python:3.10-bookworm

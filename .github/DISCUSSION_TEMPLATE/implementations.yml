@@ -9,7 +9,7 @@ body:
       label: "Implementation Reason"
       description: "Why did you decide to implement this template?"
       placeholder: |
-        I implemented this template repo to provide a better developer experience when creating repository for YYY topic | language | tooling | etc.
+        I implemented this template repo to provide a better developer experience when creating python repositories.
       render: markdown
     validations:
       required: true
