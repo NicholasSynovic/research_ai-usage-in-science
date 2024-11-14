@@ -9,7 +9,6 @@ from progress.bar import Bar
 
 
 def supportingInfo(inputPath: Path, outputPath: Path) -> DataFrame:
-
     df: DataFrame = pandas.read_parquet(inputPath)
 
     results = []
@@ -20,7 +19,6 @@ def supportingInfo(inputPath: Path, outputPath: Path) -> DataFrame:
         doi = row["doi"]
 
         try:
-
             response = requests.get(doi, timeout=20)
             response.raise_for_status()
 
@@ -46,7 +44,6 @@ def supportingInfo(inputPath: Path, outputPath: Path) -> DataFrame:
                         "h3", class_="siTitle title-small"
                     )
                     if dataKeyTitle:
-
                         dataKey = (
                             dataKeyTitle.find("a").text.strip()
                             if dataKeyTitle.find("a")

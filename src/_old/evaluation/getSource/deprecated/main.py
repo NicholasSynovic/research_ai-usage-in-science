@@ -16,7 +16,6 @@ def getDataSource(inputPath: Path, ouputPath: Path):
     bar = Bar("Processing Rows", max=len(df))
 
     for index, row in df.iterrows():
-
         doi = row["doi"]
         url = row["url"]
 
@@ -45,7 +44,6 @@ def getDataSource(inputPath: Path, ouputPath: Path):
         for p_tag in p_tags:
             strong_tag = p_tag.find("strong")
             if strong_tag and "Data Availability:" in strong_tag.text:
-
                 dataAvailability = p_tag.get_text(separator=" ", strip=True)
 
                 a_tag = p_tag.find("a", href=True)

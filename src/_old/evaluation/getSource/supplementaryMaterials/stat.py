@@ -16,11 +16,9 @@ def countPapers(inputPath: Path):
     bar = Bar("Processing Rows", max=len(df))
 
     for index, row in df.iterrows():
-
         doi = row["doi"]
 
         try:
-
             response = requests.get(doi, timeout=20)
             response.raise_for_status()
 
@@ -34,7 +32,6 @@ def countPapers(inputPath: Path):
                 if supplementary_materials:
                     count += 1
                 else:
-
                     supporting_info_title = soup.find(
                         "h2", string="Supporting information"
                     )
@@ -47,7 +44,6 @@ def countPapers(inputPath: Path):
                         if supplementary_materials:
                             count += 1
             else:
-
                 supporting_info_title = soup.find(
                     "h2", string="Supporting information"
                 )

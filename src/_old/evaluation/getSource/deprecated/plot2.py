@@ -7,7 +7,6 @@ from pandas import DataFrame
 
 
 def extractDomain(url: str) -> str:
-
     parsed_url = urlparse(url)
     domain = parsed_url.netloc
     return domain

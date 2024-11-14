@@ -93,9 +93,7 @@ def main() -> None:
 
     :return: None
     """
-    url: str = (
-        "https://service.elsevier.com/app/answers/detail/a_id/15181/supporthub/scopus/"  # noqa: E501
-    )
+    url: str = "https://service.elsevier.com/app/answers/detail/a_id/15181/supporthub/scopus/"  # noqa: E501
     soup: BeautifulSoup = parse_html(url)
 
     if soup:

@@ -23,7 +23,6 @@ def plotBarValues(data: dict) -> None:
 
 
 def plotResults(df: DataFrame, fp: Path, outputCSV: Path) -> None:
-
     dfKeywords = df.drop(columns=["doi"])
 
     keywordSums = dfKeywords.sum().sort_values(ascending=False)

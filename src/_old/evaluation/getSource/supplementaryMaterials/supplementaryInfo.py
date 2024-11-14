@@ -11,7 +11,6 @@ from progress.bar import Bar
 
 
 def getUrls(inputPath: Path) -> DataFrame:
-
     df: DataFrame = pandas.read_parquet(inputPath)
 
     urlList = []
@@ -23,7 +22,6 @@ def getUrls(inputPath: Path) -> DataFrame:
         doi = row["doi"]
 
         try:
-
             response = requests.get(doi, timeout=20)
             response.raise_for_status()
 
@@ -49,7 +47,6 @@ def getUrls(inputPath: Path) -> DataFrame:
                         "h3", class_="siTitle title-small"
                     )
                     if dataKeyTitle:
-
                         dataURL = (
                             material.find("p", class_="siDoi").find("a")[
                                 "href"

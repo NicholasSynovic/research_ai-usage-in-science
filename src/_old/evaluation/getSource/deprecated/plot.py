@@ -38,7 +38,6 @@ def extract_domain(url: str):
 
 
 def plotResults(df: DataFrame, fp: Path) -> None:
-
     print("Sample URLs:")
     print(df["dataAvailabilityLink"].head())
 

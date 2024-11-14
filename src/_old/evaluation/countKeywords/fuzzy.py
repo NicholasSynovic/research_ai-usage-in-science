@@ -13,7 +13,6 @@ from src.utils import ifFileExistsExit
 
 # did not work as well as original regex method, almost no matches are found
 def findFuzzyMatches(keyword: str, text: str) -> int:
-
     # similarity threshold that corresponds to an edit distance of up to 3
     similarityThreshold = 85
 

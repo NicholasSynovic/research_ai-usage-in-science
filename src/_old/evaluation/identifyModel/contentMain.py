@@ -36,7 +36,6 @@ def identifyModel(inputPath: Path, outputPath: Path):
 
         list = []
         for chunk in chunks:
-
             promptTemplate: List = [
                 SystemMessage(
                     content="""You are a deep learning model identifier for academic papers.

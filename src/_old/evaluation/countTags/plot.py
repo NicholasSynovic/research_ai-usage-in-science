@@ -21,7 +21,6 @@ def plotBarValues(data: dict) -> None:
 
 
 def plotResults(df: DataFrame, fp: Path) -> None:
-
     df["tags"] = df["tags"].str.replace("PLOS_", "", regex=False)
     dfSorted = df.sort_values(by="count", ascending=False).head(10)
 

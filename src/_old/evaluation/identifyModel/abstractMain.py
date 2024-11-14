@@ -110,7 +110,6 @@ def identifyModel(inputPath: Path, outputPath: Path):
     help="Path to store data in CSV format",
 )
 def main(inputPath: Path, outputPath: Path) -> None:
-
     identifyModel(inputPath, outputPath)
 
 

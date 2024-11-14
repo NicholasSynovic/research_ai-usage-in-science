@@ -36,7 +36,6 @@ def countKeywords(df: DataFrame, keywords: List[str]) -> DataFrame:
             content: str = row["content"].lower()
 
             for kw, pattern in fuzzyPatterns.items():
-
                 count: int = 0
 
                 count += len(list(pattern.finditer(title)))

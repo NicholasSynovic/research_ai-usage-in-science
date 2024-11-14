@@ -18,7 +18,6 @@ def plotBarValues(data: dict) -> None:
 
 
 def plot(input: str, output: str) -> None:
-
     df = pandas.read_csv(input)
 
     if "Domain" not in df.columns:

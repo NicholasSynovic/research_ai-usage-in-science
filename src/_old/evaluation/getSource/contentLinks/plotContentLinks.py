@@ -40,7 +40,6 @@ def extractDomains(df: DataFrame) -> DataFrame:
 
 
 def githubLinks(df: DataFrame) -> DataFrame:
-
     githubDF = df[df["domain"].str.contains("github")]
 
     githubDF = githubDF.drop(columns=["domain"])
@@ -49,7 +48,6 @@ def githubLinks(df: DataFrame) -> DataFrame:
 
 
 def plot(df: DataFrame, output: str) -> None:
-
     if "link" not in df.columns:
         raise ValueError("The CSV file must contain a 'link' column.")
 

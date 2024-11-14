@@ -11,7 +11,6 @@ from progress.bar import Bar
 
 def extractArtifact(URL: str) -> List[str]:
     try:
-
         response = requests.get(URL, timeout=20)
         response.raise_for_status()
         html_content = response.content
@@ -21,16 +20,13 @@ def extractArtifact(URL: str) -> List[str]:
         article_info_div = soup.find("div", class_="articleinfo")
 
         if article_info_div:
-
             p_tags = article_info_div.find_all("p")
 
             if len(p_tags) >= 5:
-
                 data_availability_p = p_tags[4]
 
                 links = data_availability_p.find_all("a")
                 if links:
-
                     hrefs = [
                         link["href"] for link in links if "href" in link.attrs
                     ]
@@ -44,7 +40,6 @@ def extractArtifact(URL: str) -> List[str]:
 
 
 def getURLs(inputPath: str) -> List[List[str]]:
-
     df = pandas.read_parquet(inputPath)
 
     artifacts = []
