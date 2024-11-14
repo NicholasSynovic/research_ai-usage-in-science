@@ -2,9 +2,6 @@ build:
 	poetry build
 	pip install dist/*.tar.gz
 
-build-docs:
-	sphinx-build --builder html src-docs build-docs
-
 create-dev:
 	rm -rf env
 	python3.10 -m venv env
@@ -14,9 +11,6 @@ create-dev:
 		poetry install; \
 		deactivate; \
 	)
-
-create-docs:
-	sphinx-apidoc src --output-dir src-docs --maxdepth 100 --separate
 
 create-output-dir:
 	mkdir -p data/nature
