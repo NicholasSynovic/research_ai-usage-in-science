@@ -11,7 +11,11 @@
   - [Dependencies](#dependencies)
   - [How to Install](#how-to-install)
   - [How to Run](#how-to-run)
-    - [Instructions](#instructions)
+    - [Instructions For Getting Data](#instructions-for-getting-data)
+    - [Instructions For Analyzing Data](#instructions-for-analyzing-data)
+      - [Total Number of Documents per Year](#total-number-of-documents-per-year)
+      - [Total Number of Natural Science Documents per Year](#total-number-of-natural-science-documents-per-year)
+      - [Comparison of the Total Number of Documents and Total Number of Natural Science Documents](#comparison-of-the-total-number-of-documents-and-total-number-of-natural-science-documents)
   - [How to Contribute](#how-to-contribute)
   - [Project Tutorial](#project-tutorial)
     - [Reimplementing From Existing Dataset](#reimplementing-from-existing-dataset)
@@ -62,7 +66,7 @@ aius-search-journal | aius-extract-documents | aius-filter-documents | aius-samp
 
 In practice, there exists command line arguements for each of these executables.
 
-### Instructions
+### Instructions For Getting Data
 
 1. Search journals for papers that match the following search queries from 2014
    to 2024:
@@ -85,7 +89,25 @@ In practice, there exists command line arguements for each of these executables.
    Command:
    `aius-extract-documents --input data/plos_search_results.parquet --output data/plos_search_result_documents.parquet`
 
-1.
+1. Filter documents through OpenAlex for Natural Science only documents
+
+   Command:
+   `aius-filter-documents --input data/plos_search_result_documents.parquet --output data/plos_search_result_filtered_documents.parquet --email $EMAIL`
+
+   **NOTE**: Replace `$EMAIL` with your email address
+
+### Instructions For Analyzing Data
+
+#### Total Number of Documents per Year
+
+To generate a plot of the total number of documets per year, run the following
+command:
+
+An example output would be:
+
+#### Total Number of Natural Science Documents per Year
+
+#### Comparison of the Total Number of Documents and Total Number of Natural Science Documents
 
 ## How to Contribute
 

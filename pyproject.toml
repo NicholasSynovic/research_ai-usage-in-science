@@ -41,3 +41,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 aius-search-journal = "src.searchJournal:main"
 aius-extract-documents = "src.extractDocuments:main"
+aius-filter-documents = "src.filterDocuments:main"
