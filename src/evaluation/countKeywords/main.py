@@ -4,8 +4,8 @@ from typing import List
 
 import click
 import pandas
-from pandas import DataFrame, Series
-from progress.bar import Bar
+from pandas import DataFrame
+from tqdm import tqdm
 
 from src.classes import SEARCH_QUERIES
 from src.utils import ifFileExistsExit
@@ -18,36 +18,70 @@ def createFuzzyRegex(keyword: str) -> str:
     return fuzzyPattern
 
 
-def countKeywords(df: DataFrame, keywords: List[str]) -> DataFrame:
-    data: dict[str, List[int]] = {kw: [] for kw in keywords}
-    data["doi"] = []
+# def countKeywords(df: DataFrame, keywords: List[str]) -> DataFrame:
+#     data: dict[str, List[int]] = {kw: [] for kw in keywords}
+#     data["doi"] = []
 
+
+#     with Bar("Counting keywords...", max=df.shape[0]) as bar:
+#         row: Series[str]
+#         for _, row in df.iterrows():
+#             data["doi"].append(row["doi"])
+
+#             title: str = row["titles"].lower()
+#             abstract: str = row["abstracts"].lower()
+#             content: str = row["content"].lower()
+
+#             for kw, pattern in fuzzyPatterns.items():
+
+#                 count: int = 0
+
+#                 count += len(list(pattern.finditer(title)))
+#                 count += len(list(pattern.finditer(abstract)))
+#                 count += len(list(pattern.finditer(content)))
+
+#                 data[kw].append(count)
+
+#             bar.next()
+
+#     return DataFrame(data=data)
+
+
+# new
+def countKeywords(df: DataFrame, keywords: List[str]) -> DataFrame:
+    # Initialize dictionary to store counts
+    data: dict[str, int] = {kw: 0 for kw in keywords}
+
+    # Create regex patterns for fuzzy keyword matching
     fuzzyPatterns = {
         kw: re.compile(createFuzzyRegex(kw), re.IGNORECASE) for kw in keywords
     }
 
-    with Bar("Counting keywords...", max=df.shape[0]) as bar:
-        row: Series[str]
-        for _, row in df.iterrows():
-            data["doi"].append(row["doi"])
+    # Progress bar for iteration
+    tqdm.pandas(desc="Counting papers with keywords...")
 
-            title: str = row["titles"].lower()
-            abstract: str = row["abstracts"].lower()
-            content: str = row["content"].lower()
+    def check_keywords(row):
+        title: str = row["titles"].lower()
+        abstract: str = row["abstracts"].lower()
+        content: str = row["content"].lower()
 
-            for kw, pattern in fuzzyPatterns.items():
+        for kw, pattern in fuzzyPatterns.items():
+            if (
+                pattern.search(title)
+                or pattern.search(abstract)
+                or pattern.search(content)
+            ):
+                data[kw] += 1
 
-                count: int = 0
+    # Iterate over rows to count papers with keywords
+    df.progress_apply(check_keywords, axis=1)
 
-                count += len(list(pattern.finditer(title)))
-                count += len(list(pattern.finditer(abstract)))
-                count += len(list(pattern.finditer(content)))
+    # Convert results to a DataFrame
+    result_df = DataFrame(
+        list(data.items()), columns=["Keyword", "Paper Count"]
+    )
 
-                data[kw].append(count)
-
-            bar.next()
-
-    return DataFrame(data=data)
+    return result_df
 
 
 @click.command()
