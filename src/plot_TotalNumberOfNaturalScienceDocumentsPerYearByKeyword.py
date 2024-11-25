@@ -77,7 +77,7 @@ def main(inputPath: Path, outputPath: Path) -> None:
 
     sns.barplot(data=df, x="year", y="amount", hue="Keyword")
     plt.title(
-        label="Total Number of Natural Science PLOS Publications From Search Results by Keyword"  # noqa:E501
+        label="Total Number of Natural Science PLOS Publications\nFrom Search Results by Keyword"  # noqa:E501
     )
     plt.xlabel(xlabel="Year")
     plt.ylabel(ylabel="Number of Publications")
