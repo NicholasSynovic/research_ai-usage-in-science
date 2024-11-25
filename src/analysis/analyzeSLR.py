@@ -4,6 +4,44 @@ import click
 import pandas
 from pandas import DataFrame, Series
 
+from src.analysis import DOIS
+
+
+def readDF(fp: Path) -> DataFrame:
+    print("Number Of Samples:", len(set(DOIS)))
+
+    df: DataFrame = pandas.read_excel(
+        io=fp,
+        sheet_name="Form1",
+        engine="openpyxl",
+    )
+
+    print("Rows Recorded:", df.shape[0])
+
+    df.columns = df.columns.str.strip()
+    df = df.rename(
+        columns={
+            "Do The Author's Use Deep Learning?": "UsesDL",
+            "What Is The Method Of PTM Re-Use Per Model?": "ReuseMethod",
+            "Paper DOI": "DOI",
+        }
+    )
+    df["ReuseMethod"] = df["ReuseMethod"].str.replace(
+        pat="Adaption",
+        repl="Adaptation",
+    )
+
+    df = df[df["DOI"].isin(values=DOIS)]
+    print("DOIs Recorded:", df.shape[0])
+
+    df["Ignore"] = df["Ignore"].astype(bool)
+    df = df[df["Ignore"] == False]  # noqa: E712
+    print("Unqiue DOIs Read And Recorded:", df.shape[0])
+
+    print("Missing DOIs:", DOIS.difference(df["DOI"]))
+
+    return df
+
 
 def countPapersThatUseDL(df: DataFrame) -> DataFrame:
     counts: Series = df["UsesDL"].value_counts()
@@ -13,25 +51,58 @@ def countPapersThatUseDL(df: DataFrame) -> DataFrame:
     return df[df["UsesDL"] == "Yes"]
 
 
-def countReuseMethods(df: DataFrame) -> DataFrame:
+def countReuseMethodsPerPaper(df: DataFrame) -> None:
     data: dict[str, int] = {
         "Conceptual": 0,
         "Adaptation": 0,
         "Deployment": 0,
     }
 
-    df = df.copy(deep=True)
-
-    df["ReuseMethod"] = df["ReuseMethod"].str.replace(
-        pat="Adaption",
-        repl="Adaptation",
+    data["Conceptual"] = (
+        df["ReuseMethod"].str.count(pat="Conceptual").sum().__int__()
+    )
+    data["Adaptation"] = (
+        df["ReuseMethod"].str.count(pat="Adaptation").sum().__int__()
+    )
+    data["Deployment"] = (
+        df["ReuseMethod"].str.count(pat="Deployment").sum().__int__()
     )
 
-    data["Conceptual"] = df["ReuseMethod"].str.count(pat="Conceptual").sum()
-    data["Adaptation"] = df["ReuseMethod"].str.count(pat="Adaptation").sum()
-    data["Deployment"] = df["ReuseMethod"].str.count(pat="Deployment").sum()
+    print("Conceptual Reuse:", data["Conceptual"])
+    print("Adaptation Reuse:", data["Adaptation"])
+    print("Deployment Reuse:", data["Deployment"])
 
-    return df
+
+def countPapersPerReuseMethod(df: DataFrame) -> None:
+    data: dict[str, int] = {
+        "Conceptual": 0,
+        "Adaptation": 0,
+        "Deployment": 0,
+        "Multiple": 0,
+    }
+
+    df = df.dropna(axis=0, subset="ReuseMethod")
+    print("Papers With Reuse Method:", df.shape[0])
+
+    data["Conceptual"] = df["ReuseMethod"].str.contains(pat="Conceptual").sum()
+    data["Adaptation"] = df["ReuseMethod"].str.contains(pat="Adaptation").sum()
+    data["Deployment"] = df["ReuseMethod"].str.contains(pat="Deployment").sum()
+
+    row: Series
+    for _, row in df.iterrows():
+        record: str = row["ReuseMethod"]
+
+        c: bool = True if record.find("Conceptual") > -1 else False
+        a: bool = True if record.find("Adaptation") > -1 else False
+        d: bool = True if record.find("Deployment") > -1 else False
+
+        if c + a + d > 1:
+            data["Multiple"] += 1
+
+    print("Papers Using Conceptual Reuse:", data["Conceptual"])
+    print("Papers Using Adaptation Reuse:", data["Adaptation"])
+    print("Papers Using Deployment Reuse:", data["Deployment"])
+    print("Papers Using Multiple Reuse Methods:", data["Multiple"])
 
 
 @click.command()
@@ -50,25 +121,17 @@ def countReuseMethods(df: DataFrame) -> DataFrame:
     ),
 )
 def main(slr: Path) -> None:
-    df: DataFrame = pandas.read_excel(
-        io=slr,
-        sheet_name="Form1",
-        engine="openpyxl",
-    )
-    df.columns = df.columns.str.strip()
-    df = df.rename(
-        columns={
-            "Do The Author's Use Deep Learning?": "UsesDL",
-            "What Is The Method Of PTM Re-Use Per Model?": "ReuseMethod",
-        }
-    )
+    df: DataFrame = readDF(fp=slr)
+    print("===")
 
-    df["Ignore"] = df["Ignore"].astype(bool)
-    keepDF: DataFrame = df[df["Ignore"] == False]  # noqa: E712
+    dlDF: DataFrame = countPapersThatUseDL(df=df)
+    print("===")
 
-    dlDF: DataFrame = countPapersThatUseDL(df=keepDF)
+    countReuseMethodsPerPaper(df=dlDF)
+    print("===")
 
-    dlDF = countReuseMethods(df=dlDF)
+    countPapersPerReuseMethod(df=dlDF)
+    print("===")
 
 
 if __name__ == "__main__":
