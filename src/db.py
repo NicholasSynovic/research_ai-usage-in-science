@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas
 from pandas import DataFrame
 from sqlalchemy import (
+    Boolean,
     Column,
     Engine,
     ForeignKey,
@@ -106,6 +107,29 @@ class DB:
             Column("url", String, nullable=False),
             Column("status_code", Integer, nullable=False),
             Column("html", String, nullable=False),
+        )
+
+        _: Table = Table(
+            "document_filter",
+            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column(
+                "document_id",
+                Integer,
+                ForeignKey("documents.id"),
+                nullable=False,
+            ),
+            Column(
+                "openalex_response_id",
+                Integer,
+                ForeignKey("openalex_responses.id"),
+                nullable=False,
+            ),
+            Column("retracted", Boolean, nullable=False),
+            Column("open_access", Boolean, nullable=False),
+            Column("cited_by_count", Integer, nullable=False),
+            Column("fields", String, nullable=False),
+            Column("natural_science_fields", String, nullable=False),
+            Column("is_natural_science", Boolean, nullable=False),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
