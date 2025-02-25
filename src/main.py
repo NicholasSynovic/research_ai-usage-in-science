@@ -16,7 +16,7 @@ from src import searchFunc
 from src.db import DB
 from src.utils import ifFileExistsExit
 
-COMMANDS: set[str] = {"init", "search", "ed", "oa"}
+COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter"}
 
 
 def cliParser() -> Namespace:
@@ -98,6 +98,20 @@ def cliParser() -> Namespace:
         type=str,
         help="Email address to access OpenAlex polite pool",
         dest="oa.email",
+    )
+
+    filterParser: ArgumentParser = subparser.add_parser(
+        name="filter",
+        help="Filter For Documents Relevant To This Study (Step 4)",
+    )
+    filterParser.add_argument(
+        "-d",
+        "--db",
+        nargs=1,
+        default=Path("aius.sqlite3"),
+        type=Path,
+        help="Path to AIUS SQLite3 database",
+        dest="filter.db",
     )
 
     return parser.parse_args()
@@ -315,6 +329,71 @@ def getOpenAlexMetadata(fp: Path, email: str, doiCount: int = 25) -> None:
     )
 
 
+def filterDocuments(fp: Path) -> None:
+    FIELD_FILTER: set[str] = {
+        "Agricultural and Biological Sciences",
+        "Environmental Science",
+        "Biochemistry Genetics and Molecular Biology",
+        "Immunology and Microbiology",
+        "Neuroscience",
+        "Earth and Planetary Sciences",
+        "Physics and Astronomy",
+        "Chemistry",
+    }
+
+    dfs: List[DataFrame] = []
+
+    db: DB = DB(fp=fp)
+
+    oaResponses: DataFrame = db.readTableToDF(table="openalex_responses")
+
+    row: Series
+    with Bar("Filtering documents...", max=oaResponses.shape[0]) as bar:
+        for idx, row in oaResponses.iterrows():
+            nsFields: List[str] = []
+            fields: List[str | None] = []
+            isNS: bool = False
+
+            data: defaultdict[str, List[Any]] = defaultdict(list)
+
+            json: dict = loads(s=row["html"])
+
+            data["document_id"].append(row["document_id"])
+            data["openalex_response_id"].append(idx)
+            data["retracted"].append(json["is_retracted"])
+            data["open_access"].append(json["open_access"]["is_oa"])
+            data["cited_by_count"].append(json["cited_by_count"])
+
+            topic: dict
+            for topic in json["topics"]:
+                fields.append(topic["field"]["display_name"])
+
+            data["fields"].append(fields)
+
+            field: str | None
+            for field in fields:
+                if field is None:
+                    continue
+
+                if len(FIELD_FILTER.intersection([field])) == 1:
+                    nsFields.append(field)
+
+            data["natural_science_fields"].append(nsFields)
+
+            if len(nsFields) >= 2:
+                isNS = True
+
+            data["is_natural_science"].append(isNS)
+
+            dfs.append(DataFrame(data=data))
+
+            bar.next()
+
+        df: DataFrame = pandas.concat(objs=dfs, ignore_index=True)
+        print(df)
+        print(df["is_natural_science"].value_counts())
+
+
 def main() -> None:
     args: dict[str, Any] = cliParser().__dict__
 
@@ -334,6 +413,8 @@ def main() -> None:
             extractDocuments(fp=args["ed.db"][0])
         case "oa":
             getOpenAlexMetadata(fp=args["oa.db"][0], email=args["oa.email"][0])
+        case "filter":
+            filterDocuments(fp=args["filter.db"][0])
 
     sys.exit(0)
 
