@@ -368,8 +368,6 @@ def filterDocuments(fp: Path) -> None:
             for topic in json["topics"]:
                 fields.append(topic["field"]["display_name"])
 
-            data["fields"].append(fields)
-
             field: str | None
             for field in fields:
                 if field is None:
@@ -378,11 +376,11 @@ def filterDocuments(fp: Path) -> None:
                 if len(FIELD_FILTER.intersection([field])) == 1:
                     nsFields.append(field)
 
-            data["natural_science_fields"].append(nsFields)
-
             if len(nsFields) >= 2:
                 isNS = True
 
+            data["fields"].append(fields.__str__())
+            data["natural_science_fields"].append(nsFields.__str__())
             data["is_natural_science"].append(isNS)
 
             dfs.append(DataFrame(data=data))
