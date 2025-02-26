@@ -16,7 +16,7 @@ from src import searchFunc
 from src.db import DB
 from src.utils import ifFileExistsExit
 
-COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter"}
+COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter", "plot"}
 
 
 def cliParser() -> Namespace:
@@ -114,6 +114,28 @@ def cliParser() -> Namespace:
         dest="filter.db",
     )
 
+    plotParser: ArgumentParser = subparser.add_parser(
+        name="plot",
+        help="Plot Figures (Step 5)",
+    )
+    plotParser.add_argument(
+        "-d",
+        "--db",
+        nargs=1,
+        default=Path("aius.sqlite3"),
+        type=Path,
+        help="Path to AIUS SQLite3 database",
+        dest="plot.db",
+    )
+    plotParser.add_argument(
+        "-o",
+        "--od",
+        nargs=1,
+        default=Path("."),
+        type=Path,
+        help="Path to store figures",
+        dest="plot.od",
+    )
     return parser.parse_args()
 
 
@@ -400,6 +422,30 @@ def filterDocuments(fp: Path) -> None:
         )
 
 
+def plot(fp: Path, outputDir: Path) -> None:
+    sqlQuery: str = """SELECT document_filter.*, search_responses.journal, documents.doi
+FROM document_filter
+LEFT JOIN documents ON document_filter.document_id = documents.id
+LEFT JOIN search_results ON document_filter.document_id = search_results.document_id
+LEFT JOIN search_responses ON search_responses.id = search_results.response_id
+WHERE
+(
+	document_filter.retracted = 0 AND
+	document_filter.open_access = 1 AND
+	document_filter.cited_by_count > 0 AND
+	document_filter.is_natural_science = 1 AND
+	search_responses.journal = 2
+)
+"""
+
+    db: DB = DB(fp=fp)
+
+    df: DataFrame = pandas.read_sql(
+        sql=sqlQuery, con=db.engine, index_col="id"
+    )
+    print(df)
+
+
 def main() -> None:
     args: dict[str, Any] = cliParser().__dict__
 
@@ -421,6 +467,8 @@ def main() -> None:
             getOpenAlexMetadata(fp=args["oa.db"][0], email=args["oa.email"][0])
         case "filter":
             filterDocuments(fp=args["filter.db"][0])
+        case "plot":
+            plot(fp=args["plot.db"][0], outputDir=args["plot.od"][0])
 
     sys.exit(0)
 

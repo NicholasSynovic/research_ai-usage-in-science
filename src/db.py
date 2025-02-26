@@ -54,19 +54,6 @@ class DB:
         )
 
         _: Table = Table(
-            "search_results",
-            self.metadata,
-            Column("id", Integer, primary_key=True, autoincrement=True),
-            Column(
-                "document_id",
-                Integer,
-                ForeignKey("documents.id"),
-                nullable=False,
-            ),
-            Column("response_id", Integer, nullable=False),
-        )
-
-        _: Table = Table(
             "search_responses",
             self.metadata,
             Column("id", Integer, primary_key=True, autoincrement=True),
@@ -92,6 +79,24 @@ class DB:
             Column("page", Integer, nullable=False),
             Column("status_code", Integer, nullable=False),
             Column("html", String, nullable=False),
+        )
+
+        _: Table = Table(
+            "search_results",
+            self.metadata,
+            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column(
+                "document_id",
+                Integer,
+                ForeignKey("documents.id"),
+                nullable=False,
+            ),
+            Column(
+                "response_id",
+                Integer,
+                ForeignKey("search_responses.id"),
+                nullable=False,
+            ),
         )
 
         _: Table = Table(
