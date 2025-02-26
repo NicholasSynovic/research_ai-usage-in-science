@@ -203,7 +203,7 @@ def extractDocuments(fp: Path) -> None:
         for idx, row in respDF.iterrows():
             data: defaultdict[str, List[str | int]] = defaultdict(list)
             match row["journal"]:
-                case 0:
+                case 1:
                     soup: BeautifulSoup = BeautifulSoup(
                         markup=row["html"],
                         features="lxml",
@@ -219,7 +219,7 @@ def extractDocuments(fp: Path) -> None:
                         doi: str = NATURE_DOI + url.split("/")[-1]
                         data["document_id"].append(doi)
                         data["response_id"].append(idx)
-                case 1:
+                case 2:
                     json: dict[str, Any] = loads(row["html"])
                     docs: List[dict[str, Any]] = json["searchResults"]["docs"]
 
@@ -387,9 +387,17 @@ def filterDocuments(fp: Path) -> None:
 
             bar.next()
 
-        df: DataFrame = pandas.concat(objs=dfs, ignore_index=True)
-        print(df)
-        print(df["is_natural_science"].value_counts())
+        documentFilterDF: DataFrame = pandas.concat(
+            objs=dfs,
+            ignore_index=True,
+        )
+
+        documentFilterDF.to_sql(
+            name="document_filter",
+            con=db.engine,
+            if_exists="append",
+            index=False,
+        )
 
 
 def main() -> None:

@@ -111,6 +111,7 @@ class DB:
 
         _: Table = Table(
             "document_filter",
+            self.metadata,
             Column("id", Integer, primary_key=True, autoincrement=True),
             Column(
                 "document_id",
@@ -139,16 +140,19 @@ class DB:
             name="years",
             con=self.engine,
             index=False,
+            if_exists="append",
         )
         SEARCH_KEYWORDS.to_sql(
             name="keywords",
             con=self.engine,
             index=False,
+            if_exists="append",
         )
         JOURNALS.to_sql(
             name="journals",
             con=self.engine,
             index=False,
+            if_exists="append",
         )
 
     def readTableToDF(self, table: str) -> DataFrame:

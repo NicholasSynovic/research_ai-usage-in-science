@@ -179,3 +179,4 @@ build-docs/*
 *.png
 !images/*
 pyinstaller/
+*.sqlite*
