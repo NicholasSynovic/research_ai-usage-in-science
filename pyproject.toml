@@ -32,6 +32,7 @@ fuzzywuzzy = "^0.18.0"
 python-levenshtein = "^0.25.1"
 pydantic = "^2.10.5"
 ratelimiter = "^1.2.0.post0"
+openpyxl = "^3.1.5"
 
 [tool.black]
 line-length = 79
