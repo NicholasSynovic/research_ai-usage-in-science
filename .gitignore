@@ -180,3 +180,5 @@ build-docs/*
 !images/*
 pyinstaller/
 *.sqlite*
+*.zip
+*.xlsx
