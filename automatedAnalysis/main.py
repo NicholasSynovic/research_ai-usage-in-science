@@ -2,12 +2,9 @@ from pathlib import Path
 from typing import List
 
 import click
-from langchain.prompts import PromptTemplate
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.llms import Ollama
 from langchain_core.documents.base import Document
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableSequence
+from requests import Response, post
 
 
 @click.command()
@@ -37,27 +34,44 @@ from langchain_core.runnables import RunnableSequence
 @click.option(
     "-p",
     "--prompt",
-    "prompt",
+    "promptStr",
     help="User prompt to be provided with the documents",
     required=True,
     type=str,
 )
-def main(inputFP: Path, model: str, prompt: str) -> None:
+def main(inputFP: Path, model: str, promptStr: str) -> None:
+    ollamaAPI: str = "http://localhost:11434"
+
     loader: PyPDFLoader = PyPDFLoader(file_path=inputFP.__str__())
     documents: List[Document] = loader.load()
 
-    llm: Ollama = Ollama(base_url="http://localhost:11434", model=model)
+    jsonData: dict = {
+        "model": model,
+        "stream": False,
+        "keep_alive": 0,
+        "options": {
+            "temperature": 0.1,
+            "top_k": 1,
+            "top_p": 0.1,
+            "num_predict": 10,
+            "num_ctx": 64000,
+        },
+        "messages": [
+            {
+                "role": "system",
+                "content": "Respond either 'yes' or 'no' do not ",
+            },
+            {"role": "user", "content": f"{promptStr}\n\n{documents}"},
+        ],
+    }
 
-    prompt_template: PromptTemplate = PromptTemplate(
-        input_variables=["document"],
-        template=prompt + ":\n{document}\nAnswer:",
+    resp: Response = post(
+        url=f"{ollamaAPI}/api/chat",
+        json=jsonData,
+        timeout=60,
     )
 
-    chain: RunnableSequence = prompt_template | llm | StrOutputParser()
-
-    resp: str = chain.invoke({"document": documents})
-
-    print(resp)
+    print(resp.content)
 
 
 if __name__ == "__main__":
