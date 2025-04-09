@@ -39,9 +39,33 @@ from requests import Response, post
     required=True,
     type=str,
 )
-def main(inputFP: Path, model: str, promptStr: str) -> None:
-    ollamaAPI: str = "http://localhost:11434"
-
+@click.option(
+    "-s",
+    "--system-prompt",
+    "systemPromptStr",
+    help="System prompt to be provided with the documents",
+    required=False,
+    default="Respond either 'yes' or 'no'.",
+    show_default=True,
+    type=str,
+)
+@click.option(
+    "-o",
+    "--ollama",
+    "ollamaAPI",
+    help="Ollama API endpoint",
+    required=False,
+    default="http://localhost:11434",
+    show_default=True,
+    type=str,
+)
+def main(
+    inputFP: Path,
+    model: str,
+    promptStr: str,
+    systemPromptStr: str,
+    ollamaAPI: str,
+) -> None:
     loader: PyPDFLoader = PyPDFLoader(file_path=inputFP.__str__())
     documents: List[Document] = loader.load()
 
@@ -59,7 +83,7 @@ def main(inputFP: Path, model: str, promptStr: str) -> None:
         "messages": [
             {
                 "role": "system",
-                "content": "Respond either 'yes' or 'no' do not ",
+                "content": systemPromptStr,
             },
             {"role": "user", "content": f"{promptStr}\n\n{documents}"},
         ],
@@ -71,7 +95,7 @@ def main(inputFP: Path, model: str, promptStr: str) -> None:
         timeout=60,
     )
 
-    print(resp.content)
+    print(inputFP.name, resp.json()["message"]["content"].lower())
 
 
 if __name__ == "__main__":
