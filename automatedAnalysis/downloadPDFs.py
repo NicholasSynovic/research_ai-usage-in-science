@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from string import Template
 from typing import List
+from urllib.parse import urlparse
 
 import click
 import pandas
@@ -55,6 +56,22 @@ def getResponse(doi: str) -> Response:
     return get(url=url, timeout=60, headers={"Host": host})
 
 
+def url2doi(url: str) -> str:
+    query: str = urlparse(url=url).query
+    return query[3::].split("&")[0].replace("/", "_")
+
+
+def savePDF(response: Response, outputDir: Path) -> None:
+    url: str = response.url
+    doi: str = url2doi(url=url)
+
+    fp: Path = Path(outputDir, doi + ".pdf")
+
+    with open(file=fp, mode="wb") as pdf:
+        pdf.write(response.content)
+        pdf.close()
+
+
 @click.command()
 @click.option(
     "-i",
@@ -94,9 +111,20 @@ def main(inputFP: Path, outputDir: Path) -> None:
                 responses.append(getResponse(doi))
                 bar.next()
 
-            executor.map(_run, dois[0:100])
+            executor.map(_run, dois)
 
-    print(responses)
+    with Bar("Saving PDFs to disk...", max=len(responses)) as bar:
+        resp: Response
+        for resp in responses:
+            if resp.status_code == 200:
+                savePDF(response=resp, outputDir=outputDir)
+
+            else:
+                with open(file=Path(outputDir, "errors.txt"), mode="a") as err:
+                    err.write(f"{resp.status_code} {url2doi(resp.url)}")
+                    err.close()
+
+            bar.next()
 
 
 if __name__ == "__main__":
