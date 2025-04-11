@@ -69,6 +69,24 @@ from requests import Response, post
     show_default=True,
     type=int,
 )
+@click.option(
+    "--prediction-tokens",
+    "predictionTokens",
+    help="Number of tokens a model is allowed to generate in its predictions",
+    required=False,
+    default=10,
+    show_default=True,
+    type=int,
+)
+@click.option(
+    "--context-tokens",
+    "contextTokens",
+    help="Number of tokens a model is allowed in its context",
+    required=False,
+    default=64000,
+    show_default=True,
+    type=int,
+)
 def main(
     inputFP: Path,
     model: str,
@@ -76,6 +94,8 @@ def main(
     systemPromptStr: str,
     ollamaAPI: str,
     timeout: int,
+    predictionTokens: int,
+    contextTokens: int,
 ) -> None:
     loader: PyPDFLoader = PyPDFLoader(file_path=inputFP.__str__())
     documents: List[Document] = loader.load()
@@ -88,8 +108,8 @@ def main(
             "temperature": 0.1,
             "top_k": 1,
             "top_p": 0.1,
-            "num_predict": 10,
-            "num_ctx": 64000,
+            "num_predict": predictionTokens,
+            "num_ctx": contextTokens,
         },
         "messages": [
             {
