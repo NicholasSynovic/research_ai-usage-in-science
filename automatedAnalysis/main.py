@@ -59,12 +59,23 @@ from requests import Response, post
     show_default=True,
     type=str,
 )
+@click.option(
+    "-t",
+    "--timeout",
+    "timeout",
+    help="Ollama API endpoint timeout",
+    required=False,
+    default=60,
+    show_default=True,
+    type=int,
+)
 def main(
     inputFP: Path,
     model: str,
     promptStr: str,
     systemPromptStr: str,
     ollamaAPI: str,
+    timeout: int,
 ) -> None:
     loader: PyPDFLoader = PyPDFLoader(file_path=inputFP.__str__())
     documents: List[Document] = loader.load()
@@ -92,7 +103,7 @@ def main(
     resp: Response = post(
         url=f"{ollamaAPI}/api/chat",
         json=jsonData,
-        timeout=60,
+        timeout=timeout,
     )
 
     print(inputFP.name, resp.json()["message"]["content"].lower())
