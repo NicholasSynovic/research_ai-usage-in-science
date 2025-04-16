@@ -8,7 +8,7 @@ from typing import Any, List
 
 import pandas
 from bs4 import BeautifulSoup, ResultSet, Tag
-from pandas import DataFrame, Series
+from pandas import DataFrame, ExcelFile, Series
 from progress.bar import Bar
 from requests import Response, get
 
@@ -16,7 +16,7 @@ from src import searchFunc
 from src.db import DB
 from src.utils import ifFileExistsExit
 
-COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter", "plot"}
+COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter", "aa", "plot"}
 
 
 def cliParser() -> Namespace:
@@ -38,6 +38,14 @@ def cliParser() -> Namespace:
         type=Path,
         help="Path to create AIUS SQLite3 database",
         dest="init.db",
+    )
+    initParser.add_argument(
+        "-f",
+        "--force",
+        default=False,
+        action="store_true",
+        help="Force creating a new database",
+        dest="init.force",
     )
 
     searchParser: ArgumentParser = subparser.add_parser(
@@ -114,9 +122,32 @@ def cliParser() -> Namespace:
         dest="filter.db",
     )
 
+    aaParser: ArgumentParser = subparser.add_parser(
+        name="author-agreement",
+        help="Add the author agreement data to the dataset (Optional Step 5)",
+    )
+    aaParser.add_argument(
+        "-d",
+        "--db",
+        nargs=1,
+        default=Path("aius.sqlite3"),
+        type=Path,
+        help="Path to AIUS SQLite3 database",
+        dest="aa.db",
+    )
+    aaParser.add_argument(
+        "-w",
+        "--workbook",
+        nargs=1,
+        default=Path("author-agreement.xlsx"),
+        type=Path,
+        help="Path to author agreement Excel (.xlsx) workbook",
+        dest="aa.wb",
+    )
+
     plotParser: ArgumentParser = subparser.add_parser(
         name="plot",
-        help="Plot Figures (Step 5)",
+        help="Plot Figures (Step XYZ)",
     )
     plotParser.add_argument(
         "-d",
@@ -139,8 +170,10 @@ def cliParser() -> Namespace:
     return parser.parse_args()
 
 
-def initialize(fp: Path) -> DB:
-    ifFileExistsExit(fps=[fp])
+def initialize(fp: Path, force: bool = False) -> DB:
+    if force is False:
+        ifFileExistsExit(fps=[fp])
+
     db: DB = DB(fp=fp)
     db.createTables()
     db.writeConstants()
@@ -295,7 +328,7 @@ def getOpenAlexMetadata(fp: Path, email: str, doiCount: int = 25) -> None:
 
     idx: int
     with Bar(
-        "Getting document metadata from PLOS...",
+        "Getting document metadata from OpenAlex...",
         max=ceil(documentDF.shape[0] / 25),
     ) as bar:
         for idx in range(0, documentDF.shape[0], doiCount):
@@ -422,6 +455,13 @@ def filterDocuments(fp: Path) -> None:
         )
 
 
+def addAuthorAgreement(dbFP: Path, aaFP: Path) -> None:
+    _: DB = DB(fp=dbFP)
+    ef: ExcelFile = ExcelFile(path_or_buffer=aaFP, engine="openpyxl")
+    df: DataFrame = pandas.read_excel(io=ef, sheet_name="Author Agreement")
+    print(df)
+
+
 def plot(fp: Path, outputDir: Path) -> None:
     sqlQuery: str = """SELECT document_filter.*, search_responses.journal, documents.doi
 FROM document_filter
@@ -430,13 +470,13 @@ LEFT JOIN search_results ON document_filter.document_id = search_results.documen
 LEFT JOIN search_responses ON search_responses.id = search_results.response_id
 WHERE
 (
-	document_filter.retracted = 0 AND
-	document_filter.open_access = 1 AND
-	document_filter.cited_by_count > 0 AND
-	document_filter.is_natural_science = 1 AND
-	search_responses.journal = 2
+    document_filter.retracted = 0 AND
+    document_filter.open_access = 1 AND
+    document_filter.cited_by_count > 0 AND
+    document_filter.is_natural_science = 1 AND
+    search_responses.journal = 2
 )
-"""
+"""  # noqa: E501
 
     db: DB = DB(fp=fp)
 
@@ -458,7 +498,7 @@ def main() -> None:
 
     match arg:
         case "init":
-            initialize(fp=args["init.db"][0])
+            initialize(fp=args["init.db"][0], force=args["init.force"])
         case "search":
             search(fp=args["search.db"][0], journal=args["search.journal"][0])
         case "ed":
@@ -467,8 +507,12 @@ def main() -> None:
             getOpenAlexMetadata(fp=args["oa.db"][0], email=args["oa.email"][0])
         case "filter":
             filterDocuments(fp=args["filter.db"][0])
+        case "aa":
+            addAuthorAgreement(dbFP=args["aa.db"][0], aaFP=args["aa.wb"][0])
         case "plot":
             plot(fp=args["plot.db"][0], outputDir=args["plot.od"][0])
+        case _:
+            sys.exit(1)
 
     sys.exit(0)
 

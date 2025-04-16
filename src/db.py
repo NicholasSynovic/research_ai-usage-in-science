@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas
 from pandas import DataFrame
 from sqlalchemy import (
+    JSON,
     Boolean,
     Column,
     Engine,
@@ -136,6 +137,21 @@ class DB:
             Column("fields", String, nullable=False),
             Column("natural_science_fields", String, nullable=False),
             Column("is_natural_science", Boolean, nullable=False),
+        )
+
+        _: Table = Table(
+            "author_agreement",
+            self.metadata,
+            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column(
+                "document_id",
+                Integer,
+                ForeignKey("documents.id"),
+                nullable=False,
+            ),
+            Column("uses_dl", Boolean, nullable=False),
+            Column("uses_ptms", Boolean, nullable=False),
+            Column("ptm_reuse_pairings", JSON, nullable=False),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
