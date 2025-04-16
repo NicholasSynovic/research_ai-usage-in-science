@@ -187,8 +187,23 @@ def _mapDFIndexToDFValue(
     c2: str,
 ) -> None:
     """
-    Modifies df2 in place
-    """
+    Modifies df2 in place by replacing values in column `c2` with the corresponding
+    index values from df1 based on matching values in column `c1`.
+
+    For each value in df1[c1], the function finds matching rows in df2[c2]
+    and replaces those values with the index of the value in df1.
+
+    Parameters:
+        df1 (DataFrame): Source DataFrame containing the reference values and indices.
+        df2 (DataFrame): Target DataFrame whose column will be modified in place.
+        c1 (str): Column name in df1 to match values from.
+        c2 (str): Column name in df2 whose matching values will be replaced.
+
+    Note:
+        - df1[c1] values are assumed to be unique.
+        - This operation is performed in-place and does not return anything.
+        - May be inefficient for large DataFrames due to the use of a loop.
+    """  # noqa: E501
     replacementValues: Series = df1[c1]
 
     val: Any
@@ -456,10 +471,51 @@ def filterDocuments(fp: Path) -> None:
 
 
 def addAuthorAgreement(dbFP: Path, aaFP: Path) -> None:
-    _: DB = DB(fp=dbFP)
+    db: DB = DB(fp=dbFP)
+    documentDF: DataFrame = db.readTableToDF(table="documents")
+
     ef: ExcelFile = ExcelFile(path_or_buffer=aaFP, engine="openpyxl")
     df: DataFrame = pandas.read_excel(io=ef, sheet_name="Author Agreement")
-    print(df)
+    df.columns = df.columns.str.lower()
+    df.columns = df.columns.str.replace(" ", "_")
+    df.rename(columns={"doi": "document_id"}, inplace=True)
+
+    row: Series
+    idx: int
+    for idx, row in df.iterrows():
+        datum: List[dict[str, str]] = []
+        if pandas.isna(obj=row["ptm_reuse_pairings"]):
+            continue
+
+        pairSplits: List[str] = row["ptm_reuse_pairings"].split(";")
+
+        pairStr: str
+        for pairStr in pairSplits:
+            data: dict[str, str] = defaultdict(str)
+
+            pairStr = pairStr.strip()
+            model, reuseMethod = pairStr.split(",")
+            model = model.replace("[", "").strip()
+            reuseMethod = reuseMethod.replace("]", "").strip()
+
+            data["ptm"] = model
+            data["reuse_method"] = reuseMethod
+
+            datum.append(data)
+
+        df.at[idx, "ptm_reuse_pairings"] = dumps(obj=datum)
+
+    df["ptm_reuse_pairings"] = df["ptm_reuse_pairings"].fillna(value="[]")
+
+    _mapDFIndexToDFValue(df1=documentDF, df2=df, c1="doi", c2="document_id")
+
+    df.to_sql(
+        name="author_agreement",
+        con=db.engine,
+        if_exists="append",
+        index=True,
+        index_label="id",
+    )
 
 
 def plot(fp: Path, outputDir: Path) -> None:
@@ -494,7 +550,7 @@ def main() -> None:
     try:
         arg: str = list(argSet.intersection(COMMANDS))[0]
     except IndexError:
-        sys.exit(0)
+        sys.exit(1)
 
     match arg:
         case "init":
