@@ -48,7 +48,7 @@ def getDOIs(dbPath: Path) -> List[str]:
 def getResponse(doi: str) -> Response:
     host: str = "journals.plos.org"
     urlTemplate: Template = Template(
-        template="https://journals.plos.org/plosone/article/file?id=${doi}&type=printable"
+        template="https://journals.plos.org/plosone/article/file?id=${doi}&type=printable"  # noqa: E501
     )
 
     url: str = urlTemplate.substitute(doi=doi)
