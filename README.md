@@ -84,7 +84,7 @@ asdf
 
 ## How To Install
 
-```
+```shell
 make create-dev
 source env/bin/activate
 make build
