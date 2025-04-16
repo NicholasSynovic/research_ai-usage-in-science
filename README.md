@@ -15,10 +15,7 @@ and author agreement excel workbooks to Zenodo.
 - [An Exploratory Mixed-Methods Study of Deep Neural Network Reuse in Computational Natural Science](#an-exploratory-mixed-methods-study-of-deep-neural-network-reuse-in-computational-natural-science)
   - [Table Of Contents](#table-of-contents)
   - [About](#about)
-    - [Open-Access Data](#open-access-data)
-    - [Nature](#nature)
-    - [PLOS](#plos)
-    - [Science](#science)
+    - [Open-Access Data Collection](#open-access-data-collection)
   - [OpenAlex](#openalex)
   - [Automated Analysis With Ollama Reasoning Models](#automated-analysis-with-ollama-reasoning-models)
   - [Dependencies](#dependencies)
@@ -29,8 +26,8 @@ and author agreement excel workbooks to Zenodo.
 ## About
 
 This repository contains the source code to automatically search and filter for
-Natural Science publications from Nature, PLOS, and Science using OpenAlex. It
-also includes all of our code to capture and parse the metadata, as well as bulk
+Natural Science publications from Nature and PLOS using OpenAlex. It also
+includes all of our code to capture and parse the metadata, as well as bulk
 download open-access articles from Nature and PLOS. Finally, it also includes
 the code to run an automated analysis of our study on arbiturary papers using
 pre-trained foundational reasoning and non-reasoning large language models
@@ -39,21 +36,22 @@ operations and figure generations of our work. For the manual review portions of
 study, we have released a template Excel (.xlsx) workbook and instructions on
 how to perform our author agreement process.
 
-### Open-Access Data
+### Open-Access Data Collection
 
-asdf
+> TODO: Release PDFs as part of the Zenodo artifact
 
-### Nature
+Our work is based on peer-reviewed, open-access academic articles from PLOS and
+Nature. As part of our Zenodo artifact, we have released the `.pdf` documents
+leveraged in our study from both PLOS and Nature. While it may be possible to
+leverage our methods on non-open-access works, we make no claims to its
+effectiveness our efficacy.
 
-asdf
-
-### PLOS
-
-asfd
-
-### Science
-
-asdf
+At the time of this study, both PLOS's and Nature's Terms Of Service (TOS)
+supported the collection, aggregation, and release of open-access works in
+scientific pursuit. Prior to bulk downloading any documents from Nature or PLOS,
+we advise the reader to review both
+[Nature's TOS](https://www.nature.com/info/terms-and-conditions) and
+[PLOS's TOS](https://plos.org/terms-of-use/).
 
 ## OpenAlex
 

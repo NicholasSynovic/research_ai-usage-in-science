@@ -67,7 +67,7 @@ def cliParser() -> Namespace:
         nargs=1,
         default="plos",
         type=str,
-        choices=["nature", "plos", "science"],
+        choices=["nature", "plos"],
         help="Journal to search through",
         dest="search.journal",
     )
@@ -223,9 +223,6 @@ def search(fp: Path, journal: str) -> None:
             df = searchFunc.nature()
         case "plos":
             df = searchFunc.plos()
-        case "science":
-            searchFunc.science()
-            return None
         case _:
             return None
 

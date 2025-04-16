@@ -7,7 +7,6 @@ from pandas import DataFrame
 from src import SEARCH_KEYWORDS, YEARS
 from src.journals.nature import Nature
 from src.journals.plos import PLOS
-from src.journals.science import Science
 from src.types import SearchResultsDF
 
 
@@ -30,15 +29,6 @@ def _run(journal: Nature | PLOS) -> DataFrame:
     SearchResultsDF(df_dict=df.to_dict(orient="records"))
 
     return df
-
-
-def science() -> None:
-    journal: Science = Science()
-    journal.generateURLs(
-        years=YEARS["year"].tolist(),
-        queries=SEARCH_KEYWORDS["keyword"].tolist(),
-    )
-    print(journal.message)
 
 
 def nature() -> DataFrame:
