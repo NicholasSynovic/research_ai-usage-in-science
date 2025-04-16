@@ -25,6 +25,9 @@ and author agreement excel workbooks to Zenodo.
 
 ## About
 
+> TODO: Add links to each tutorial section TODO: Release template Excel (.xslx)
+> file for author agreement with instructions on how to use it
+
 This repository contains the source code to automatically search and filter for
 Natural Science publications from Nature and PLOS using OpenAlex. It also
 includes all of our code to capture and parse the metadata, as well as bulk
@@ -46,6 +49,8 @@ leveraged in our study from both PLOS and Nature. While it may be possible to
 leverage our methods on non-open-access works, we make no claims to its
 effectiveness our efficacy.
 
+> TODO: Review TOS to ensure that this is accurate
+
 At the time of this study, both PLOS's and Nature's Terms Of Service (TOS)
 supported the collection, aggregation, and release of open-access works in
 scientific pursuit. Prior to bulk downloading any documents from Nature or PLOS,
@@ -55,7 +60,17 @@ we advise the reader to review both
 
 ## OpenAlex
 
-asdf
+OpenAlex is an open database of scientific works and their metadata. We leverage
+OpenAlex extensively to extract academic work metadata in a journal agnostic
+manner. Additionally, we rely on OpenAlex's topic identification system to
+filter for Natural Science (i.e., Chemistry, Biology, Physics, and Environmental
+Science). You can read more about this system
+[here](https://docs.openalex.org/api-entities/topics).
+
+In our Zenodo release, we store the OpenAlex responses within the SQLite3
+artifact in the `openalex_responses` table. As OpenAlex continously updates its
+aggregated works, we recommend reproducers of our work to leverage the stored
+responses.
 
 ## Automated Analysis With Ollama Reasoning Models
 
