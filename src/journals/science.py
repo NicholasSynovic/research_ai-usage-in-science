@@ -30,7 +30,7 @@ necessary URLs to reproduce our work are now stored in `./science_urls.json`.
         self,
         years: List[int],
         queries: List[str],
-        fp: Path = Path("science.json"),
+        fp: Path = Path("science_urls.json"),
     ) -> None:
         json: dict[str, List[str]] = {}
 
