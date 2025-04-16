@@ -17,7 +17,7 @@ and author agreement excel workbooks to Zenodo.
   - [About](#about)
     - [Open-Access Data Collection](#open-access-data-collection)
   - [OpenAlex](#openalex)
-  - [Automated Analysis With Ollama Reasoning Models](#automated-analysis-with-ollama-reasoning-models)
+  - [Automated Analysis With Ollama Models](#automated-analysis-with-ollama-models)
   - [Dependencies](#dependencies)
   - [How To Install](#how-to-install)
   - [How To Run](#how-to-run)
@@ -72,9 +72,11 @@ artifact in the `openalex_responses` table. As OpenAlex continously updates its
 aggregated works, we recommend reproducers of our work to leverage the stored
 responses.
 
-## Automated Analysis With Ollama Reasoning Models
+## Automated Analysis With Ollama Models
 
-asdf
+Leveraging the results from the author agreement process described in our paper,
+we leveraged pre-trained foundational reasoning and non-reasoning models to
+automatically review the bulk of remaining papers
 
 ## Dependencies
 
@@ -82,11 +84,19 @@ asdf
 
 ## How To Install
 
-asdf
+```
+make create-dev
+source env/bin/activate
+make build
+make package
+```
 
 ## How To Run
 
-asdf
+We have created a pipeline that you can execute to reproduce the work. Please
+run `./run.bash {{EMAIL_ADDRESS}}` where `{{EMAIL_ADDRESS}}` is a valid email to
+access the
+[OpenAlex API polite pool](https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication#the-polite-pool).
 
 ## Tutorial
 
