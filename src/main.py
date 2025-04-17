@@ -16,7 +16,7 @@ from src import searchFunc
 from src.db import DB
 from src.utils import ifFileExistsExit
 
-COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter", "aa", "plot"}
+COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter", "aa", "stat"}
 
 
 def cliParser() -> Namespace:
@@ -145,27 +145,18 @@ def cliParser() -> Namespace:
         dest="aa.wb",
     )
 
-    plotParser: ArgumentParser = subparser.add_parser(
-        name="plot",
-        help="Plot Figures (Step XYZ)",
+    statParser: ArgumentParser = subparser.add_parser(
+        name="stat",
+        help="Generate statistics from the dataset and print to console",
     )
-    plotParser.add_argument(
+    statParser.add_argument(
         "-d",
         "--db",
         nargs=1,
         default=Path("aius.sqlite3"),
         type=Path,
         help="Path to AIUS SQLite3 database",
-        dest="plot.db",
-    )
-    plotParser.add_argument(
-        "-o",
-        "--od",
-        nargs=1,
-        default=Path("."),
-        type=Path,
-        help="Path to store figures",
-        dest="plot.od",
+        dest="stat.db",
     )
     return parser.parse_args()
 
@@ -515,28 +506,27 @@ def addAuthorAgreement(dbFP: Path, aaFP: Path) -> None:
     )
 
 
-def plot(fp: Path, outputDir: Path) -> None:
-    sqlQuery: str = """SELECT document_filter.*, search_responses.journal, documents.doi
-FROM document_filter
-LEFT JOIN documents ON document_filter.document_id = documents.id
-LEFT JOIN search_results ON document_filter.document_id = search_results.document_id
-LEFT JOIN search_responses ON search_responses.id = search_results.response_id
-WHERE
-(
-    document_filter.retracted = 0 AND
-    document_filter.open_access = 1 AND
-    document_filter.cited_by_count > 0 AND
-    document_filter.is_natural_science = 1 AND
-    search_responses.journal = 2
-)
-"""  # noqa: E501
-
+def stats(fp: Path) -> None:
     db: DB = DB(fp=fp)
+    aaDF: DataFrame = db.readTableToDF(table="author_agreement")
 
-    df: DataFrame = pandas.read_sql(
-        sql=sqlQuery, con=db.engine, index_col="id"
-    )
-    print(df)
+    print("Author agremeent stats")
+    print("Total documents:", aaDF.shape[0])
+    print("Total DL docs:", aaDF[aaDF["uses_dl"] == True].shape[0])
+    print("Total PTM docs:", aaDF[aaDF["uses_ptms"] == True].shape[0])
+
+    aaUsesPTMs = aaDF[aaDF["uses_ptms"] == 1]
+
+    methods: List[str] = []
+    json: List[dict[str, str]]
+    for json in aaUsesPTMs["ptm_reuse_pairings"]:
+        item: dict[str, str]
+        for item in json:
+            methods.append(item["reuse_method"])
+
+    print("Conceptual Reuse method counts:", methods.count("Conceptual"))
+    print("Adaptation Reuse method counts:", methods.count("Adaptation"))
+    print("Deployment Reuse method counts:", methods.count("Deployment"))
 
 
 def main() -> None:
@@ -562,8 +552,8 @@ def main() -> None:
             filterDocuments(fp=args["filter.db"][0])
         case "aa":
             addAuthorAgreement(dbFP=args["aa.db"][0], aaFP=args["aa.wb"][0])
-        case "plot":
-            plot(fp=args["plot.db"][0], outputDir=args["plot.od"][0])
+        case "stat":
+            stats(fp=args["stat.db"][0])
         case _:
             sys.exit(1)
 
