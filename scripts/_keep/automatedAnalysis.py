@@ -103,7 +103,8 @@ def main(
     jsonData: dict = {
         "model": model,
         "stream": False,
-        "keep_alive": 0,
+        "prompt": f"{promptStr}\n\n{documents}",
+        "system": systemPromptStr,
         "options": {
             "temperature": 0.1,
             "top_k": 1,
@@ -111,22 +112,15 @@ def main(
             "num_predict": predictionTokens,
             "num_ctx": contextTokens,
         },
-        "messages": [
-            {
-                "role": "system",
-                "content": systemPromptStr,
-            },
-            {"role": "user", "content": f"{promptStr}\n\n{documents}"},
-        ],
     }
 
     resp: Response = post(
-        url=f"{ollamaAPI}/api/chat",
+        url=f"{ollamaAPI}/api/generate",
         json=jsonData,
         timeout=timeout,
     )
 
-    print(inputFP.name, resp.json()["message"]["content"].lower())
+    print(inputFP.name, resp.json()["response"].lower())
 
 
 if __name__ == "__main__":
