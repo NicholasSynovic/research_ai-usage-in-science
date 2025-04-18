@@ -6,7 +6,9 @@ from math import ceil
 from pathlib import Path
 from typing import Any, List
 
+import matplotlib.pyplot as plt
 import pandas
+import seaborn as sns
 from bs4 import BeautifulSoup, ResultSet, Tag
 from pandas import DataFrame, ExcelFile, Series
 from progress.bar import Bar
@@ -518,6 +520,9 @@ def stats(fp: Path) -> None:
     # Print the search results information for $4.1.1 regarding PLOS One
     print("PLOS One Search Results\n===")
 
+    # Set year between 2014 to 2024
+    searchResponsesDF["year"] = searchResponsesDF["year"] + 2013
+
     # Filter for papers from PLOS One (journal == 2)
     searchResponsesDF = searchResponsesDF[searchResponsesDF["journal"] == 2]
 
@@ -536,19 +541,42 @@ def stats(fp: Path) -> None:
         searchResponsesDF.to_dict()["keyword"],
     )
 
+    # Map year from the search result to the search response
+    searchResultsDF["year"] = searchResultsDF["response_id"].map(
+        searchResponsesDF.to_dict()["year"],
+    )
+
     # Count total number of search results per keyword
     print("Total documents returned per keyword")
     print(searchResultsDF["keyword"].value_counts())
 
     # Count total number of unique search results per keyword
+    completelyUniqueSearchResultsDF: DataFrame = (
+        searchResultsDF.drop_duplicates(
+            subset="document_id",
+            keep=False,
+        )
+    )
+    print("Total completely unique documents returned per keyword")
+    print(completelyUniqueSearchResultsDF["keyword"].value_counts())
+
+    print("\nNumber of PLOS One papers per year figure\n===")
     uniqueSearchResultsDF: DataFrame = searchResultsDF.drop_duplicates(
         subset="document_id",
-        keep=False,
+        keep="first",
     )
-    print("Total unique documents returned per keyword")
-    print(uniqueSearchResultsDF["keyword"].value_counts())
+    data: Series = uniqueSearchResultsDF["year"].value_counts().sort_index()
+    sns.barplot(x=data.index, y=data.values, order=data.index)
 
-    print()
+    for i, v in enumerate(data.values):
+        plt.text(i, v + 0.5, str(v), ha="center", va="bottom")
+
+    plt.title(label="Number Of Papers Published Per Year")
+    plt.xlabel(xlabel="Year")
+    plt.ylabel(ylabel="Number Of Papers")
+    plt.savefig("fig_section-4.1.2.pdf")
+    plt.clf()
+    print("Saved figure to:", "fig_section-4.1.2.pdf")
 
     print("Author agremeent stats\n===")
     print("Total documents:", authorAgreementDF.shape[0])
