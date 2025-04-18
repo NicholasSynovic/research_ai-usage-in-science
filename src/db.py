@@ -182,3 +182,16 @@ class DB:
             con=self.engine,
             index_col="id",
         )
+
+    def getPLOSPapersPerKeyword(self) -> DataFrame:
+        sqlQuery: str = """
+SELECT search_results.*, keywords.keyword FROM search_results
+INNER JOIN search_responses ON search_results.response_id = search_responses.id
+INNER JOIN keywords ON search_responses.keyword = keywords.id
+WHERE search_responses.journal = 2;
+"""
+        return pandas.read_sql_query(
+            sql=sqlQuery,
+            con=self.engine,
+            index_col="id",
+        )

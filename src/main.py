@@ -516,6 +516,7 @@ def stats(fp: Path) -> None:
     keywordDF: DataFrame = db.readTableToDF(table="keywords")
     searchResponsesDF: DataFrame = db.readTableToDF(table="search_responses")
     searchResultsDF: DataFrame = db.readTableToDF(table="search_results")
+    openalexDF: DataFrame = db.readTableToDF(table="openalex_responses")
 
     # Print the search results information for $4.1.1 regarding PLOS One
     print("PLOS One Search Results\n===")
@@ -560,16 +561,35 @@ def stats(fp: Path) -> None:
     print("Total completely unique documents returned per keyword")
     print(completelyUniqueSearchResultsDF["keyword"].value_counts())
 
-    print("\nNumber of PLOS One papers per year figure\n===")
+    print("\nNumber of OpenAlex Papers From PLOS per year\n===")
+    openalexDF["year"] = openalexDF["document_id"].map(
+        searchResultsDF.to_dict()["year"],
+    )
+
+    print(openalexDF)
+    input()
+
+    print(
+        "\nNumber of PLOS One, OpenAlex, and Natural Science papers per year figure\n==="
+    )
     uniqueSearchResultsDF: DataFrame = searchResultsDF.drop_duplicates(
         subset="document_id",
         keep="first",
     )
-    data: Series = uniqueSearchResultsDF["year"].value_counts().sort_index()
-    sns.barplot(x=data.index, y=data.values, order=data.index)
 
-    for i, v in enumerate(data.values):
-        plt.text(i, v + 0.5, str(v), ha="center", va="bottom")
+    plosPapersPerYear: Series = (
+        uniqueSearchResultsDF["year"].value_counts().sort_index()
+    )
+
+    sns.barplot(
+        x=plosPapersPerYear.index,
+        y=plosPapersPerYear.values,
+        order=plosPapersPerYear.index,
+        label="PLOS Papers",
+    )
+
+    # for i, v in enumerate(data.values):
+    #     plt.text(i, v + 0.5, str(v), ha="center", va="bottom")
 
     plt.title(label="Number Of Papers Published Per Year")
     plt.xlabel(xlabel="Year")
