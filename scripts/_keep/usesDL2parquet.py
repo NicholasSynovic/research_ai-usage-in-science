@@ -1,5 +1,7 @@
 import re
+from json import dump
 from pathlib import Path
+from typing import List
 
 import click
 
@@ -45,14 +47,24 @@ def delete_text_between_words(paragraph, start_word, end_word):
 )
 def main(inputFP: Path) -> None:
     content: str = open(file=inputFP, mode="r").read()
+    rawLines: List[str] = content.split(sep="$MAGIC_VALUE_END$")
 
-    print(
-        delete_text_between_words(
-            paragraph=content,
-            start_word="<think>",
-            end_word="</think>",
-        )
-    )
+    data: List[dict[str, str]] = []
+
+    line: str
+    for line in rawLines:
+        datum: dict[str, str] = {}
+        line = line.replace("$MAGIC_VALUE_START$", "").strip()
+        document: str = line.split(" ")[0]
+        line = line.replace(document, "").strip()
+
+        datum["document"] = document
+        datum["json"] = line
+        data.append(datum)
+
+    with open(file="usesDL.json", mode="w") as jsonFile:
+        dump(obj=data, fp=jsonFile)
+        jsonFile.close()
 
 
 if __name__ == "__main__":
