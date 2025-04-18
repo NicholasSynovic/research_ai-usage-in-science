@@ -120,7 +120,12 @@ def main(
         timeout=timeout,
     )
 
-    print(inputFP.name, resp.json()["response"].lower())
+    print(
+        "$MAGIC_VALUE_START$",
+        inputFP.name,
+        resp.json(),
+        "$MAGIC_VALUE_END$",
+    )
 
 
 if __name__ == "__main__":
