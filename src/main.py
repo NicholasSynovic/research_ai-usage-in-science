@@ -508,14 +508,60 @@ def addAuthorAgreement(dbFP: Path, aaFP: Path) -> None:
 
 def stats(fp: Path) -> None:
     db: DB = DB(fp=fp)
-    aaDF: DataFrame = db.readTableToDF(table="author_agreement")
 
-    print("Author agremeent stats")
-    print("Total documents:", aaDF.shape[0])
-    print("Total DL docs:", aaDF[aaDF["uses_dl"] == True].shape[0])
-    print("Total PTM docs:", aaDF[aaDF["uses_ptms"] == True].shape[0])
+    # Get DataFrames from database
+    authorAgreementDF: DataFrame = db.readTableToDF(table="author_agreement")
+    keywordDF: DataFrame = db.readTableToDF(table="keywords")
+    searchResponsesDF: DataFrame = db.readTableToDF(table="search_responses")
+    searchResultsDF: DataFrame = db.readTableToDF(table="search_results")
 
-    aaUsesPTMs = aaDF[aaDF["uses_ptms"] == 1]
+    # Print the search results information for $4.1.1 regarding PLOS One
+    print("PLOS One Search Results\n===")
+
+    # Filter for papers from PLOS One (journal == 2)
+    searchResponsesDF = searchResponsesDF[searchResponsesDF["journal"] == 2]
+
+    # Map keyword index to keyword value
+    searchResponsesDF["keyword"] = searchResponsesDF["keyword"].map(
+        keywordDF.to_dict()["keyword"],
+    )
+
+    # Only focus on PLOS One results
+    searchResultsDF = searchResultsDF[
+        searchResultsDF["response_id"].isin(searchResponsesDF.index)
+    ]
+
+    # Map keyword from the search result to the search response
+    searchResultsDF["keyword"] = searchResultsDF["response_id"].map(
+        searchResponsesDF.to_dict()["keyword"],
+    )
+
+    # Count total number of search results per keyword
+    print("Total documents returned per keyword")
+    print(searchResultsDF["keyword"].value_counts())
+
+    # Count total number of unique search results per keyword
+    uniqueSearchResultsDF: DataFrame = searchResultsDF.drop_duplicates(
+        subset="document_id",
+        keep=False,
+    )
+    print("Total unique documents returned per keyword")
+    print(uniqueSearchResultsDF["keyword"].value_counts())
+
+    print()
+
+    print("Author agremeent stats\n===")
+    print("Total documents:", authorAgreementDF.shape[0])
+    print(
+        "Total DL docs:",
+        authorAgreementDF[authorAgreementDF["uses_dl"] == True].shape[0],
+    )
+    print(
+        "Total PTM docs:",
+        authorAgreementDF[authorAgreementDF["uses_ptms"] == True].shape[0],
+    )
+
+    aaUsesPTMs = authorAgreementDF[authorAgreementDF["uses_ptms"] == 1]
 
     methods: List[str] = []
     json: List[dict[str, str]]
