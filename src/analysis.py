@@ -103,7 +103,7 @@ def countNumberOf_PLOS_OA_NS_PapersPerYear(db: DB) -> None:
 
 
 def plotNumberOf_PLOS_OA_NS_PapersPerYear(db: DB, outputDir: Path) -> None:
-    outputFP: Path = Path(outputDir, "fig_PLOS_vs_PLOS-OA-NS.pdf")
+    outputFP: Path = Path(outputDir, "fig_section-4.1.2.pdf")
 
     plosPapers: Series = countNumberOfPLOSPapersPerYear(db=db)
     nsPapers: Series = countNumberOf_PLOS_OA_NS_PapersPerYear(db=db)
@@ -152,3 +152,5 @@ def plotNumberOf_PLOS_OA_NS_PapersPerYear(db: DB, outputDir: Path) -> None:
     plt.tight_layout()
     plt.savefig(outputFP)
     plt.clf()
+
+    print("Saved figure to:", outputFP)

@@ -3,6 +3,7 @@ from argparse import ArgumentParser, Namespace, _SubParsersAction
 from collections import defaultdict
 from json import dumps, loads
 from math import ceil
+from os import getcwd
 from pathlib import Path
 from typing import Any, List
 
@@ -510,7 +511,7 @@ def stats(dbFP: Path, outputDir: Path) -> None:
     def _analysis2json(func, filename: str) -> None:
         outputFP: Path = Path(outputDir, filename)
         func(db=db).to_json(path_or_buf=outputFP, index=False, indent=4)
-        print("Save analysis to:", outputFP)
+        print("Saved analysis to:", outputFP)
 
     db: DB = DB(fp=dbFP)
 
@@ -535,6 +536,18 @@ def stats(dbFP: Path, outputDir: Path) -> None:
         - analysis.countTotalCompletelyUniqueSearchResultsFromPLOS(db=db),
     )
 
+    print(
+        "Total unique search results from PLOS that are also indexed in OpenAlex:",  # noqa: E501
+        analysis.countNumberOf_PLOS_OA_PapersPerYear(db=db).values.sum(),
+    )
+
+    print(
+        "Total unique search results from PLOS that are also indexed in OpenAlex, have at least one citation, and are Natural Science works:",  # noqa: E501
+        analysis.countNumberOf_PLOS_OA_NS_PapersPerYear(db=db).values.sum(),
+    )
+
+    print("\n===\n")
+
     _analysis2json(
         analysis.countTotalSearchResultsFromPLOSByKeyword,
         "totalSearchResultsByKeyword_PLOS.json",
@@ -552,7 +565,10 @@ def stats(dbFP: Path, outputDir: Path) -> None:
 
     print("\n===\n")
 
-    analysis.plotNumberOf_PLOS_OA_NS_PapersPerYear(db=db)
+    analysis.plotNumberOf_PLOS_OA_NS_PapersPerYear(
+        db=db,
+        outputDir=Path(getcwd()),
+    )
 
     # # Print the search results information for $4.1.1 regarding PLOS One
     # print("PLOS One Search Results\n===")
