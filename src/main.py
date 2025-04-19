@@ -6,15 +6,13 @@ from math import ceil
 from pathlib import Path
 from typing import Any, List
 
-import matplotlib.pyplot as plt
 import pandas
-import seaborn as sns
 from bs4 import BeautifulSoup, ResultSet, Tag
 from pandas import DataFrame, ExcelFile, Series
 from progress.bar import Bar
 from requests import Response, get
 
-from src import searchFunc
+from src import analysis, searchFunc
 from src.db import DB
 from src.utils import ifFileExistsExit
 
@@ -508,119 +506,157 @@ def addAuthorAgreement(dbFP: Path, aaFP: Path) -> None:
     )
 
 
-def stats(fp: Path) -> None:
-    db: DB = DB(fp=fp)
+def stats(dbFP: Path, outputDir: Path) -> None:
+    def _analysis2json(func, filename: str) -> None:
+        outputFP: Path = Path(outputDir, filename)
+        func(db=db).to_json(path_or_buf=outputFP, index=False, indent=4)
+        print("Save analysis to:", outputFP)
 
-    # Get DataFrames from database
-    authorAgreementDF: DataFrame = db.readTableToDF(table="author_agreement")
-    keywordDF: DataFrame = db.readTableToDF(table="keywords")
-    searchResponsesDF: DataFrame = db.readTableToDF(table="search_responses")
-    searchResultsDF: DataFrame = db.readTableToDF(table="search_results")
-    openalexDF: DataFrame = db.readTableToDF(table="openalex_responses")
-
-    # Print the search results information for $4.1.1 regarding PLOS One
-    print("PLOS One Search Results\n===")
-
-    # Set year between 2014 to 2024
-    searchResponsesDF["year"] = searchResponsesDF["year"] + 2013
-
-    # Filter for papers from PLOS One (journal == 2)
-    searchResponsesDF = searchResponsesDF[searchResponsesDF["journal"] == 2]
-
-    # Map keyword index to keyword value
-    searchResponsesDF["keyword"] = searchResponsesDF["keyword"].map(
-        keywordDF.to_dict()["keyword"],
-    )
-
-    # Only focus on PLOS One results
-    searchResultsDF = searchResultsDF[
-        searchResultsDF["response_id"].isin(searchResponsesDF.index)
-    ]
-
-    # Map keyword from the search result to the search response
-    searchResultsDF["keyword"] = searchResultsDF["response_id"].map(
-        searchResponsesDF.to_dict()["keyword"],
-    )
-
-    # Map year from the search result to the search response
-    searchResultsDF["year"] = searchResultsDF["response_id"].map(
-        searchResponsesDF.to_dict()["year"],
-    )
-
-    # Count total number of search results per keyword
-    print("Total documents returned per keyword")
-    print(searchResultsDF["keyword"].value_counts())
-
-    # Count total number of unique search results per keyword
-    completelyUniqueSearchResultsDF: DataFrame = (
-        searchResultsDF.drop_duplicates(
-            subset="document_id",
-            keep=False,
-        )
-    )
-    print("Total completely unique documents returned per keyword")
-    print(completelyUniqueSearchResultsDF["keyword"].value_counts())
-
-    print("\nNumber of OpenAlex Papers From PLOS per year\n===")
-    openalexDF["year"] = openalexDF["document_id"].map(
-        searchResultsDF.to_dict()["year"],
-    )
-
-    print(openalexDF)
-    input()
+    db: DB = DB(fp=dbFP)
 
     print(
-        "\nNumber of PLOS One, OpenAlex, and Natural Science papers per year figure\n==="
-    )
-    uniqueSearchResultsDF: DataFrame = searchResultsDF.drop_duplicates(
-        subset="document_id",
-        keep="first",
+        "Total search results from PLOS:",
+        analysis.countTotalSearchResultsFromPLOS(db=db),
     )
 
-    plosPapersPerYear: Series = (
-        uniqueSearchResultsDF["year"].value_counts().sort_index()
-    )
-
-    sns.barplot(
-        x=plosPapersPerYear.index,
-        y=plosPapersPerYear.values,
-        order=plosPapersPerYear.index,
-        label="PLOS Papers",
-    )
-
-    # for i, v in enumerate(data.values):
-    #     plt.text(i, v + 0.5, str(v), ha="center", va="bottom")
-
-    plt.title(label="Number Of Papers Published Per Year")
-    plt.xlabel(xlabel="Year")
-    plt.ylabel(ylabel="Number Of Papers")
-    plt.savefig("fig_section-4.1.2.pdf")
-    plt.clf()
-    print("Saved figure to:", "fig_section-4.1.2.pdf")
-
-    print("Author agremeent stats\n===")
-    print("Total documents:", authorAgreementDF.shape[0])
     print(
-        "Total DL docs:",
-        authorAgreementDF[authorAgreementDF["uses_dl"] == True].shape[0],
+        "Total unique search results from PLOS:",
+        analysis.countTotalUniqueSearchResultsFromPLOS(db=db),
     )
+
     print(
-        "Total PTM docs:",
-        authorAgreementDF[authorAgreementDF["uses_ptms"] == True].shape[0],
+        "Total completely unique search results from PLOS:",
+        analysis.countTotalCompletelyUniqueSearchResultsFromPLOS(db=db),
     )
 
-    aaUsesPTMs = authorAgreementDF[authorAgreementDF["uses_ptms"] == 1]
+    print(
+        "Total search results present in two or more search queries:",
+        analysis.countTotalUniqueSearchResultsFromPLOS(db=db)
+        - analysis.countTotalCompletelyUniqueSearchResultsFromPLOS(db=db),
+    )
 
-    methods: List[str] = []
-    json: List[dict[str, str]]
-    for json in aaUsesPTMs["ptm_reuse_pairings"]:
-        item: dict[str, str]
-        for item in json:
-            methods.append(item["reuse_method"])
+    _analysis2json(
+        analysis.countTotalSearchResultsFromPLOSByKeyword,
+        "totalSearchResultsByKeyword_PLOS.json",
+    )
 
-    print("Conceptual Reuse method counts:", methods.count("Conceptual"))
-    print("Adaptation Reuse method counts:", methods.count("Adaptation"))
-    print("Deployment Reuse method counts:", methods.count("Deployment"))
+    _analysis2json(
+        analysis.countTotalUniqueSearchResultsFromPLOSByKeyword,
+        "totalUnqiueSearchResultsByKeyword_PLOS.json",
+    )
+
+    _analysis2json(
+        analysis.countTotalCompletelyUniqueSearchResultsFromPLOSByKeyword,
+        "totalCompletelyUnqiueSearchResultsByKeyword_PLOS.json",
+    )
+
+    print("\n===\n")
+
+    analysis.plotNumberOf_PLOS_OA_NS_PapersPerYear(db=db)
+
+    # # Print the search results information for $4.1.1 regarding PLOS One
+    # print("PLOS One Search Results\n===")
+
+    # # Set year between 2014 to 2024
+    # searchResponsesDF["year"] = searchResponsesDF["year"] + 2013
+
+    # # Filter for papers from PLOS One (journal == 2)
+    # searchResponsesDF = searchResponsesDF[searchResponsesDF["journal"] == 2]
+
+    # # Map keyword index to keyword value
+    # searchResponsesDF["keyword"] = searchResponsesDF["keyword"].map(
+    #     keywordDF.to_dict()["keyword"],
+    # )
+
+    # # Only focus on PLOS One results
+    # searchResultsDF = searchResultsDF[
+    #     searchResultsDF["response_id"].isin(searchResponsesDF.index)
+    # ]
+
+    # # Map keyword from the search result to the search response
+    # searchResultsDF["keyword"] = searchResultsDF["response_id"].map(
+    #     searchResponsesDF.to_dict()["keyword"],
+    # )
+
+    # # Map year from the search result to the search response
+    # searchResultsDF["year"] = searchResultsDF["response_id"].map(
+    #     searchResponsesDF.to_dict()["year"],
+    # )
+
+    # # Count total number of search results per keyword
+    # print("Total documents returned per keyword")
+    # print(searchResultsDF["keyword"].value_counts())
+
+    # # Count total number of unique search results per keyword
+    # completelyUniqueSearchResultsDF: DataFrame = (
+    #     searchResultsDF.drop_duplicates(
+    #         subset="document_id",
+    #         keep=False,
+    #     )
+    # )
+    # print("Total completely unique documents returned per keyword")
+    # print(completelyUniqueSearchResultsDF["keyword"].value_counts())
+
+    # print("\nNumber of OpenAlex Papers From PLOS per year\n===")
+    # openalexDF["year"] = openalexDF["document_id"].map(
+    #     searchResultsDF.to_dict()["year"],
+    # )
+
+    # print(openalexDF)
+    # input()
+
+    # print(
+    #     "\nNumber of PLOS One, OpenAlex, and Natural Science papers per year figure\n==="
+    # )
+    # uniqueSearchResultsDF: DataFrame = searchResultsDF.drop_duplicates(
+    #     subset="document_id",
+    #     keep="first",
+    # )
+
+    # plosPapersPerYear: Series = (
+    #     uniqueSearchResultsDF["year"].value_counts().sort_index()
+    # )
+
+    # sns.barplot(
+    #     x=plosPapersPerYear.index,
+    #     y=plosPapersPerYear.values,
+    #     order=plosPapersPerYear.index,
+    #     label="PLOS Papers",
+    # )
+
+    # # for i, v in enumerate(data.values):
+    # #     plt.text(i, v + 0.5, str(v), ha="center", va="bottom")
+
+    # plt.title(label="Number Of Papers Published Per Year")
+    # plt.xlabel(xlabel="Year")
+    # plt.ylabel(ylabel="Number Of Papers")
+    # plt.savefig("fig_section-4.1.2.pdf")
+    # plt.clf()
+    # print("Saved figure to:", "fig_section-4.1.2.pdf")
+
+    # print("Author agremeent stats\n===")
+    # print("Total documents:", authorAgreementDF.shape[0])
+    # print(
+    #     "Total DL docs:",
+    #     authorAgreementDF[authorAgreementDF["uses_dl"] == True].shape[0],
+    # )
+    # print(
+    #     "Total PTM docs:",
+    #     authorAgreementDF[authorAgreementDF["uses_ptms"] == True].shape[0],
+    # )
+
+    # aaUsesPTMs = authorAgreementDF[authorAgreementDF["uses_ptms"] == 1]
+
+    # methods: List[str] = []
+    # json: List[dict[str, str]]
+    # for json in aaUsesPTMs["ptm_reuse_pairings"]:
+    #     item: dict[str, str]
+    #     for item in json:
+    #         methods.append(item["reuse_method"])
+
+    # print("Conceptual Reuse method counts:", methods.count("Conceptual"))
+    # print("Adaptation Reuse method counts:", methods.count("Adaptation"))
+    # print("Deployment Reuse method counts:", methods.count("Deployment"))
 
 
 def main() -> None:
@@ -647,7 +683,7 @@ def main() -> None:
         case "aa":
             addAuthorAgreement(dbFP=args["aa.db"][0], aaFP=args["aa.wb"][0])
         case "stat":
-            stats(fp=args["stat.db"][0])
+            stats(dbFP=args["stat.db"][0], outputDir=Path("."))
         case _:
             sys.exit(1)
 

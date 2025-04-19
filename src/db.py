@@ -195,3 +195,48 @@ WHERE search_responses.journal = 2;
             con=self.engine,
             index_col="id",
         )
+
+    def getPLOSPapersPerYear(self) -> DataFrame:
+        sqlQuery: str = """
+SELECT search_results.*, years.year FROM search_results
+INNER JOIN search_responses ON search_results.response_id = search_responses.id
+INNER JOIN years ON search_responses.year = years.id
+WHERE search_responses.journal = 2;
+"""
+        return pandas.read_sql_query(
+            sql=sqlQuery,
+            con=self.engine,
+            index_col="id",
+        )
+
+    def get_PLOS_OA_PapersPerYear(self) -> DataFrame:
+        sqlQuery: str = """
+SELECT search_results.*, years.year, openalex_responses.id AS oaID FROM search_results
+INNER JOIN search_responses ON search_results.response_id = search_responses.id
+INNER JOIN years ON search_responses.year = years.id
+INNER JOIN openalex_responses ON search_results.document_id = openalex_responses.document_id
+WHERE search_responses.journal = 2;
+"""  # noqa: E501
+        return pandas.read_sql_query(
+            sql=sqlQuery,
+            con=self.engine,
+            index_col="id",
+        )
+
+    def get_PLOS_OA_NS_PapersPerYear(self) -> DataFrame:
+        sqlQuery: str = """
+SELECT search_results.*, years.year, openalex_responses.id as oaID, document_filter.cited_by_count FROM search_results
+INNER JOIN search_responses ON search_results.response_id = search_responses.id
+INNER JOIN years ON search_responses.year = years.id
+INNER JOIN openalex_responses ON search_results.document_id = openalex_responses.document_id
+INNER JOIN document_filter ON oaID = document_filter.openalex_response_id
+WHERE
+    document_filter.cited_by_count >= 1 AND
+    document_filter.is_natural_science = 1 AND
+    search_responses.journal = 2;
+"""  # noqa: E501
+        return pandas.read_sql_query(
+            sql=sqlQuery,
+            con=self.engine,
+            index_col="id",
+        )
