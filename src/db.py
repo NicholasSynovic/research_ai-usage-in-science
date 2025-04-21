@@ -247,3 +247,16 @@ SELECT documents.doi FROM author_agreement
 INNER JOIN documents ON author_agreement.document_id = documents.id;
 """
         return pandas.read_sql_query(sql=sqlQuery, con=self.engine)
+
+    def get_PLOS_OA_NS_PaperDOIs(self) -> DataFrame:
+        sqlQuery: str = """
+SELECT DISTINCT documents.doi FROM documents
+INNER JOIN document_filter ON documents.id = document_filter.document_id
+INNER JOIN search_results ON documents.id = search_results.document_id
+INNER JOIN search_responses ON search_results.response_id = search_responses.id
+WHERE
+    document_filter.cited_by_count > 0 AND
+    document_filter.is_natural_science = TRUE AND
+    search_responses.journal = 2;
+"""  # noqa: E501
+        return pandas.read_sql_query(sql=sqlQuery, con=self.engine)

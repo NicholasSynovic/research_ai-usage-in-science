@@ -72,8 +72,9 @@ def download(dbFP: Path, sample: str, outputDir: Path) -> None | int:
     match sample:
         case "author-agreement":
             dois = db.getAuthorAgreementDOIs()["doi"].to_list()
+        case "plos-ns":
+            dois = db.get_PLOS_OA_NS_PaperDOIs()["doi"].to_list()
         case _:
-            print(sample)
             return 0
 
     downloadPLOSPDFs(dois=dois, outputDir=outputDir)
