@@ -15,9 +15,19 @@ from requests import Response, get
 
 from src import analysis, searchFunc
 from src.db import DB
+from src.downloader import download
 from src.utils import ifFileExistsExit
 
-COMMANDS: set[str] = {"init", "search", "ed", "oa", "filter", "aa", "stat"}
+COMMANDS: set[str] = {
+    "init",
+    "search",
+    "ed",
+    "oa",
+    "filter",
+    "aa",
+    "stat",
+    "download",
+}
 
 
 def cliParser() -> Namespace:
@@ -159,6 +169,37 @@ def cliParser() -> Namespace:
         help="Path to AIUS SQLite3 database",
         dest="stat.db",
     )
+
+    downloadParser: ArgumentParser = subparser.add_parser(
+        name="download",
+        help="Download samples of PDF documents",
+    )
+    downloadParser.add_argument(
+        "-d",
+        "--db",
+        nargs=1,
+        default=Path("aius.sqlite3"),
+        type=Path,
+        help="Path to AIUS SQLite3 database",
+        dest="download.db",
+    )
+    downloadParser.add_argument(
+        "-s",
+        "--sample",
+        nargs=1,
+        choices=["author-agreement", "plos-ns"],
+        help="Sample of papers to download",
+        dest="download.sample",
+    )
+    downloadParser.add_argument(
+        "-o",
+        "--output-dir",
+        nargs=1,
+        default=Path("."),
+        type=Path,
+        help="Path to save PDFs",
+        dest="download.output",
+    )
     return parser.parse_args()
 
 
@@ -269,7 +310,9 @@ def extractDocuments(fp: Path) -> None:
                     )
                     tags: ResultSet[Tag] = soup.find_all(
                         name="a",
-                        attrs={"class": "c-card__link"},
+                        attrs={
+                            "class920d1b31810b3ad8d86825c7a0496989": "c-card__link"  # noqa: E501
+                        },
                     )
 
                     tag: Tag
@@ -596,6 +639,17 @@ def main() -> None:
             addAuthorAgreement(dbFP=args["aa.db"][0], aaFP=args["aa.wb"][0])
         case "stat":
             stats(dbFP=args["stat.db"][0], outputDir=Path("."))
+        case "download":
+            if (
+                download(
+                    dbFP=args["download.db"][0],
+                    sample=args["download.sample"][0],
+                    outputDir=args["download.output"][0],
+                )
+                == 0
+            ):
+                sys.exit(1)
+
         case _:
             sys.exit(1)
 

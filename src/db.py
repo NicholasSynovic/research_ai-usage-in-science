@@ -240,3 +240,10 @@ WHERE
             con=self.engine,
             index_col="id",
         )
+
+    def getAuthorAgreementDOIs(self) -> DataFrame:
+        sqlQuery: str = """
+SELECT documents.doi FROM author_agreement
+INNER JOIN documents ON author_agreement.document_id = documents.id;
+"""
+        return pandas.read_sql_query(sql=sqlQuery, con=self.engine)
