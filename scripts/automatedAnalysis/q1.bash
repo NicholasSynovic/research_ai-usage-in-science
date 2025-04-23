@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source optparse.bash
+source $(dirname "$0")/optparse.bash
 optparse.define short=d long=directory desc="The directory of PDFs to process" variable=pdf_dir
 optparse.define short=o long=output desc="The output file" variable=output_file default=q1.txt
 source $( optparse.build )
