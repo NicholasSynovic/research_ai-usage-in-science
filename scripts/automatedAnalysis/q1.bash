@@ -7,4 +7,4 @@ source $( optparse.build )
 
 $(OLLAMA_DEBUG="1" ollama serve 2>&1 | tee q1_ollama.log) &
 
-find $(dirname "$0")/$pdf_dir -name "*.pdf" -exec python automatedAnalysis.py -i {} -m "qwq" -p "Do the author's use deep learning methods in their paper?" -t 600 --prediction-tokens 2000 --context-tokens 38000 >> $output_file \;
+find $(dirname "$0")/data/$pdf_dir -name "*.pdf" -exec python automatedAnalysis.py -i {} -m "qwq" -p "Do the author's use deep learning methods in their paper?" -t 600 --prediction-tokens 2000 --context-tokens 38000 >> $output_file \;
