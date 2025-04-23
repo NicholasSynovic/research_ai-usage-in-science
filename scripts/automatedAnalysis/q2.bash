@@ -6,4 +6,5 @@ optparse.define short=o long=output desc="The output file" variable=output_file 
 source $( optparse.build )
 
 $(OLLAMA_DEBUG="1" ollama serve 2>&1 | tee q2_ollama.log) &
-find $pdf_dir -name "*.pdf" -exec python automatedAnalysis.py -i {} -m "qwq" -p "Do the author's use pre-trained deep learning models in their paper?" -t 600 --prediction-tokens 2000 --context-tokens 38000 >> $output_file \;
+
+find $(dirname "$0")/$pdf_dir -name "*.pdf" -exec python automatedAnalysis.py -i {} -m "qwq" -p "Do the author's use pre-trained deep learning models in their paper?" -t 600 --prediction-tokens 2000 --context-tokens 38000 >> $output_file \;
