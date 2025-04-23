@@ -181,4 +181,3 @@ build-docs/*
 pyinstaller/
 *.sqlite*
 *.zip
-.xlsx
