@@ -1,7 +1,5 @@
 # An Exploratory Mixed-Methods Study of Deep Neural Network Reuse in Computational Natural Science
 
-> Submitted to
-> [ESEM'25 - Technical Track](https://conf.researchr.org/track/esem-2025/esem-2025-technical-track)
 > TODO: Update authors after double blind review TODO: Add link to the pre-print
 > article TODO: Add link to data hosted on Zenodo
 
