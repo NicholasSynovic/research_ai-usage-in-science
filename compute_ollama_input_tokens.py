@@ -154,6 +154,7 @@ def create_json_data(
         "stream": False,
         "prompt": content,
         "system": 'Do not generate a reponse. Return only "."',
+        "think": False,
         "options": {
             "temperature": 0.1,
             "top_k": 1,
