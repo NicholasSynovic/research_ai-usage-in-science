@@ -16,6 +16,4 @@ SEARCH_KEYWORDS: DataFrame = DataFrame(
     }
 )
 
-JOURNALS: DataFrame = DataFrame(
-    data={"journal": ["Nature", "PLOS", "Science"]}
-)
+JOURNALS: DataFrame = DataFrame(data={"journal": ["Nature", "PLOS", "Science"]})

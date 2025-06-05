@@ -4,10 +4,10 @@ from typing import List, Tuple
 import pandas
 from pandas import DataFrame
 
-from src import SEARCH_KEYWORDS, YEARS
-from src.journals.nature import Nature
-from src.journals.plos import PLOS
-from src.types import SearchResultsDF
+from aius import SEARCH_KEYWORDS, YEARS
+from aius.journals.nature import Nature
+from aius.journals.plos import PLOS
+from aius.types import SearchResultsDF
 
 
 def _run(journal: Nature | PLOS) -> DataFrame:

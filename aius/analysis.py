@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas import DataFrame, Series
 
-from src.db import DB
+from aius.db import DB
 
 
 def countTotalSearchResultsFromPLOS(db: DB) -> int:

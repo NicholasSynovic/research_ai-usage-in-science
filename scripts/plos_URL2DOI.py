@@ -5,7 +5,7 @@ import pandas
 from pandas import DataFrame
 from pyfs import resolvePath
 
-from src.classes.plos import PLOS
+from aius.classes.plos import PLOS
 
 
 @click.command()

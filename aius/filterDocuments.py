@@ -8,8 +8,8 @@ from pandas import DataFrame, Series
 from progress.bar import Bar
 from requests import Response, get
 
-from src.filter import FIELD_FILTER
-from src.utils import ifFileExistsExit
+from aius.filter import FIELD_FILTER
+from aius.utils import ifFileExistsExit
 
 
 def getOA(email: str, doi: str) -> Response:

@@ -6,7 +6,7 @@ import pandas
 from pandas import DataFrame, Timestamp
 from pandas.core.groupby.generic import DataFrameGroupBy
 
-from src.utils import ifFileExistsExit
+from aius.utils import ifFileExistsExit
 
 
 def groupByYear(df: DataFrame) -> DataFrameGroupBy:

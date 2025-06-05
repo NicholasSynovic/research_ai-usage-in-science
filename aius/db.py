@@ -16,7 +16,7 @@ from sqlalchemy import (
     create_engine,
 )
 
-from src import JOURNALS, SEARCH_KEYWORDS, YEARS
+from aius import JOURNALS, SEARCH_KEYWORDS, YEARS
 
 
 class DB:

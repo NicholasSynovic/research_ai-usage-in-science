@@ -8,9 +8,9 @@ from pandas import DataFrame
 from progress.bar import Bar
 from requests import Response
 
-from src.journals._generic import Journal_ABC
-from src.search import Search, SearchResultDataFrameSchema
-from src.utils import formatText
+from aius.journals._generic import Journal_ABC
+from aius.search import Search, SearchResultDataFrameSchema
+from aius.utils import formatText
 
 
 class Nature(Journal_ABC):

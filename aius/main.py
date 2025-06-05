@@ -13,10 +13,10 @@ from pandas import DataFrame, ExcelFile, Series
 from progress.bar import Bar
 from requests import Response, get
 
-from src import analysis, searchFunc
-from src.db import DB
-from src.downloader import download
-from src.utils import ifFileExistsExit
+from aius import analysis, searchFunc
+from aius.db import DB
+from aius.downloader import download
+from aius.utils import ifFileExistsExit
 
 COMMANDS: set[str] = {
     "init",

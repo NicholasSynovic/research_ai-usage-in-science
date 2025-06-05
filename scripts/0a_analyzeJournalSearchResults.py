@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup, ResultSet, Tag
 from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
 
-from src.types import SearchResultsDF
+from aius.types import SearchResultsDF
 
 
 def countSearchResultsPerYear(df: DataFrame, journal: str) -> Series:

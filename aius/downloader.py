@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from progress.bar import Bar
 from requests import Response, get
 
-from src.db import DB
+from aius.db import DB
 
 
 def _getResponse(doi: str) -> Response:

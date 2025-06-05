@@ -11,7 +11,7 @@ from pandas import DataFrame
 from progress.bar import Bar
 from requests import Response, get
 
-from src.db import DB
+from aius.db import DB
 
 URL_SOURCE: str = "PLOS"
 
