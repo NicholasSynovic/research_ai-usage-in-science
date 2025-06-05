@@ -1,6 +1,6 @@
 build:
 	git --no-pager tag | tail -n 1 | xargs -I % poetry version %
-	poetry version --short > src/_version
+	poetry version --short > aius/_version
 	poetry build
 	pip install dist/*.tar.gz
 
@@ -18,17 +18,8 @@ create-dev:
 package:
 	pyinstaller --clean \
 		--onefile \
-		--add-data ./src/_version:. \
+		--add-data ./aius/_version:. \
 		--workpath ./pyinstaller \
 		--name aius\
-		--hidden-import src \
-		src/main.py
-
-create-output-dir:
-	mkdir -p data/nature
-	mkdir -p data/plos
-	mkdir -p data/science
-
-	mkdir -p data/nature/zettels
-	mkdir -p data/plos/zettels
-	mkdir -p data/science/zettels
+		--hidden-import aius \
+		aius/main.py

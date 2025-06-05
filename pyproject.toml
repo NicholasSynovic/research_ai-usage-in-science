@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "src"
+name = "aius"
 version = "0.1.0"
 description = "Tooling to support the analysis of AI usage within scientific domains"
 license = "GNU AFFERO"
@@ -43,13 +43,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-aius-search = "src.search.main:main"
-aius-search-plot = "src.search.plot:main"
-aius-filter-search-results = "src.filter.main:main"
-aius-download-papers = "src.download.main:main"
-aius-transform-papers = "src.transform.main:main"
-aius-evaluation-count-keywords = "src.evaluation.countKeywords.main:main"
-aius-evaluation-plot-keywords = "src.evaluation.countKeywords.plot:main"
-aius-evaluation-count-tags = "src.evaluation.countTags.main:main"
-aius-evaluation-plot-tags = "src.evaluation.countTags.plot:main"
-aius-ollama-filter-search-results = "src.ollamaFilter.main:main"
+aius = "aius.main:main"
