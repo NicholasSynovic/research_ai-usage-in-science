@@ -153,12 +153,12 @@ def create_json_data(
         "model": model,
         "stream": False,
         "prompt": content,
-        "system": "",
+        "system": 'Do not generate a reponse. Return only "."',
         "options": {
             "temperature": 0.1,
             "top_k": 1,
             "top_p": 0.1,
-            "num_predict": 0,
+            "num_predict": 1,
             "num_ctx": context_token_limit,
         },
     }
@@ -247,8 +247,7 @@ def main() -> None:
         "context_token_limit": [],
         "response_code": [],
         "actual_context_tokens": [],
-        "token_difference": [],
-        "json": [],
+        "generated_tokens": [],
     }
     json: dict
     with Bar("Submitting JSON data to Ollama...", max=len(json_data)) as bar:
@@ -265,7 +264,7 @@ def main() -> None:
 
             responses["response_code"].append(resp.status_code)
             responses["actual_context_tokens"].append(resp.json()["prompt_eval_count"])
-            responses["json"].append(resp.json())
+            responses["generated_tokens"].append(resp.json()["eval_count"])
 
             bar.next()
 
