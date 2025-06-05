@@ -1,3 +1,10 @@
+"""
+Handle command line argument parsing.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 from argparse import Namespace, ArgumentParser, _SubParsersAction
 from pathlib import Path
 
@@ -162,7 +169,7 @@ class CLI:
     def add_statistics_parser(self) -> None:
         statistics_parser: ArgumentParser = self.subparsers.add_parser(
             name="stat",
-            help="Generate statistics from the dataset and print to console (Optional Step 6)",
+            help="Generate statistics and print to console (Optional Step 6)",
         )
 
         statistics_parser.add_argument(
@@ -178,7 +185,7 @@ class CLI:
     def add_document_download_parser(self) -> None:
         document_download_parser: ArgumentParser = self.subparsers.add_parser(
             name="download",
-            help="Download samples of PDF documents",
+            help="Download samples of PDF documents (Optional Step 7)",
         )
 
         document_download_parser.add_argument(
@@ -202,8 +209,11 @@ class CLI:
             "-o",
             "--output-dir",
             nargs=1,
-            default=Path(".").resolve(),
+            default=Path.cwd().resolve(),
             type=Path,
             help="Path to save PDFs",
             dest="download.output",
         )
+
+    def parse_cli(self) -> Namespace:
+        return self.parser.parse_args()
