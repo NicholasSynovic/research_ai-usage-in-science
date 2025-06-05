@@ -24,9 +24,7 @@ def createBaseDF(df: DataFrame) -> DataFrame:
         datum: defaultdict[str, str | bool | None] = defaultdict(None)
         datum["doi"] = doi.strip()
 
-        dlUsage: List[str] = _df[
-            "Do The Author's Use Deep Learning?\n"
-        ].unique()
+        dlUsage: List[str] = _df["Do The Author's Use Deep Learning?\n"].unique()
 
         if len(dlUsage) == 1:
             datum["uses_dl"] = True if dlUsage[0] == "Yes" else False

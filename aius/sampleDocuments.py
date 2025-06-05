@@ -10,9 +10,7 @@ from aius.utils import ifFileExistsExit
 
 
 def groupByYear(df: DataFrame) -> DataFrameGroupBy:
-    df["year"] = df["publication_date"].apply(
-        lambda x: Timestamp(ts_input=x).year
-    )
+    df["year"] = df["publication_date"].apply(lambda x: Timestamp(ts_input=x).year)
     return df.groupby(by="year")
 
 

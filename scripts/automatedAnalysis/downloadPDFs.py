@@ -20,9 +20,7 @@ def getDOIs(dbPath: Path) -> List[str]:
         con=dbEngine,
         index_col="id",
     )
-    plosResponsesDF: DataFrame = searchResponsesDF[
-        searchResponsesDF["journal"] == 1
-    ]
+    plosResponsesDF: DataFrame = searchResponsesDF[searchResponsesDF["journal"] == 1]
     plosIndex: Index = plosResponsesDF.index
 
     searchResultsDF: DataFrame = pandas.read_sql_table(

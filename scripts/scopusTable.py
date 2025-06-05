@@ -51,11 +51,7 @@ def dataToDict(soup: BeautifulSoup) -> dict:
 
     df_selected = df[["ASJC category", "Subject area"]]
 
-    return (
-        df_selected.groupby("Subject area")["ASJC category"]
-        .apply(list)
-        .to_dict()
-    )
+    return df_selected.groupby("Subject area")["ASJC category"].apply(list).to_dict()
 
 
 def save_dict_to_file(dictionary: dict, filename: str) -> None:
@@ -93,7 +89,9 @@ def main() -> None:
 
     :return: None
     """
-    url: str = "https://service.elsevier.com/app/answers/detail/a_id/15181/supporthub/scopus/"  # noqa: E501
+    url: str = (
+        "https://service.elsevier.com/app/answers/detail/a_id/15181/supporthub/scopus/"  # noqa: E501
+    )
     soup: BeautifulSoup = parse_html(url)
 
     if soup:

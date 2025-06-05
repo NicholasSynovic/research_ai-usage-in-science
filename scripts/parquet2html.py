@@ -59,7 +59,7 @@ def main(inputPath: Path, outputPath: Path) -> None:
         for _, row in df.iterrows():
             filepath: Path = Path(
                 absOutputPath,
-                f'{row["year"]}_{row["query"]}_{row["page"]}_{row["status_code"]}.html',  # noqa: E501
+                f"{row['year']}_{row['query']}_{row['page']}_{row['status_code']}.html",  # noqa: E501
             )
 
             soup: BeautifulSoup = BeautifulSoup(

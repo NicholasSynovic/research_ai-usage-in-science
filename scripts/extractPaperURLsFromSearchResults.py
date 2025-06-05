@@ -17,9 +17,7 @@ def plosExtraction(df: DataFrame) -> DataFrame:
     }
 
     baseURL: str = "https://journals.plos.org/plosone/article?id="
-    with Bar(
-        "Extracting paper URLs from search results...", max=df.shape[0]
-    ) as bar:
+    with Bar("Extracting paper URLs from search results...", max=df.shape[0]) as bar:
         row: Series
         for _, row in df.iterrows():
             json: dict = loads(s=row["html"])
