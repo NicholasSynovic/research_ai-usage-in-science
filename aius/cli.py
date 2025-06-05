@@ -7,6 +7,18 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 from argparse import Namespace, ArgumentParser, _SubParsersAction
 from pathlib import Path
+import sys
+
+COMMANDS: set[str] = {
+    "init",
+    "search",
+    "ed",
+    "oa",
+    "filter",
+    "aa",
+    "stat",
+    "download",
+}
 
 
 class CLI:
@@ -217,3 +229,12 @@ class CLI:
 
     def parse_cli(self) -> Namespace:
         return self.parser.parse_args()
+
+
+def get_subparser_keyword(args: Namespace) -> str:
+    argument_set: set[str] = set([arg.split(".")[0] for arg in args.__dict__.keys()])
+
+    try:
+        return list(argument_set.intersection(COMMANDS))[0]
+    except IndexError as ie:
+        raise ie
