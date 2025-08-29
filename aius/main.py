@@ -10,15 +10,18 @@ def get_subparser_keyword_from_namespace(namespace: dict[str, list[Any]]) -> str
 
 
 def main() -> None:
+    # Parse command line args
     cli: CLI = CLI()
     namespace: dict[str, Any] = cli.parse().__dict__
     subparser_keyword: str = get_subparser_keyword_from_namespace(
         namespace=namespace,
     )
 
+    # Get the database path
+    db_path: Path = namespace[f"{subparser_keyword}.db"]
+
     match subparser_keyword:
-        case "init":
-            db_path: Path = namespace[f"{subparser_keyword}.db"]
+        case "init":  # Initialize the application
             error_code: int = initialize(db_path=db_path)
             if error_code == -1:
                 print("ERROR CREATING DATABASE: File already exists")
