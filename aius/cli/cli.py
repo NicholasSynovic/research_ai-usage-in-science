@@ -1,11 +1,11 @@
 """
-Handle command line argument parsing file.
+Handle command line argument parsing.
 
 Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
-from argparse import ArgumentParser, Namespace, _SubParsersAction
+from argparse import ArgumentParser, _SubParsersAction
 import aius
 from pathlib import Path
 
@@ -31,6 +31,8 @@ class CLI:
         # Create sub-parsers
         self.add_init()  # Initialize the application
         self.add_search()  # Search journals for papers
+        self.add_extract_documents()  # Extract documents from journal search
+        self.add_openalex()  # Get document metadata from OpenAlex
 
     def _resolve_path(self, path_string: str) -> Path:
         return Path(path_string).resolve()
@@ -78,6 +80,48 @@ class CLI:
             choices=["nature", "plos"],
             help="Journal to search through",
             dest="search.journal",
+        )
+
+    def add_extract_documents(self) -> None:
+        extract_documents_parser: ArgumentParser = self.subparsers.add_parser(
+            name="extract-documents",
+            help="Extract Documents From Search Responses",
+            description="Step 2",
+        )
+
+        extract_documents_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=self._resolve_path,
+            help=self.db_help,
+            dest="ed.db",
+        )
+
+    def add_openalex(self) -> None:
+        openalex_parser: ArgumentParser = self.subparsers.add_parser(
+            name="openalex",
+            help="Get Document Metadata From OpenAlex",
+            description="Step 3",
+        )
+
+        openalex_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=self._resolve_path,
+            help=self.db_help,
+            dest="oa.db",
+        )
+        openalex_parser.add_argument(
+            "-e",
+            "--email",
+            nargs=1,
+            type=str,
+            help="Email address to access OpenAlex polite pool",
+            dest="oa.email",
         )
 
 
