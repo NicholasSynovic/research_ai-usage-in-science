@@ -12,6 +12,9 @@ from pathlib import Path
 
 class CLI:
     def __init__(self) -> None:
+        # Set common CLI argument help strings
+        self.db_help: str = "Database path"
+
         # Set CLI default values
         self.database_path: Path = Path(f"./{aius.PROGRAM_NAME}.sqlite3").resolve()
 
@@ -27,6 +30,10 @@ class CLI:
 
         # Create sub-parsers
         self.add_init()  # Initialize the application
+        self.add_search()  # Search journals for papers
+
+    def _resolve_path(self, path_string: str) -> Path:
+        return Path(path_string).resolve()
 
     def add_init(self) -> None:
         initialize_parser: ArgumentParser = self.subparsers.add_parser(
@@ -40,10 +47,39 @@ class CLI:
             "--db",
             nargs=1,
             default=self.database_path,
-            type=Path,
-            help="Path to create the output database",
+            type=self._resolve_path,
+            help=self.db_help,
             dest="init.db",
         )
 
+    def add_search(self) -> None:
+        search_parser: ArgumentParser = self.subparsers.add_parser(
+            name="search",
+            help="Search journals for papers with keywords",
+            description="Step 1",
+        )
 
-CLI().parser.parse_args()
+        search_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=self._resolve_path,
+            help=self.db_help,
+            dest="search.db",
+        )
+
+        search_parser.add_argument(
+            "-j",
+            "--journal",
+            nargs=1,
+            default="plos",
+            type=str,
+            choices=["nature", "plos"],
+            help="Journal to search through",
+            dest="search.journal",
+        )
+
+
+args = CLI().parser.parse_args()
+print(args)
