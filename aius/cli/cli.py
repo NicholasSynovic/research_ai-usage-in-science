@@ -33,6 +33,7 @@ class CLI:
         self.add_search()  # Search journals for papers
         self.add_extract_documents()  # Extract documents from journal search
         self.add_openalex()  # Get document metadata from OpenAlex
+        self.add_document_filter()  # Filter for Natural Science documents
 
     def _resolve_path(self, path_string: str) -> Path:
         return Path(path_string).resolve()
@@ -85,7 +86,7 @@ class CLI:
     def add_extract_documents(self) -> None:
         extract_documents_parser: ArgumentParser = self.subparsers.add_parser(
             name="extract-documents",
-            help="Extract Documents From Search Responses",
+            help="Extract documents from journal searches",
             description="Step 2",
         )
 
@@ -102,7 +103,7 @@ class CLI:
     def add_openalex(self) -> None:
         openalex_parser: ArgumentParser = self.subparsers.add_parser(
             name="openalex",
-            help="Get Document Metadata From OpenAlex",
+            help="Get document metadata from OpenAlex",
             description="Step 3",
         )
 
@@ -124,6 +125,19 @@ class CLI:
             dest="oa.email",
         )
 
+    def add_document_filter(self) -> None:
+        document_filter_parser: ArgumentParser = self.subparsers.add_parser(
+            name="filter",
+            help="Filter for Natural Science documents",
+            description="Step 4",
+        )
 
-args = CLI().parser.parse_args()
-print(args)
+        document_filter_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=self._resolve_path,
+            help=self.db_help,
+            dest="filter.db",
+        )
