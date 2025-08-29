@@ -1,3 +1,8 @@
+PROGRAM_NAME: str = "AIUS"
+PROGRAM_DESCRIPTION: str = "Identify AI usage in Natural Science research papers"
+PROGRAM_EPILOG: str = "Copyright 2025 (C) Nicholas M. Synovic"
+
+
 from pandas import DataFrame
 
 YEARS: DataFrame = DataFrame(data={"year": list(range(2014, 2025))})
