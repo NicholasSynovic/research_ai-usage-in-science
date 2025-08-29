@@ -1,3 +1,4 @@
+MODULE_NAME: str = "aius"
 PROGRAM_NAME: str = "AIUS"
 PROGRAM_DESCRIPTION: str = "Identify AI usage in Natural Science research papers"
 PROGRAM_EPILOG: str = "Copyright 2025 (C) Nicholas M. Synovic"

@@ -8,6 +8,7 @@ Copyright 2025 (C) Nicholas M. Synovic
 from argparse import ArgumentParser, _SubParsersAction
 import aius
 from pathlib import Path
+from importlib.metadata import version
 
 
 class CLI:
@@ -34,6 +35,14 @@ class CLI:
         self.add_extract_documents()  # Extract documents from journal search
         self.add_openalex()  # Get document metadata from OpenAlex
         self.add_document_filter()  # Filter for Natural Science documents
+
+        # Add version argument
+        self.parser.add_argument(
+            "-v",
+            "--version",
+            action="version",
+            version=version(distribution_name=aius.MODULE_NAME),
+        )
 
     def _resolve_path(self, path_string: str) -> Path:
         return Path(path_string).resolve()
@@ -141,3 +150,6 @@ class CLI:
             help=self.db_help,
             dest="filter.db",
         )
+
+
+CLI().parser.parse_args()
