@@ -6,7 +6,5 @@ def initialize(db_path: Path) -> int:
     if db_path.exists():
         return -1
 
-    db: DB = DB(fp=db_path)
-    db.createTables()
-    db.writeConstants()
+    DB(db_path=db_path)
     return 0
