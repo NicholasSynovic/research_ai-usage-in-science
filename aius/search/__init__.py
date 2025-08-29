@@ -1,22 +1,14 @@
 from abc import ABC, abstractmethod
 from requests import Response, get
+from pandas import DataFrame
+
 
 GET_TIMEOUT: int = 60
-
-SEARCH_RESULTS: dict[str, list] = {
-    "year": [],
-    "query": [],
-    "page": [],
-    "url": [],
-    "status_code": [],
-    "html": [],
-    "journal": [],
-}
 
 
 class JournalSearch(ABC):
     def __init__(self) -> None:
-        pass
+        self.name: str = ""
 
     @abstractmethod
     def _construct_url(
@@ -31,10 +23,23 @@ class JournalSearch(ABC):
         self,
         year: int,
         keyword: str,
-    ) -> list[Response]: ...
+    ) -> DataFrame: ...
 
-    def search_single_page(self, year: int, keyword: str, page: int) -> Response:
-        return get(
+    def search_single_page(self, year: int, keyword: str, page: int) -> DataFrame:
+        resp: Response = get(
             url=self._construct_url(year=year, keyword=keyword, page=page),
             timeout=GET_TIMEOUT,
         )
+
+        data: dict[str, list] = {
+            "year": [year],
+            "keyword": [keyword],
+            "page": [page],
+            "url": [resp.url],
+            "status_code": [resp.status_code],
+            "html": [resp.content.decode(errors="ignore")],
+            "journal": [self.name],
+            "response_object": [resp],
+        }
+
+        return DataFrame(data=data)
