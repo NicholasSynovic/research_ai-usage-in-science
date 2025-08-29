@@ -27,6 +27,9 @@ def main() -> None:
                 print("ERROR CREATING DATABASE: File already exists")
                 sys.exit(2)
 
+        case "search":  # Search journals for papers
+            journal: str = namespace["search.journal"]
+
         case _:
             sys.exit(1)
 
