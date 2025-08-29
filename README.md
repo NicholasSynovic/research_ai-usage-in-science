@@ -84,9 +84,7 @@ asdf
 
 ```shell
 make create-dev
-source env/bin/activate
 make build
-make package
 ```
 
 ## How To Run
