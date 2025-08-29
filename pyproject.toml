@@ -1,46 +1,56 @@
-[tool.poetry]
+[project]
 name = "aius"
 version = "0.1.0"
 description = "Tooling to support the analysis of AI usage within scientific domains"
-license = "GNU AFFERO"
-authors = ["Nicholas M. Synovic <nicholas.synovic@gmail.com>"]
+authors = [{ name = "Nicholas M. Synovic", email = "nicholas.synovic@gmail.com" }]
+requires-python = "~=3.13"
 readme = "README.md"
-homepage = "https://github.com/NicholasSynovic/research_ai-usage-in-science"
-repository = "https://github.com/NicholasSynovic/research_ai-usage-in-science"
-keywords = ["research", "AI", "software engineering", "science"]
-classifiers = ["Development Status :: 3 - Alpha"]
+keywords = [
+    "research",
+    "AI",
+    "software engineering",
+    "science",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pandas = "^2.2.0"
-progress = "^1.6"
-requests = "^2.31.0"
-click = "^8.1.7"
-bs4 = "^0.0.2"
-lxml = "^5.1.0"
-zettelgeist = "^1.1.5"
-typedframe = "^0.11.0"
-pyarrow = "^16.1.0"
-langchain = "^0.2.7"
-langchain-core = "^0.2.12"
-langchain-community = "^0.2.7"
-matplotlib = "^3.9.1"
-seaborn = "^0.13.2"
-ollama = "^0.3.1"
-langchain-ollama = "^0.1.1"
-fuzzywuzzy = "^0.18.0"
-python-levenshtein = "^0.25.1"
-pydantic = "^2.10.5"
-ratelimiter = "^1.2.0.post0"
-openpyxl = "^3.1.5"
-pypdf = "^5.4.0"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3.13"
+]
+
+dependencies = [
+    "pandas>=2.2.0,<3",
+    "progress~=1.6",
+    "requests>=2.31.0,<3",
+    "click>=8.1.7,<9",
+    "bs4>=0.0.2,<0.0.3",
+    "lxml>=5.1.0,<6",
+    "zettelgeist>=1.1.5,<2",
+    "typedframe>=0.11.0,<0.12",
+    "langchain>=0.2.7,<0.3",
+    "langchain-core>=0.2.12,<0.3",
+    "langchain-community>=0.2.7,<0.3",
+    "matplotlib>=3.9.1,<4",
+    "seaborn>=0.13.2,<0.14",
+    "ollama>=0.3.1,<0.4",
+    "langchain-ollama>=0.1.1,<0.2",
+    "fuzzywuzzy>=0.18.0,<0.19",
+    "pydantic>=2.10.5,<3",
+    "ratelimiter>=1.2.0.post0,<2",
+    "openpyxl>=3.1.5,<4",
+    "pypdf>=5.4.0,<6",
+]
+
+[project.urls]
+Homepage = "https://github.com/NicholasSynovic/research_ai-usage-in-science"
+Repository = "https://github.com/NicholasSynovic/research_ai-usage-in-science"
+
+[project.scripts]
+aius = "aius.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 79
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-aius = "aius.main:main"
