@@ -39,11 +39,14 @@ def main() -> None:
     )
 
     # Instantiate the database
-    db_path: Path = namespace[f"{subparser_keyword}.db"]
+    db_path: Path = namespace[f"{subparser_keyword}.db"][0]
     db: DB = DB(db_path=db_path)
 
     match subparser_keyword:
         case "search":  # Search journals for papers
+            # Get the total number of existing rows of the `search` table
+            row_count: int = db.get_last_row_id(table_name="search")
+
             # Get the journal class
             journal_search: JournalSearch = instantiate_journal_search(
                 journal_name=namespace["search.journal"],
@@ -57,6 +60,11 @@ def main() -> None:
                 journal_search=journal_search,
                 keyword_year_products=keyword_year_products,
             )
+
+            # Update index to accomodate for the existing row count if row_count > 0
+            if row_count > 0:
+                # Offset by 1 to accomodate 0th index
+                data_df.index += row_count + 1
 
             # Write data to the database
             data_df.to_sql(
