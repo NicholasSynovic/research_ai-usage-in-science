@@ -6,9 +6,10 @@ Copyright 2025 (C) Nicholas M. Synovic
 """
 
 from argparse import ArgumentParser, Namespace, _SubParsersAction
-import aius
-from pathlib import Path
 from importlib.metadata import version
+from pathlib import Path
+
+import aius
 
 
 class CLI:

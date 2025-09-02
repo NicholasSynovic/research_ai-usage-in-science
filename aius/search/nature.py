@@ -1,9 +1,11 @@
-from aius.search import JournalSearch
 from string import Template
-from pandas import DataFrame
+
 import pandas as pd
-from progress.bar import Bar
 from bs4 import BeautifulSoup, ResultSet, Tag
+from pandas import DataFrame
+from progress.bar import Bar
+
+from aius.search import JournalSearch
 
 
 class Nature(JournalSearch):

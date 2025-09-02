@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from requests import Response, get
-from pandas import DataFrame
+from typing import Iterable
 
+import pandas
+from pandas import DataFrame
+from requests import Response, get
 
 GET_TIMEOUT: int = 60
 
@@ -43,3 +45,17 @@ class JournalSearch(ABC):
         }
 
         return DataFrame(data=data)
+
+
+def search_all_keyword_year_products(
+    journal_search: JournalSearch,
+    keyword_year_products: Iterable,
+) -> DataFrame:
+    df_list: list[DataFrame] = []
+
+    keyword: str
+    year: int
+    for keyword, year in keyword_year_products:
+        df_list.append(journal_search.search_all_pages(year=year, keyword=keyword))
+
+    return pandas.concat(objs=df_list, ignore_index=True)

@@ -28,6 +28,13 @@ repos:
       - id: pyroma
         files: '\.toml$'
 
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        name: isort (python)
+
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.12.11

@@ -5,17 +5,17 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
+import sys
+from argparse import ArgumentParser, Namespace
+from collections.abc import Generator
+from functools import partial
 from pathlib import Path
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents.base import Document
-from requests import Response, post
-from argparse import ArgumentParser, Namespace
-from progress.bar import Bar
-from functools import partial
 from pandas import DataFrame
-import sys
-from collections.abc import Generator
+from progress.bar import Bar
+from requests import Response, post
 
 
 def cli() -> Namespace:

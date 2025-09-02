@@ -1,12 +1,16 @@
+import sys
+from itertools import product
+from pathlib import Path
+from typing import Any, Iterable, Literal
+
+from pandas import DataFrame
+
+import aius
 from aius.cli import CLI
 from aius.init import initialize
-from typing import Any
-import sys
-from pathlib import Path
-from aius.search import JournalSearch
-from aius.search.plos import PLOS
+from aius.search import JournalSearch, search_all_keyword_year_products
 from aius.search.nature import Nature
-from typing import Literal
+from aius.search.plos import PLOS
 
 
 def get_subparser_keyword_from_namespace(namespace: dict[str, list[Any]]) -> str:
@@ -20,6 +24,10 @@ def instantiate_journal_search(
         return PLOS()
     else:
         return Nature()
+
+
+def create_keyword_year_product() -> Iterable:
+    return product(aius.KEYWORD_LIST, aius.YEAR_LIST)
 
 
 def main() -> None:
@@ -41,9 +49,20 @@ def main() -> None:
                 sys.exit(2)
 
         case "search":  # Search journals for papers
+            # Get the journal class
             journal_search: JournalSearch = instantiate_journal_search(
                 journal_name=namespace["search.journal"],
             )
+
+            # Create an extended list of keywords and years
+            keyword_year_products = create_keyword_year_product()
+
+            # Iterate through products
+            data_df: DataFrame = search_all_keyword_year_products(
+                journal_search=journal_search,
+                keyword_year_products=keyword_year_products,
+            )
+            print(data_df)
 
         case _:
             sys.exit(1)
