@@ -7,6 +7,7 @@ from pandas import DataFrame
 
 import aius
 from aius.cli import CLI
+from aius.db import DB
 from aius.init import initialize
 from aius.search import JournalSearch, search_all_keyword_year_products
 from aius.search.nature import Nature
@@ -49,6 +50,9 @@ def main() -> None:
                 sys.exit(2)
 
         case "search":  # Search journals for papers
+            # Instantiate the database
+            db: DB = DB(db_path=db_path)
+
             # Get the journal class
             journal_search: JournalSearch = instantiate_journal_search(
                 journal_name=namespace["search.journal"],
@@ -62,7 +66,15 @@ def main() -> None:
                 journal_search=journal_search,
                 keyword_year_products=keyword_year_products,
             )
-            print(data_df)
+
+            # Write data to the database
+            data_df.to_sql(
+                name="search",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
 
         case _:
             sys.exit(1)

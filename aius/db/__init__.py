@@ -1,8 +1,12 @@
 from pathlib import Path
 
 from sqlalchemy import (
+    Column,
     Engine,
+    Integer,
     MetaData,
+    String,
+    Table,
     create_engine,
 )
 
@@ -21,6 +25,19 @@ class DB:
         self._write_constants()
 
     def _create_tables(self) -> None:
+        # Search table
+        _: Table = Table(
+            "search",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("html", String),
+            Column("journal", String),
+            Column("keyword", String),
+            Column("page", Integer),
+            Column("status_code", Integer),
+            Column("url", String),
+            Column("year", Integer),
+        )
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def _write_constants(self) -> None:
