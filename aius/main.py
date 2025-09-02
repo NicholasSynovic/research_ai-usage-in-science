@@ -45,7 +45,7 @@ def main() -> None:
     match subparser_keyword:
         case "search":  # Search journals for papers
             # Get the total number of existing rows of the `search` table
-            row_count: int = db.get_last_row_id(table_name="search")
+            row_count: int = db.get_last_row_id(table_name="searches")
 
             # Get the journal class
             journal_search: JournalSearch = instantiate_journal_search(
@@ -68,7 +68,7 @@ def main() -> None:
 
             # Write data to the database
             data_df.to_sql(
-                name="search",
+                name="searches",
                 con=db.engine,
                 if_exists="append",
                 index=True,

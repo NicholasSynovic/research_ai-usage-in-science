@@ -3,6 +3,7 @@ from pathlib import Path
 from sqlalchemy import (
     Column,
     Engine,
+    ForeignKey,
     Integer,
     MetaData,
     String,
@@ -28,7 +29,7 @@ class DB:
     def _create_tables(self) -> None:
         # Search table
         _: Table = Table(
-            "search",
+            "searches",
             self.metadata,
             Column("_id", Integer, primary_key=True),
             Column("html", String),
@@ -39,6 +40,24 @@ class DB:
             Column("url", String),
             Column("year", Integer),
         )
+
+        # Papers table
+        _: Table = Table(
+            "papers",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("doi", String),
+        )
+
+        # Searches to Papers table
+        _: Table = Table(
+            "searches_to_papers",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("search_id", Integer, ForeignKey("searches._id")),
+            Column("paper_id", Integer, ForeignKey("papers._id")),
+        )
+
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def _write_constants(self) -> None:
