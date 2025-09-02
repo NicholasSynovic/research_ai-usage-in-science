@@ -3,14 +3,15 @@ from itertools import product
 from pathlib import Path
 from typing import Any, Iterable, Literal
 
+import pandas
 from pandas import DataFrame
 
 import aius
-import aius.extract_documents.plos as plos_extractor
 import aius.search.nature as nature_search
 import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
+from aius.extract_documents import JournalExtractor
 from aius.search import JournalSearch, search_all_keyword_year_products
 
 
@@ -35,15 +36,6 @@ def create_keyword_year_product() -> Iterable:
     return product(aius.KEYWORD_LIST, aius.YEAR_LIST)
 
 
-def instantiate_journal_extractor(
-    journal_name: Literal["plos", "nature"],
-) -> JournalExtractor:
-    if journal_name == "plos":
-        return plos_extractor.PLOS()
-    else:
-        return None
-
-
 def main() -> None:
     # Parse command line args
     cli: CLI = CLI()
@@ -53,7 +45,11 @@ def main() -> None:
     )
 
     # Instantiate the database
-    db_path: Path = namespace[f"{subparser_keyword}.db"][0]
+    try:
+        db_path: Path = namespace[f"{subparser_keyword}.db"][0]
+    except TypeError:
+        db_path: Path = namespace[f"{subparser_keyword}.db"]
+
     db: DB = DB(db_path=db_path)
 
     match subparser_keyword:
@@ -93,13 +89,24 @@ def main() -> None:
             # Instantiate the database
             db: DB = DB(db_path=db_path)
 
+            # Get the total number of existing rows of the `search` table
+            row_count: int = db.get_last_row_id(table_name="search")
+
+            # Get search data
+            search_data: DataFrame = pandas.read_sql_table(
+                table_name="search",
+                con=db.engine,
+                index_col="_id",
+            )
+
             # Get the journal extractor class
-            journal_extractor: JournalExtractor = instantiate_journal_extractor(
-                journal_name=namespace["ed.journal"],
+            journal_extractor: JournalExtractor = JournalExtractor(
+                search_data=search_data,
             )
 
             # Extract papers
-            journal_extractor.extract_all_papers()
+            data_df: DataFrame = journal_extractor.extract_all_papers()
+            print(len(data_df["doi"].unique()))
 
             # Write data to the database
 
