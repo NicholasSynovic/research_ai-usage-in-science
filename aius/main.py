@@ -105,10 +105,20 @@ def main() -> None:
             )
 
             # Extract papers
-            data_df: DataFrame = journal_extractor.extract_all_papers()
-            print(data_df["doi"])
+            papers_df: DataFrame = journal_extractor.extract_all_papers()
+
+            # Organize papers
+            unique_papers_df: DataFrame
+            search_paper_relationships: DataFrame
+            unique_papers_df, search_paper_relationships = (
+                journal_extractor.organize_papers(
+                    papers_df=papers_df,
+                )
+            )
 
             # Write data to the database
+            print(unique_papers_df)
+            print(search_paper_relationships)
 
         case _:
             sys.exit(1)
