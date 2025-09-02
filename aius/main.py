@@ -3,10 +3,23 @@ from aius.init import initialize
 from typing import Any
 import sys
 from pathlib import Path
+from aius.search import JournalSearch
+from aius.search.plos import PLOS
+from aius.search.nature import Nature
+from typing import Literal
 
 
 def get_subparser_keyword_from_namespace(namespace: dict[str, list[Any]]) -> str:
     return next(iter(namespace.keys())).split(sep=".")[0]
+
+
+def instantiate_journal_search(
+    journal_name: Literal["plos", "nature"],
+) -> JournalSearch:
+    if journal_name == "plos":
+        return PLOS()
+    else:
+        return Nature()
 
 
 def main() -> None:
@@ -28,7 +41,9 @@ def main() -> None:
                 sys.exit(2)
 
         case "search":  # Search journals for papers
-            journal: str = namespace["search.journal"]
+            journal_search: JournalSearch = instantiate_journal_search(
+                journal_name=namespace["search.journal"],
+            )
 
         case _:
             sys.exit(1)
