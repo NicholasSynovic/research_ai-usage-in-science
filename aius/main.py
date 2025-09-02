@@ -8,7 +8,6 @@ from pandas import DataFrame
 import aius
 from aius.cli import CLI
 from aius.db import DB
-from aius.init import initialize
 from aius.search import JournalSearch, search_all_keyword_year_products
 from aius.search.nature import Nature
 from aius.search.plos import PLOS
@@ -39,20 +38,12 @@ def main() -> None:
         namespace=namespace,
     )
 
-    # Get the database path
+    # Instantiate the database
     db_path: Path = namespace[f"{subparser_keyword}.db"]
+    db: DB = DB(db_path=db_path)
 
     match subparser_keyword:
-        case "init":  # Initialize the application
-            error_code: int = initialize(db_path=db_path)
-            if error_code == -1:
-                print("ERROR CREATING DATABASE: File already exists")
-                sys.exit(2)
-
         case "search":  # Search journals for papers
-            # Instantiate the database
-            db: DB = DB(db_path=db_path)
-
             # Get the journal class
             journal_search: JournalSearch = instantiate_journal_search(
                 journal_name=namespace["search.journal"],
