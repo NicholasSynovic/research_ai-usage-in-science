@@ -31,7 +31,6 @@ class CLI:
         )
 
         # Create sub-parsers
-        self.add_init()  # Initialize the application
         self.add_search()  # Search journals for papers
         self.add_extract_documents()  # Extract documents from journal search
         self.add_openalex()  # Get document metadata from OpenAlex
@@ -47,23 +46,6 @@ class CLI:
 
     def _resolve_path(self, path_string: str) -> Path:
         return Path(path_string).resolve()
-
-    def add_init(self) -> None:
-        initialize_parser: ArgumentParser = self.subparsers.add_parser(
-            name="init",
-            help=f"Initialize {aius.PROGRAM_NAME}",
-            description="Step 0",
-        )
-
-        initialize_parser.add_argument(
-            "-d",
-            "--db",
-            nargs=1,
-            default=self.database_path,
-            type=self._resolve_path,
-            help=self.db_help,
-            dest="init.db",
-        )
 
     def add_search(self) -> None:
         search_parser: ArgumentParser = self.subparsers.add_parser(
