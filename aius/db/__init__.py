@@ -8,6 +8,7 @@ from sqlalchemy import (
     String,
     Table,
     create_engine,
+    text,
 )
 
 
@@ -42,3 +43,7 @@ class DB:
 
     def _write_constants(self) -> None:
         pass
+
+    def get_last_row_id(self, table_name: str) -> int:
+        sql = text(f"SELECT _id FROM {table_name} ORDER BY _id DESC;")
+        return self.engine.connect().execute(statement=sql).first()[0]
