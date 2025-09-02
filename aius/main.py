@@ -106,7 +106,7 @@ def main() -> None:
 
             # Extract papers
             data_df: DataFrame = journal_extractor.extract_all_papers()
-            print(len(data_df["doi"].unique()))
+            print(data_df["doi"])
 
             # Write data to the database
 

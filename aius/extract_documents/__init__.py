@@ -3,6 +3,7 @@ from json import loads
 import pandas
 from pandas import DataFrame, Series
 from progress.bar import Bar
+from bs4 import BeautifulSoup, ResultSet, Tag
 
 
 class JournalExtractor:
@@ -28,6 +29,25 @@ class JournalExtractor:
 
         return DataFrame(data=datum)
 
+    def _extract_nature(self, idx, row: Series) ->  DataFrame:
+         # Copy template
+        datum: dict[str, list] = self.datum_template.copy()
+
+        # Get BeautifulSoup object
+        soup: BeautifulSoup = BeautifulSoup(markup=row["html"], features="lxml")
+
+        # Parser BeautifulSoup for DOIs
+        links: ResultSet[Tag] = soup.find_all(name="a", attrs={"class": "c-card__link",})
+
+        link: Tag
+        for link in links:
+            suffix: str = link.get(key="href").split("/")[-1]
+
+            datum["search_id"].append(idx)
+            datum["doi"].append(f"https://doi.org/10.1038/{suffix}")
+
+        return DataFrame(data=datum)
+
     def extract_all_papers(self) -> DataFrame:
         df_list: list[DataFrame] = []
 
@@ -40,8 +60,7 @@ class JournalExtractor:
                     case "plos":
                         df_list.append(self._extract_plos(idx=idx, row=row))
                     case "nature":
-                        pass
-
+                        df_list.append(self._extract_nature(idx=idx, row=row))
                 bar.next()
 
         return pandas.concat(objs=df_list, ignore_index=True)
