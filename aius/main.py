@@ -7,6 +7,7 @@ import pandas
 from pandas import DataFrame
 
 import aius
+import aius.filter as aius_filter
 import aius.search.nature as nature_search
 import aius.search.plos as plos_search
 from aius.cli import CLI
@@ -150,6 +151,28 @@ def main() -> None:
             # Write data to database
             oa_df.to_sql(
                 name="openalex",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+
+        case "filter":
+            # Instantiate the database
+            db: DB = DB(db_path=db_path)
+
+            # Get data
+            data_df: DataFrame = aius_filter.get_papers_openalex_data(db=db)
+
+            # Apply filter
+            ns_data: DataFrame = aius_filter.apply_filters(data_df=data_df)
+
+            # Drop irrelevant columns
+            ns_papers: DataFrame = ns_data[["paper_id"]]
+
+            # Write data
+            ns_papers.to_sql(
+                name="ns_papers",
                 con=db.engine,
                 if_exists="append",
                 index=True,
