@@ -148,7 +148,13 @@ def main() -> None:
             oa_df: DataFrame = oa.get_metadata()
 
             # Write data to database
-            print(oa_df)
+            oa_df.to_sql(
+                name="openalex",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
 
         case _:
             sys.exit(1)

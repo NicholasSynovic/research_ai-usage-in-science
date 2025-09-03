@@ -15,11 +15,11 @@ class OpenAlex:
 
         # Create a list of DataFrame chunks to iterate through
         self.papers_df_list: list[DataFrame] = [
-            self.papers_df[i : i + 25]
+            self.papers_df[i : i + 50]
             for i in range(
                 0,
                 len(self.papers_df),
-                25,
+                50,
             )
         ]
 
@@ -67,7 +67,7 @@ class OpenAlex:
         with Bar("Calling OpenAlex REST API... ", max=bar_max) as bar:
             # Iterate through the list of DataFrames
             df_chunk: DataFrame
-            for df_chunk in self.papers_df_list[0:10]:
+            for df_chunk in self.papers_df_list:
                 resp: Response = self._get_request(dois=df_chunk["doi"])
 
                 result: dict
