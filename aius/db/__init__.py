@@ -58,6 +58,7 @@ class DB:
             Column("paper_id", Integer, ForeignKey("papers._id")),
         )
 
+        # OpenAlex table
         _: Table = Table(
             "openalex",
             self.metadata,
@@ -70,6 +71,14 @@ class DB:
             Column("topic_1", String),
             Column("topic_2", String),
             Column("url", String),
+        )
+
+        # Natural Science Papers
+        _: Table = Table(
+            "ns_papers",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("paper_id", Integer, ForeignKey("papers._id")),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
