@@ -89,14 +89,10 @@ def main() -> None:
             # Instantiate the database
             db: DB = DB(db_path=db_path)
 
-            # Get the total number of existing rows of the `search` table
-            row_count: int = db.get_last_row_id(table_name="search")
-
             # Get search data
             search_data: DataFrame = pandas.read_sql_table(
-                table_name="search",
+                table_name="searches",
                 con=db.engine,
-                index_col="_id",
             )
 
             # Get the journal extractor class
@@ -117,8 +113,20 @@ def main() -> None:
             )
 
             # Write data to the database
-            print(unique_papers_df)
-            print(search_paper_relationships)
+            unique_papers_df.to_sql(
+                name="papers",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+            search_paper_relationships.to_sql(
+                name="searches_to_papers",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
 
         case _:
             sys.exit(1)

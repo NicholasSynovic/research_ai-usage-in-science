@@ -13,7 +13,7 @@ class JournalExtractor:
 
         self.datum_template: dict[str, list] = {"search_id": [], "doi": []}
 
-    def _extract_plos(self, idx, row: Series) -> DataFrame:
+    def _extract_plos(self, row: Series) -> DataFrame:
         # Copy template
         datum: dict[str, list] = self.datum_template.copy()
 
@@ -25,12 +25,12 @@ class JournalExtractor:
         docs: list[dict] = json_dict["searchResults"]["docs"]
         doc: dict
         for doc in docs:
-            datum["search_id"].append(idx)
+            datum["search_id"].append(row["_id"])
             datum["doi"].append(f"https://doi.org/{doc['id']}")
 
         return DataFrame(data=datum)
 
-    def _extract_nature(self, idx, row: Series) -> DataFrame:
+    def _extract_nature(self, row: Series) -> DataFrame:
         # Copy template
         datum: dict[str, list] = self.datum_template.copy()
 
@@ -49,7 +49,7 @@ class JournalExtractor:
         for link in links:
             suffix: str = link.get(key="href").split("/")[-1]
 
-            datum["search_id"].append(idx)
+            datum["search_id"].append(row["_id"])
             datum["doi"].append(f"https://doi.org/10.1038/{suffix}")
 
         return DataFrame(data=datum)
@@ -98,15 +98,16 @@ class JournalExtractor:
             "Extracting papers from search results...", max=self.search_data.shape[0]
         ) as bar:
             row: Series
-            for idx, row in self.search_data.iterrows():
+            for _, row in self.search_data.iterrows():
                 match row["journal"]:
                     case "plos":
-                        df_list.append(self._extract_plos(idx=idx, row=row))
+                        df_list.append(self._extract_plos(row=row))
                     case "nature":
-                        df_list.append(self._extract_nature(idx=idx, row=row))
+                        df_list.append(self._extract_nature(row=row))
                 bar.next()
 
-        return pandas.concat(objs=df_list, ignore_index=True)
+        data: DataFrame = pandas.concat(objs=df_list, ignore_index=True)
+        return data.drop_duplicates(ignore_index=True)
 
     def organize_papers(self, papers_df: DataFrame) -> tuple[DataFrame, DataFrame]:
         # Get the unique set of paper DOIs
