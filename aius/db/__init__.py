@@ -58,6 +58,20 @@ class DB:
             Column("paper_id", Integer, ForeignKey("papers._id")),
         )
 
+        _: Table = Table(
+            "openalex",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("cited_by_count", Integer),
+            Column("json", String),
+            Column("paper_id", Integer, ForeignKey("papers._id")),
+            Column("status_code", Integer),
+            Column("topic_0", String),
+            Column("topic_1", String),
+            Column("topic_2", String),
+            Column("url", String),
+        )
+
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def _write_constants(self) -> None:
