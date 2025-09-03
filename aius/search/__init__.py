@@ -5,7 +5,7 @@ import pandas
 from pandas import DataFrame
 from requests import Response, get
 
-GET_TIMEOUT: int = 60
+import aius
 
 
 class JournalSearch(ABC):
@@ -30,7 +30,7 @@ class JournalSearch(ABC):
     def search_single_page(self, year: int, keyword: str, page: int) -> DataFrame:
         resp: Response = get(
             url=self._construct_url(year=year, keyword=keyword, page=page),
-            timeout=GET_TIMEOUT,
+            timeout=aius.GET_TIMEOUT,
         )
 
         data: dict[str, list] = {

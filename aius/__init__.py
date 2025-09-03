@@ -3,6 +3,8 @@ PROGRAM_NAME: str = "AIUS"
 PROGRAM_DESCRIPTION: str = "Identify AI usage in Natural Science research papers"
 PROGRAM_EPILOG: str = "Copyright 2025 (C) Nicholas M. Synovic"
 
+GET_TIMEOUT: int = 60
+
 KEYWORD_LIST: list[str] = [
     r'"Deep Learning"',
     r'"Deep Neural Network"',

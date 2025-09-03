@@ -12,6 +12,7 @@ import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
 from aius.extract_documents import JournalExtractor
+from aius.openalex import OpenAlex
 from aius.search import JournalSearch, search_all_keyword_year_products
 
 
@@ -127,6 +128,26 @@ def main() -> None:
                 index=True,
                 index_label="_id",
             )
+
+        case "oa":  # Get paper metadata from OpenAlex
+            # Get the email address from the CLI
+            email: str = namespace[f"{subparser_keyword}.email"][0]
+
+            # Instantiate the database
+            db: DB = DB(db_path=db_path)
+
+            # Get papers data
+            papers_df: DataFrame = pandas.read_sql_table(
+                table_name="papers", con=db.engine, index_col="_id"
+            )
+
+            # Instantiate OpenAlex object
+            oa: OpenAlex = OpenAlex(email=email, papers_df=papers_df)
+
+            # Request for metadata from OpenAlex
+            oa_df: DataFrame = oa.get_metadata()
+
+            # Write data to database
 
         case _:
             sys.exit(1)

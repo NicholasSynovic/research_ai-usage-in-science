@@ -114,6 +114,7 @@ class CLI:
             nargs=1,
             type=str,
             help="Email address to access OpenAlex polite pool",
+            required=True,
             dest="oa.email",
         )
 
