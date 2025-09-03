@@ -1,4 +1,4 @@
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from progress.bar import Bar
 from requests import Response, get
 
@@ -21,6 +21,12 @@ class OpenAlex:
             )
         ]
 
+    def _get_request(self, dois: Series[str]) -> Response:
+        return get(
+            url=f"https://api.openalex.org/works?per-page=100&mailto={self.email}&filter=doi:{'|'.join(dois)}",
+            timeout=aius.GET_TIMEOUT,
+        )
+
     def get_metadata(self) -> DataFrame:
         # Get the maximum of the bar
         bar_max: int = len(self.papers_df_list)
@@ -29,7 +35,8 @@ class OpenAlex:
             # Iterate through the list of DataFrames
             df_chunk: DataFrame
             for df_chunk in self.papers_df_list:
-                print(df_chunk)
+                resp: Response = self._get_request(dois=df_chunk["doi"])
+
                 bar.next()
 
         return DataFrame()
