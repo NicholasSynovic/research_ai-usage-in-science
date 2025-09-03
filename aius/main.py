@@ -148,6 +148,7 @@ def main() -> None:
             oa_df: DataFrame = oa.get_metadata()
 
             # Write data to database
+            print(oa_df)
 
         case _:
             sys.exit(1)
