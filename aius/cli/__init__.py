@@ -68,7 +68,6 @@ class CLI:
             "-j",
             "--journal",
             nargs=1,
-            default="plos",
             type=str,
             choices=["nature", "plos"],
             help="Journal to search through",
