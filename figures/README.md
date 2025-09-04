@@ -6,7 +6,8 @@
   - [Table of Contents](#table-of-contents)
   - [0. Total Nature and PLOS Papers](#0-total-nature-and-plos-papers)
   - [1. Total Nature and PLOS Natural Science Papers](#1-total-nature-and-plos-natural-science-papers)
-  - [2. Frequency Of Top-5 Primary Topics From Nature and PLOS](#2-frequency-of-top-5-primary-topics-from-nature-and-plos)
+  - [2. Frequency of Top-5 Primary Topics From Nature and PLOS](#2-frequency-of-top-5-primary-topics-from-nature-and-plos)
+  - [3. Frequency of Natural Science Topics From Nature and PLOS](#3-frequency-of-natural-science-topics-from-nature-and-plos)
 
 ## 0. Total Nature and PLOS Papers
 
@@ -27,7 +28,7 @@ OpenAlex.
 - [Code](total_plos_nature_natural_science_papers.py)
 - [Figure](total_plos_nature_natural_science_papers.pdf)
 
-## 2. Frequency Of Top-5 Primary Topics From Nature and PLOS
+## 2. Frequency of Top-5 Primary Topics From Nature and PLOS
 
 This figure displays a bar chart where the X-Axis is of the top-5 OpenAlex
 primary topic (the first topic), and the Y-Axis is the frequency of that topic.
@@ -38,3 +39,15 @@ topics.
 
 - [Code](frequency_of_top_5_primary_topics_nature_plos.py)
 - [Figure](frequency_of_top_5_primary_topics_nature_plos.pdf)
+
+## 3. Frequency of Natural Science Topics From Nature and PLOS
+
+This figure displays a bar chart where the X-Axis is of the OpenAlex natural
+science topics, and the Y-Axis is the frequency of that topic. Each topic has
+two associated bars, one red and one blue. The red bar represents the topics
+captured from Nature, the blue represents topics from PLOS. As each paper can
+have three topics, the frequency of topics will be greater than the number of
+papers.
+
+- [Code](frequency_of_natural_science_topics.py)
+- [Figure](frequency_of_natural_science_topics.pdf)
