@@ -61,7 +61,7 @@ def main() -> None:
 
             # Get the journal class
             journal_search: JournalSearch = instantiate_journal_search(
-                journal_name=namespace["search.journal"],
+                journal_name=namespace["search.journal"][0],
             )
 
             # Create an extended list of keywords and years
