@@ -9,6 +9,7 @@ import seaborn as sns
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
+import aius
 from aius.db import DB
 
 PROGRAM_NAME: str = "Frequency Of Natural Science Topics"
@@ -43,6 +44,7 @@ def compute(df: DataFrame) -> DataFrame:
 
     # Condense column into a single column
     melted_df: DataFrame = df.melt(id_vars=["journal"]).drop(columns="variable")
+    melted_df = melted_df[melted_df["value"].isin(aius.FIELD_FILTER)]
 
     # Group data by journal
     df_gb: DataFrameGroupBy = melted_df.groupby(by="journal")
@@ -61,24 +63,27 @@ def compute(df: DataFrame) -> DataFrame:
         df_list.append(datum)
 
     data: DataFrame = pandas.concat(objs=df_list, ignore_index=True)
-    data["value"] = data["value"].apply(lambda x: fill(x, width=13))
-
-    print(data)
-    quit()
+    data["value"] = data["value"].apply(
+        lambda x: fill(
+            x,
+            width=13,
+            replace_whitespace=False,
+        )
+    )
 
     return data.sort_values(by="count", ignore_index=True, ascending=False)
 
 
 def plot(data: DataFrame) -> None:
     # Plot
-    ax = sns.barplot(data=data, x="topic_0", y="count", hue="Journal")
+    ax = sns.barplot(data=data, x="value", y="count", hue="Journal")
 
     # Title
     plt.title(label=PROGRAM_NAME)
 
     # X axis
     plt.xlabel(xlabel="Journal")
-    # plt.xticks(rotation=-45)
+    plt.xticks(size="x-small")
 
     # Y axis
     plt.ylabel(ylabel="Papers Captured")  # Set y axis labe
@@ -101,6 +106,7 @@ def plot(data: DataFrame) -> None:
                 s=f"{int(height):,}",  # formatted text
                 ha="center",
                 va="bottom",
+                size="x-small",
             )
 
     # Save figure
