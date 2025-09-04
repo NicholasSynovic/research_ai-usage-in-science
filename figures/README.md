@@ -1,0 +1,29 @@
+# Guide To Understanding Figure Order
+
+## Table of Contents
+
+- [Guide To Understanding Figure Order](#guide-to-understanding-figure-order)
+  - [Table of Contents](#table-of-contents)
+  - [0. Total Nature and PLOS Papers](#0-total-nature-and-plos-papers)
+  - [1. Total Nature and PLOS Natural Science Papers](#1-total-nature-and-plos-natural-science-papers)
+  - [2. Frequency Of Top-5 Topics From Nature and PLOS](#2-frequency-of-top-5-topics-from-nature-and-plos)
+
+## 0. Total Nature and PLOS Papers
+
+This figure displays a bar chart of the total number of Nature and PLOS papers
+captured in our search.
+
+## 1. Total Nature and PLOS Natural Science Papers
+
+This figure displays a bar chart of the total number of Nature and PLOS *natural
+science* papers captured in our search. Natural science papers are identified by
+having at least one citation and two topics that are were identified as being
+relevant to Natural Science. Citation counts and topics are provided via
+OpenAlex.
+
+## 2. Frequency Of Top-5 Topics From Nature and PLOS
+
+This figure displays a bar chart where the X-Axis is of the top 5 OpenAlex
+topic, and the Y-Axis is the frequency of that topic. Each topic has two
+associated bars, one red and one blue. The red bar represents the topics
+captured from Nature, the blue represents topics from PLOS.
