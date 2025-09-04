@@ -153,5 +153,14 @@ class CLI:
             dest="download.db",
         )
 
+        download_parser.add_argument(
+            "-s--directory",
+            nargs=1,
+            required=True,
+            type=self._resolve_path,
+            help="Directory to write PDFs to",
+            dest="download.directory",
+        )
+
     def parse(self) -> Namespace:
         return self.parser.parse_args()
