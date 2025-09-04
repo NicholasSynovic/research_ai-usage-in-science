@@ -199,7 +199,7 @@ def main() -> None:
             # Create downloader object
             downloader: Downloader = Downloader(
                 data=data_df,
-                pdf_dir=namespace["downloader.directory"][0],
+                pdf_dir=namespace["download.directory"][0],
             )
 
             # Download papers
