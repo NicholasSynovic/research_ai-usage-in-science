@@ -1,6 +1,5 @@
 build:
-	git --no-pager tag | tail -n 1 | xargs -I % poetry version %
-	uv version --short > aius/_version
+	git --no-pager tag | tail -n 1 | xargs -I % uv version %
 	uv build
 	uv pip install dist/*.tar.gz
 
