@@ -4,7 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas
 import seaborn as sns
-from pandas import DataFrame, Series
+from pandas import DataFrame
 
 from aius.db import DB
 
