@@ -12,6 +12,7 @@ import aius.search.nature as nature_search
 import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
+from aius.download import Downloader
 from aius.extract_documents import JournalExtractor
 from aius.openalex import OpenAlex
 from aius.search import JournalSearch, search_all_keyword_year_products
@@ -178,6 +179,28 @@ def main() -> None:
                 index=True,
                 index_label="_id",
             )
+
+        case "download":
+            # Instantiate the database
+            db: DB = DB(db_path=db_path)
+
+            # Get data
+            sql_query: str = """
+                SELECT s.journal, ns.paper_id, p.doi FROM searches s
+                JOIN searches_to_papers sbt ON s._id = sbt.search_id
+                JOIN ns_papers ns ON ns.paper_id = sbt.paper_id
+                JOIN papers p ON p._id = ns.paper_id;
+            """
+            data_df: DataFrame = pandas.read_sql_query(
+                sql=sql_query,
+                con=db.engine,
+            )
+
+            # Create downloader object
+            downloader: Downloader = Downloader(data=data_df)
+
+            # Download papers
+            downloader.download()
 
         case _:
             sys.exit(1)
