@@ -1,13 +1,16 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pandas
+import seaborn as sns
 from pandas import DataFrame, Series
 
 from aius.db import DB
 
 PROGRAM_NAME: str = "Total PLOS and Nature Papers"
 DB_HELP: str = "Path to database"
+FIGURE_PATH: Path = Path("total_plos_nature_papers.pdf").resolve()
 
 
 def cli() -> Namespace:
@@ -30,12 +33,47 @@ def get_data(db: DB) -> DataFrame:
     return pandas.read_sql_query(sql=sql_query, con=db.engine)
 
 
-def compute(df: DataFrame) -> Series:
-    return df["journal"].value_counts()
+def compute(df: DataFrame) -> DataFrame:
+    data: DataFrame = df["journal"].value_counts().to_frame().reset_index(drop=False)
+    # Format data
+    data["journal"] = (
+        data["journal"]
+        .str.upper()
+        .str.replace(
+            pat="NATURE",
+            repl="Nature",
+        )
+    )
+
+    return data
 
 
-def plot(data: Series) -> None:
-    print(data)
+def plot(data: DataFrame) -> None:
+    # Plot
+    sns.barplot(data=data, x="journal", y="count")
+
+    # Title
+    plt.title(label="Total Nature and PLOS Papers captured")
+
+    # X axis
+    plt.xlabel(xlabel="Journal")
+
+    # Y axis
+    plt.ylabel(ylabel="Papers Captured")  # Set y axis labe
+
+    # Add commas to y axis values
+    current_values = plt.gca().get_yticks()
+    plt.gca().set_yticklabels(["{:,.0f}".format(x) for x in current_values])
+
+    # Add values to the tops of bars
+    for i in range(len(data["journal"])):
+        y_value: int = data["count"][i] + data["count"][i] * 0.01
+        value: str = "{:,.0f}".format(data["count"][i])
+        plt.text(x=i, y=y_value, s=value, ha="center")
+
+    # Save figure
+    plt.tight_layout()
+    plt.savefig(FIGURE_PATH)
 
 
 def main() -> None:
