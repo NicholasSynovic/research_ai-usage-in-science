@@ -70,6 +70,7 @@ class CLI:
             "--journal",
             nargs=1,
             type=str,
+            required=True,
             choices=["nature", "plos"],
             help="Journal to search through",
             dest="search.journal",
@@ -141,6 +142,7 @@ class CLI:
             help="Download Natural Science PDF documents",
             description="Step 5",
         )
+
         download_parser.add_argument(
             "-d",
             "--db",
