@@ -59,7 +59,7 @@ wheels = [
 
 [[package]]
 name = "aius"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "bs4" },
