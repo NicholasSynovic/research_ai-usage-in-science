@@ -1,5 +1,6 @@
 build:
-	git --no-pager tag | tail -n 1 | xargs -I % uv version %
+	rm -rf dist
+	git tag | tr -s '[:blank:]' '\n' | tail -n 1 | xargs -I % uv version %
 	uv build
 	uv pip install dist/*.tar.gz
 
