@@ -8,7 +8,7 @@ from pandas import DataFrame, Series
 
 from aius.db import DB
 
-PROGRAM_NAME: str = "Total PLOS and Nature Papers"
+PROGRAM_NAME: str = "Total Nature and PLOS Papers"
 DB_HELP: str = "Path to database"
 FIGURE_PATH: Path = Path("total_plos_nature_papers.pdf").resolve()
 
@@ -53,7 +53,7 @@ def plot(data: DataFrame) -> None:
     sns.barplot(data=data, x="journal", y="count")
 
     # Title
-    plt.title(label="Total Nature and PLOS Papers captured")
+    plt.title(label=PROGRAM_NAME)
 
     # X axis
     plt.xlabel(xlabel="Journal")
@@ -87,7 +87,7 @@ def main() -> None:
     df: DataFrame = get_data(db=db)
 
     # Compute data
-    data: Series = compute(df=df)
+    data: DataFrame = compute(df=df)
 
     # Plot data
     plot(data=data)
