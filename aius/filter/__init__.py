@@ -1,18 +1,8 @@
 import pandas
 from pandas import DataFrame
 
+import aius
 from aius.db import DB
-
-FIELD_FILTER: set[str] = {
-    "Agricultural and Biological Sciences",
-    "Environmental Science",
-    "Biochemistry Genetics and Molecular Biology",
-    "Immunology and Microbiology",
-    "Neuroscience",
-    "Earth and Planetary Sciences",
-    "Physics and Astronomy",
-    "Chemistry",
-}
 
 
 def get_papers_openalex_data(db: DB) -> DataFrame:
@@ -27,7 +17,10 @@ def apply_filters(data_df: DataFrame) -> DataFrame:
 
     # Filter for at least two topics
     mask = (
-        filtered_on_citations.apply(lambda row: row.isin(FIELD_FILTER).sum(), axis=1)
+        filtered_on_citations.apply(
+            lambda row: row.isin(aius.FIELD_FILTER).sum(),
+            axis=1,
+        )
         >= 2
     )
     filtered_on_topics: DataFrame = filtered_on_citations[mask]

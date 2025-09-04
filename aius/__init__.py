@@ -3,6 +3,18 @@ PROGRAM_NAME: str = "AIUS"
 PROGRAM_DESCRIPTION: str = "Identify AI usage in Natural Science research papers"
 PROGRAM_EPILOG: str = "Copyright 2025 (C) Nicholas M. Synovic"
 
+FIELD_FILTER: set[str] = {
+    "Agricultural and Biological Sciences",
+    "Environmental Science",
+    "Biochemistry Genetics and Molecular Biology",
+    "Immunology and Microbiology",
+    "Neuroscience",
+    "Earth and Planetary Sciences",
+    "Physics and Astronomy",
+    "Chemistry",
+}
+
+
 GET_TIMEOUT: int = 60
 
 KEYWORD_LIST: list[str] = [
