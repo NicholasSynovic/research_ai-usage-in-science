@@ -8,6 +8,8 @@
   - [1. Total Nature and PLOS Natural Science Papers](#1-total-nature-and-plos-natural-science-papers)
   - [2. Frequency of Top-5 Primary Topics From Nature and PLOS](#2-frequency-of-top-5-primary-topics-from-nature-and-plos)
   - [3. Frequency of Natural Science Topics From Nature and PLOS](#3-frequency-of-natural-science-topics-from-nature-and-plos)
+  - [4. Number of Papers Published in PLOS and Nature per Year](#4-number-of-papers-published-in-plos-and-nature-per-year)
+  - [5. Number of Natural science Papers Published in PLOS and Nature per Year](#5-number-of-natural-science-papers-published-in-plos-and-nature-per-year)
 
 ## 0. Total Nature and PLOS Papers
 
@@ -51,3 +53,20 @@ papers.
 
 - [Code](frequency_of_natural_science_topics.py)
 - [Figure](frequency_of_natural_science_topics.pdf)
+
+## 4. Number of Papers Published in PLOS and Nature per Year
+
+This figure's X Axis is the year, and the Y axis is the number of papers
+published. There are two bars per x tick. One for Nature and another for PLOS.
+
+- [Code](number_of_papers_published_per_year.py)
+- [Figure](number_of_papers_published_per_year.pdf)
+
+## 5. Number of Natural science Papers Published in PLOS and Nature per Year
+
+This figure's X Axis is the year, and the Y axis is the number of natural
+science papers published. There are two bars per x tick. One for Nature and
+another for PLOS.
+
+- [Code](number_of_natural_science_papers_published_per_year.py)
+- [Figure](number_of_natural_science_papers_published_per_year.pdf)
