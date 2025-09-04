@@ -154,7 +154,8 @@ class CLI:
         )
 
         download_parser.add_argument(
-            "-s--directory",
+            "-s",
+            "--directory",
             nargs=1,
             required=True,
             type=self._resolve_path,
