@@ -4,7 +4,7 @@ requires-python = ">=3.13, <4"
 
 [[package]]
 name = "aius"
-version = "1.2.2"
+version = "1.2.3"
 source = { editable = "." }
 dependencies = [
     { name = "bs4" },
