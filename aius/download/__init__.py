@@ -32,20 +32,22 @@ class Downloader:
         # Return the response
         return get(url=url, timeout=aius.GET_TIMEOUT)
 
-    def _write_pdf(self, resp: Response, doi: str) -> None:
-        # Create filename from doi prefix and suffix
-        filename: str = f"{doi.replace('https://doi.org/', '').replace('/', '_')}.pdf"
-
-        # Create filepath
-        filepath: Path = Path(self.pdf_dir, filename)
-
-        # Write data from the resp
-        filepath.write_bytes(data=resp.content)
-
     def download(self) -> None:
         with Bar("Downloading data...", max=self.data.shape[0]) as bar:
             row: Series
             for _, row in self.data.iterrows():
+                # Create filename from doi prefix and suffix
+                filename: str = f"{row['doi'].replace('https://doi.org/', '').replace('/', '_')}.pdf"
+
+                # Create filepath for PDF
+                filepath: Path = Path(self.pdf_dir, filename)
+
+                # Check if file exists at that filepath and skip processing it
+                if filepath.exists():
+                    bar.next()
+                    continue
+
+                # Get PDF response
                 resp: Response
                 match row["journal"]:
                     case "nature":
@@ -55,5 +57,7 @@ class Downloader:
                     case _:
                         raise TypeError("Not a valid journal")
 
-                self._write_pdf(resp=resp, doi=row["doi"])
+                # Write data from the response
+                filepath.write_bytes(data=resp.content)
+
                 bar.next()
