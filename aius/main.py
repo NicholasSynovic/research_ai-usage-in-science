@@ -186,7 +186,7 @@ def main() -> None:
 
             # Get data
             sql_query: str = """
-                SELECT s.journal, ns.paper_id, p.doi FROM searches s
+                SELECT DISTINCT s.journal, p.doi FROM searches s
                 JOIN searches_to_papers sbt ON s._id = sbt.search_id
                 JOIN ns_papers ns ON ns.paper_id = sbt.paper_id
                 JOIN papers p ON p._id = ns.paper_id;
