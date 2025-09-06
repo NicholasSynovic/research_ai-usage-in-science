@@ -27,8 +27,6 @@ dependencies = [
     "lxml>=5.1.0,<6",
     "matplotlib>=3.9.1,<4",
     "seaborn>=0.13.2,<0.14",
-    "ollama>=0.3.1,<0.4",
-    "mdformat>=0.7.22",
     "sqlalchemy>=2.0.43",
 ]
 
