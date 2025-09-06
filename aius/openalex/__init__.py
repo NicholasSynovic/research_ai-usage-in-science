@@ -59,6 +59,7 @@ class OpenAlex:
             "topic_1": [],
             "topic_2": [],
             "json": [],
+            "open_access": [],
         }
 
         # Get the maximum of the bar
@@ -85,6 +86,9 @@ class OpenAlex:
                     topics: list[dict[str, dict[str, str]]] = result["topics"]
                     topic_0, topic_1, topic_2 = self._get_topics(topics=topics)
 
+                    # Get open access status from the first location
+                    open_access: bool = result["locations"][0]["is_oa"]
+
                     # Store data
                     data["paper_id"].append(paper_id)
                     data["url"].append(resp.url)
@@ -94,6 +98,7 @@ class OpenAlex:
                     data["topic_1"].append(topic_1)
                     data["topic_2"].append(topic_2)
                     data["json"].append(dumps(obj=result))
+                    data["open_access"].append(open_access)
 
                 bar.next()
 
