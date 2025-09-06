@@ -22,12 +22,13 @@ dependencies = [
     "pandas>=2.2.0,<3",
     "progress~=1.6",
     "requests>=2.31.0,<3",
-    "click>=8.1.7,<9",
     "bs4>=0.0.2,<0.0.3",
     "lxml>=5.1.0,<6",
     "matplotlib>=3.9.1,<4",
     "seaborn>=0.13.2,<0.14",
     "sqlalchemy>=2.0.43",
+    "langchain-community>=0.3.29",
+    "pypdf>=6.0.0",
 ]
 
 [project.urls]
