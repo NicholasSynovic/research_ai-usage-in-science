@@ -67,7 +67,7 @@ def main() -> None:
     df_list: list[DataFrame] = []
     with Bar("Preprocessing PDFs... ", max=len(filepaths)) as bar:
         filepath: Path
-        for filepath in filepaths[:2]:
+        for filepath in filepaths:
             df_list.append(process_pdf(pdf_path=filepath))
             bar.next()
 
