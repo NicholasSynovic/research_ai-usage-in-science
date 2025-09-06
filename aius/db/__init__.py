@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from sqlalchemy import (
+    Boolean,
     Column,
     Engine,
     ForeignKey,
@@ -65,6 +66,7 @@ class DB:
             Column("_id", Integer, primary_key=True),
             Column("cited_by_count", Integer),
             Column("json", String),
+            Column("open_access", Boolean),
             Column("paper_id", Integer, ForeignKey("papers._id")),
             Column("status_code", Integer),
             Column("topic_0", String),
