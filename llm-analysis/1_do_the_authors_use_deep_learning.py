@@ -88,7 +88,7 @@ def main() -> None:
             }
 
             resp: Response = post(
-                url=f"{args.ollama[0]}/api/generate",
+                url=f"http://{args.ollama[0]}/api/generate",
                 json=jsonData,
                 timeout=aius.GET_TIMEOUT,
             )
@@ -100,44 +100,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-def main_old(
-    inputFP: Path,
-    model: str,
-    promptStr: str,
-    systemPromptStr: str,
-    ollamaAPI: str,
-    timeout: int,
-    predictionTokens: int,
-    contextTokens: int,
-) -> None:
-    loader: PyPDFLoader = PyPDFLoader(file_path=inputFP.__str__())
-    documents: List[Document] = loader.load()
-
-    jsonData: dict = {
-        "model": model,
-        "stream": False,
-        "prompt": f"{promptStr}\n\n{documents}",
-        "system": systemPromptStr,
-        "options": {
-            "temperature": 0.1,
-            "top_k": 1,
-            "top_p": 0.1,
-            "num_predict": predictionTokens,
-            "num_ctx": contextTokens,
-        },
-    }
-
-    resp: Response = post(
-        url=f"{ollamaAPI}/api/generate",
-        json=jsonData,
-        timeout=timeout,
-    )
-
-    print(
-        "$MAGIC_VALUE_START$",
-        inputFP.name,
-        resp.json(),
-        "$MAGIC_VALUE_END$",
-    )
