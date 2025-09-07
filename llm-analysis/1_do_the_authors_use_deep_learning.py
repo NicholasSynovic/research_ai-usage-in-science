@@ -1,3 +1,4 @@
+import json
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import List
@@ -5,10 +6,15 @@ from typing import List
 import pandas
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents.base import Document
-from pandas import DataFrame
+from pandas import DataFrame, Series
+from progress.bar import Bar
 from requests import Response, post
 
+import aius
+
 PROGRAM_NAME: str = '"Do the author\'s use deep learning?"'
+SYSTEM_PROMPT: str = "You are part of a system that processes Boolean logic. For any question or statement, output only a machine-readable Boolean: True or False. No additional text, formatting, or explanation is allowed."
+USER_PROMPT: str = PROGRAM_NAME
 
 
 def cli() -> Namespace:
@@ -38,7 +44,7 @@ def cli() -> Namespace:
         type=lambda x: Path(x).resolve(),
         nargs=1,
         required=True,
-        help="Path to store output as an Apache Parquet file",
+        help="Path to a directory to store output as JSON files",
     )
 
     parser.add_argument(
@@ -56,7 +62,40 @@ def main() -> None:
     args: Namespace = cli()
 
     df: DataFrame = pandas.read_parquet(path=args.pdf[0], engine="pyarrow")
-    print(df)
+
+    row: Series
+    with Bar("Submitting requests...", max=df.shape[0]) as bar:
+        for _, row in df.iterrows():
+            fp: Path = Path(
+                args.output[0],
+                Path(row["filename"]).stem + ".json",
+            )
+
+            documents: list[Document] = row["document_text"]
+            document_text: str = "".join(documents)
+
+            jsonData: dict = {
+                "model": args.model[0],
+                "stream": False,
+                "prompt": f"{USER_PROMPT}\n\n{document_text}",
+                "system": SYSTEM_PROMPT,
+                "options": {
+                    "temperature": 0.1,
+                    "top_k": 1,
+                    "top_p": 0.1,
+                    "num_predict": 10,
+                },
+            }
+
+            resp: Response = post(
+                url=f"{args.ollama[0]}/api/generate",
+                json=jsonData,
+                timeout=aius.GET_TIMEOUT,
+            )
+
+            fp.write_text(data=json.dumps(obj=resp.json(), indent=4))
+
+            bar.next()
 
 
 if __name__ == "__main__":
