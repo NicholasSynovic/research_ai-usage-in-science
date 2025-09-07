@@ -1,14 +1,14 @@
 import json
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import List
 
 import pandas
-from langchain_community.document_loaders import PyPDFLoader
+import tiktoken
 from langchain_core.documents.base import Document
 from pandas import DataFrame, Series
 from progress.bar import Bar
 from requests import Response, post
+from tiktoken import Encoding
 
 import aius
 
@@ -58,6 +58,18 @@ def cli() -> Namespace:
     return parser.parse_args()
 
 
+def compute_tokens(text: str) -> int:
+    token_count: int = 127000
+
+    encoding: Encoding = tiktoken.encoding_for_model("gpt-4")
+
+    encoded_token_count: int = len(encoding.encode(text=text))
+    if encoded_token_count < token_count:
+        return encoded_token_count + 50
+
+    return token_count
+
+
 def main() -> None:
     args: Namespace = cli()
 
@@ -73,17 +85,19 @@ def main() -> None:
 
             documents: list[Document] = row["document_text"]
             document_text: str = "".join(documents)
+            prompt: str = f"{USER_PROMPT}\n\n{document_text}"
 
             jsonData: dict = {
                 "model": args.model[0],
                 "stream": False,
-                "prompt": f"{USER_PROMPT}\n\n{document_text}",
+                "prompt": prompt,
                 "system": SYSTEM_PROMPT,
                 "options": {
                     "temperature": 0.1,
                     "top_k": 1,
                     "top_p": 0.1,
                     "num_predict": 10,
+                    "num_ctx": compute_tokens(text=prompt),
                 },
             }
 
