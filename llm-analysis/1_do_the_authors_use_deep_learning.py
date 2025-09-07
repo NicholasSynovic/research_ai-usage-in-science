@@ -2,8 +2,10 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import List
 
+import pandas
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents.base import Document
+from pandas import DataFrame
 from requests import Response, post
 
 PROGRAM_NAME: str = '"Do the author\'s use deep learning?"'
@@ -13,12 +15,12 @@ def cli() -> Namespace:
     parser: ArgumentParser = ArgumentParser(prog=PROGRAM_NAME)
 
     parser.add_argument(
-        "-d",
-        "--directory",
+        "-p",
+        "--pdf",
         type=lambda x: Path(x).resolve(),
         nargs=1,
         required=True,
-        help="Path to PDF directory",
+        help="Path to PDF preprocessing parquet file",
     )
 
     parser.add_argument(
@@ -39,11 +41,22 @@ def cli() -> Namespace:
         help="Path to store output as an Apache Parquet file",
     )
 
+    parser.add_argument(
+        "--ollama",
+        type=str,
+        nargs=1,
+        required=True,
+        help="Ollama API endpoint",
+    )
+
     return parser.parse_args()
 
 
 def main() -> None:
-    pass
+    args: Namespace = cli()
+
+    df: DataFrame = pandas.read_parquet(path=args.pdf[0], engine="pyarrow")
+    print(df)
 
 
 if __name__ == "__main__":

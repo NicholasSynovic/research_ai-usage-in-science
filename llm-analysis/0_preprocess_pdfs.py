@@ -11,8 +11,9 @@ import pandas
 from langchain_community.document_loaders import PyPDFLoader
 from pandas import DataFrame
 from progress.bar import Bar
+from pypdf.errors import LimitReachedError, PdfReadWarning
 
-PROGRAM_NAME: str = "PDF preprocessor"
+PROGRAM_NAME: str = "PDF Preprocessor"
 
 
 def cli() -> Namespace:
@@ -52,9 +53,9 @@ def process_pdf(pdf_path: Path) -> DataFrame:
     pdf_loader: PyPDFLoader = PyPDFLoader(
         file_path=pdf_path,
         extract_images=False,
-        mode="single",
+        mode="page",
     )
-    data["document_text"].append(pdf_loader.load()[0].page_content)
+    data["document_text"].append(f"{pdf_loader.load()}")
 
     return DataFrame(data=data)
 
@@ -68,7 +69,11 @@ def main() -> None:
     with Bar("Preprocessing PDFs... ", max=len(filepaths)) as bar:
         filepath: Path
         for filepath in filepaths:
-            df_list.append(process_pdf(pdf_path=filepath))
+            try:
+                df_list.append(process_pdf(pdf_path=filepath))
+            except:
+                pass
+
             bar.next()
 
     df: DataFrame = pandas.concat(objs=df_list, ignore_index=True)
