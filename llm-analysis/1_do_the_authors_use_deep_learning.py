@@ -97,7 +97,7 @@ def main() -> None:
                     "top_k": 1,
                     "top_p": 0.1,
                     "num_predict": 10,
-                    "num_ctx": compute_tokens(text=prompt),
+                    "num_ctx": 25000,
                 },
             }
 
