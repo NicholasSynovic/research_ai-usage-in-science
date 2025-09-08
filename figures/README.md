@@ -85,4 +85,4 @@ It also reports the total number of documents returned across all searches, and
 the total number of unique documents returned.
 
 - [Code](breakdown_of_plos_keyword_searches.py)
-- See command line for figure generation
+- [Figure](breakdown_of_plos_keyword_searches.py)
