@@ -10,6 +10,7 @@
   - [3. Frequency of Natural Science Topics From Nature and PLOS](#3-frequency-of-natural-science-topics-from-nature-and-plos)
   - [4. Number of Papers Published in PLOS and Nature per Year](#4-number-of-papers-published-in-plos-and-nature-per-year)
   - [5. Number of Natural science Papers Published in PLOS and Nature per Year](#5-number-of-natural-science-papers-published-in-plos-and-nature-per-year)
+  - [Breakdown Of PLOS Keyword Searches](#breakdown-of-plos-keyword-searches)
 
 ## 0. Total Nature and PLOS Papers
 
@@ -70,3 +71,18 @@ another for PLOS.
 
 - [Code](number_of_natural_science_papers_published_per_year.py)
 - [Figure](number_of_natural_science_papers_published_per_year.pdf)
+
+## Breakdown Of PLOS Keyword Searches
+
+This generates a table of the following columns for PLOS search results:
+
+- Keyword: The keyword used in the search
+- Total Documents: The total number of documents returned in the search
+- Unique Documents: The total number of *unique* documents returned in the
+  search
+
+It also reports the total number of documents returned across all searches, and
+the total number of unique documents returned.
+
+- [Code](breakdown_of_plos_keyword_searches.py)
+- See command line for figure generation
