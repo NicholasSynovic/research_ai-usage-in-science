@@ -98,6 +98,7 @@ def main() -> None:
                     "top_p": 0.1,
                     "num_predict": 10,
                     "num_ctx": 25000,
+                    "seed": 42,
                 },
             }
 
