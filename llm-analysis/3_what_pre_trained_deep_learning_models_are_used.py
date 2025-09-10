@@ -111,6 +111,10 @@ def main() -> None:
                 Path(row["filename"]).stem + ".json",
             )
 
+            if fp.exists():
+                bar.next()
+                continue
+
             documents: list[Document] = row["document_text"]
             document_text: str = "".join(documents)
             prompt: str = f"{USER_PROMPT}\n\n{document_text}"
@@ -125,7 +129,7 @@ def main() -> None:
                     "top_k": 1,
                     "top_p": 0.1,
                     "num_predict": 10,
-                    "num_ctx": 25000,
+                    "num_ctx": 50000,
                     "seed": 42,
                 },
             }
@@ -133,7 +137,7 @@ def main() -> None:
             resp: Response = post(
                 url=f"http://{args.ollama[0]}/api/generate",
                 json=jsonData,
-                timeout=aius.GET_TIMEOUT,
+                timeout=360000,
             )
 
             fp.write_text(data=json.dumps(obj=resp.json(), indent=4))
