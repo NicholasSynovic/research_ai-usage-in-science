@@ -12,15 +12,15 @@ from tiktoken import Encoding
 
 import aius
 
-PROGRAM_NAME: str = "Do the author's use deep learning?"
+PROGRAM_NAME: str = "Are pre-trained deep learning models used?"
 SYSTEM_PROMPT: str = """
 (C) Context:
 You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine readable format.
-Your sole responsibility is to evaluate the paper's content and determine whether the author's use deep learning models or methods in their methodology.
+Your sole responsibility is to evaluate the paper's content and determine whether the author's reuse pre-trained deep learning models in their methodology.
 Your response will be consumed by downstream systems that require structured JSON.
 
 (O) Objective:
-Your task is to output only a JSON object containing a single key-value pair, where the key is "result" and the value is a boolean (true or false) based on whether the input text use deep learning models or methods in their methodology.
+Your task is to output only a JSON object containing a single key-value pair, where the key is "result" and the value is a boolean (true or false) based on whether the input text reuses pre-trained deep learning methods in their methodology.
 No explanations or extra output are allowed.
 
 (S) Style:
