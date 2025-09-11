@@ -48,6 +48,8 @@ class DB:
             self.metadata,
             Column("_id", Integer, primary_key=True),
             Column("doi", String),
+            Column("html", String),
+            Column("md", String),
         )
 
         # Searches to Papers table
