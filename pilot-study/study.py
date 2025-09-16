@@ -38,7 +38,7 @@ def create_urls() -> list[str]:
             urls.append(
                 plos._construct_url(year=year, keyword=keyword, page=1)
                 .replace("DATE_NEWEST_FIRST", "MOST_CITED")
-                .replace("resultsPerPage=100", "resultsPerPage=5")
+                .replace("resultsPerPage=100", "resultsPerPage=1")
             )
 
     return urls
@@ -54,7 +54,7 @@ def main() -> None:
         df = get_all_pages(urls=urls)
         PICKLE_PATH.write_bytes(data=pickle.dumps(obj=df))
 
-    print(df["id"].unique().size)
+    print(df["id"].unique())
 
 
 if __name__ == "__main__":
