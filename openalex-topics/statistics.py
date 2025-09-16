@@ -3,10 +3,11 @@ from pathlib import Path
 
 import pandas
 from pandas import DataFrame
+from pandas.core.groupby import DataFrameGroupBy
 from progress.bar import Bar
 from requests import Response, get
+
 from aius import FIELD_FILTER
-from pandas.core.groupby import DataFrameGroupBy
 
 OA_TOPICS_API: str = "https://api.openalex.org/topics"
 PICKLE_PATH: Path = Path("oa_topics.pickle").absolute()
@@ -53,7 +54,15 @@ def main() -> None:
     topic_df["subfield_name"] = topic_df["subfield"].apply(lambda x: x["display_name"])
     topic_df["field_name"] = topic_df["field"].apply(lambda x: x["display_name"])
     topic_df["domain_name"] = topic_df["domain"].apply(lambda x: x["display_name"])
-    df: DataFrame = topic_df[["display_name", "works_count", "subfield_name", "field_name", "domain_name",]]
+    df: DataFrame = topic_df[
+        [
+            "display_name",
+            "works_count",
+            "subfield_name",
+            "field_name",
+            "domain_name",
+        ]
+    ]
 
     # Filter for only Natural Science topics
     ns_df = df[df["field_name"].isin(FIELD_FILTER)]
@@ -70,7 +79,13 @@ def main() -> None:
     _df: DataFrame
     idx: str
     for idx, _df in ns_dfgb:
-        print(idx, "topics", _df["display_name"].unique().size, "subfields", _df["subfield_name"].unique().size,)
+        print(
+            idx,
+            "topics",
+            _df["display_name"].unique().size,
+            "subfields",
+            _df["subfield_name"].unique().size,
+        )
 
 
 if __name__ == "__main__":
