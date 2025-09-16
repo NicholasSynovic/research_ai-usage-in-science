@@ -24,7 +24,7 @@ class PLOS(Downloader):
         pass
 
     def get_jats(self) -> Response:
-        pass
+        return Response()
 
     def get_pdfs(self) -> Response:
-        pass
+        return Response()

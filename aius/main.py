@@ -7,12 +7,12 @@ import pandas
 from pandas import DataFrame
 
 import aius
+import aius.download.plos as plos_download
 import aius.filter as aius_filter
 import aius.search.nature as nature_search
 import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
-from aius.download import Downloader
 from aius.extract_documents import JournalExtractor
 from aius.openalex import OpenAlex
 from aius.search import JournalSearch, search_all_keyword_year_products
@@ -195,6 +195,18 @@ def main() -> None:
                 sql=sql_query,
                 con=db.engine,
             )
+
+            # Split the data into PLOS and Nature data
+            plos_data_df: DataFrame = data_df[data_df["journal"] == "plos"]
+            nature_data_df: DataFrame = data_df[data_df["journal"] == "nature"]
+
+            # Download and store PLOS data
+            plos_downloader: plos_download.PLOS = plos_download.PLOS(
+                paper_dois=plos_data_df,
+            )
+
+            print(plos_data_df)
+            quit()
 
             # Create downloader object
             downloader: Downloader = Downloader(
