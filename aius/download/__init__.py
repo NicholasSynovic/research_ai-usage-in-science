@@ -16,6 +16,15 @@ class Downloader(ABC):
         return get(url=url, timeout=timeout)
 
     @abstractmethod
+    def create_jats_urls(self) -> None:
+        """
+        Modifies self.paper_dois in place to add a new column `jats_urls`.
+
+        This column contains links to the JATS XML content of paper DOIs.
+        """
+        ...
+
+    @abstractmethod
     def create_pdf_urls(self) -> None:
         """
         Modifies self.paper_dois in place to add a new column `pdf_urls`.
@@ -25,22 +34,13 @@ class Downloader(ABC):
         ...
 
     @abstractmethod
-    def create_html_urls(self) -> None:
-        """
-        Modifies self.paper_dois in place to add a new column `html_urls`.
-
-        This column contains links to the HTML content of paper DOIs.
-        """
+    def get_jats(self) -> Response:
+        """Yield JATS URL `requests.Response` objects"""
         ...
 
     @abstractmethod
     def get_pdfs(self) -> Response:
         """Yield PDF URL `requests.Response` objects"""
-        ...
-
-    @abstractmethod
-    def get_html(self) -> Response:
-        """Yield HTML URL `requests.Response` objects"""
         ...
 
 
