@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 from pandas import DataFrame, Series
@@ -7,57 +8,93 @@ from requests import Response, get
 import aius
 
 
-class Downloader:
-    def __init__(self, data: DataFrame, pdf_dir: Path) -> None:
-        self.data: DataFrame = data
-        self.pdf_dir: Path = pdf_dir
+class Downloader(ABC):
+    def __init__(self, paper_dois: DataFrame) -> None:
+        self.paper_dois = paper_dois
 
-    def _get_plos(self, doi: str) -> Response:
-        # Get DOI prefix/suffix from DOI
-        doi_prefix_suffix: str = doi.replace("https://doi.org/", "")
+    def _get(self, url: str, timeout: int = 60) -> Response:
+        return get(url=url, timeout=timeout)
 
-        # Create PLOS PDF URL
-        url: str = f"https://journals.plos.org/plosone/article/file?id={doi_prefix_suffix}&type=printable"
+    @abstractmethod
+    def create_jats_urls(self) -> None:
+        """
+        Modifies self.paper_dois in place to add a new column `jats_urls`.
 
-        # Return the response
-        return get(url=url, timeout=aius.GET_TIMEOUT)
+        This column contains links to the JATS XML content of paper DOIs.
+        """
+        ...
 
-    def _get_nature(self, doi: str) -> Response:
-        # Get DOI suffix from DOI
-        doi_suffix: str = doi.split(sep="/")[-1]
+    @abstractmethod
+    def create_pdf_urls(self) -> None:
+        """
+        Modifies self.paper_dois in place to add a new column `pdf_urls`.
 
-        # Create Nature PDF URL
-        url: str = f"https://www.nature.com/articles/{doi_suffix}.pdf"
+        This column contains links to the PDF content of paper DOIs.
+        """
+        ...
 
-        # Return the response
-        return get(url=url, timeout=aius.GET_TIMEOUT)
+    @abstractmethod
+    def get_jats(self) -> Response:
+        """Yield JATS URL `requests.Response` objects"""
+        ...
 
-    def download(self) -> None:
-        with Bar("Downloading data...", max=self.data.shape[0]) as bar:
-            row: Series
-            for _, row in self.data.iterrows():
-                # Create filename from doi prefix and suffix
-                filename: str = f"{row['doi'].replace('https://doi.org/', '').replace('/', '_')}.pdf"
+    @abstractmethod
+    def get_pdfs(self) -> Response:
+        """Yield PDF URL `requests.Response` objects"""
+        ...
 
-                # Create filepath for PDF
-                filepath: Path = Path(self.pdf_dir, filename)
 
-                # Check if file exists at that filepath and skip processing it
-                if filepath.exists():
-                    bar.next()
-                    continue
+# class Downloader:
+#     def __init__(self, data: DataFrame, pdf_dir: Path) -> None:
+#         self.data: DataFrame = data
+#         self.pdf_dir: Path = pdf_dir
 
-                # Get PDF response
-                resp: Response
-                match row["journal"]:
-                    case "nature":
-                        resp = self._get_nature(doi=row["doi"])
-                    case "plos":
-                        resp = self._get_plos(doi=row["doi"])
-                    case _:
-                        raise TypeError("Not a valid journal")
+#     def _get_plos(self, doi: str) -> Response:
+#         # Get DOI prefix/suffix from DOI
+#         doi_prefix_suffix: str = doi.replace("https://doi.org/", "")
 
-                # Write data from the response
-                filepath.write_bytes(data=resp.content)
+#         # Create PLOS PDF URL
+#         url: str = f"https://journals.plos.org/plosone/article/file?id={doi_prefix_suffix}&type=printable"
 
-                bar.next()
+#         # Return the response
+#         return get(url=url, timeout=aius.GET_TIMEOUT)
+
+#     def _get_nature(self, doi: str) -> Response:
+#         # Get DOI suffix from DOI
+#         doi_suffix: str = doi.split(sep="/")[-1]
+
+#         # Create Nature PDF URL
+#         url: str = f"https://www.nature.com/articles/{doi_suffix}.pdf"
+
+#         # Return the response
+#         return get(url=url, timeout=aius.GET_TIMEOUT)
+
+#     def download(self) -> None:
+#         with Bar("Downloading data...", max=self.data.shape[0]) as bar:
+#             row: Series
+#             for _, row in self.data.iterrows():
+#                 # Create filename from doi prefix and suffix
+#                 filename: str = f"{row['doi'].replace('https://doi.org/', '').replace('/', '_')}.pdf"
+
+#                 # Create filepath for PDF
+#                 filepath: Path = Path(self.pdf_dir, filename)
+
+#                 # Check if file exists at that filepath and skip processing it
+#                 if filepath.exists():
+#                     bar.next()
+#                     continue
+
+#                 # Get PDF response
+#                 resp: Response
+#                 match row["journal"]:
+#                     case "nature":
+#                         resp = self._get_nature(doi=row["doi"])
+#                     case "plos":
+#                         resp = self._get_plos(doi=row["doi"])
+#                     case _:
+#                         raise TypeError("Not a valid journal")
+
+#                 # Write data from the response
+#                 filepath.write_bytes(data=resp.content)
+
+#                 bar.next()
