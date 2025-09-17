@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
+from typing import Literal
 
 from pandas import DataFrame, Series
 from requests import Response, get
@@ -54,6 +55,17 @@ class Downloader(ABC):
         row: Series
         for _, row in self.paper_dois.iterrows():
             yield get(url=row[column], timeout=timeout)
+
+
+def download(df: DataFrame, journal_downloader: Downloader) -> DataFrame:
+    # Create URLs
+    journal_downloader.create_html_urls()
+    journal_downloader.create_jats_urls()
+    journal_downloader.create_pdf_urls()
+
+    # Download
+
+    return journal_downloader.paper_dois
 
 
 # class Downloader:

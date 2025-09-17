@@ -200,19 +200,14 @@ def main() -> None:
             plos_data_df: DataFrame = data_df[data_df["journal"] == "plos"]
             nature_data_df: DataFrame = data_df[data_df["journal"] == "nature"]
 
+            # Handle PLOS data first
+
             # Download and store PLOS data
             plos_downloader: plos_download.PLOS = plos_download.PLOS(
                 paper_dois=plos_data_df,
             )
 
-            # Create JATS XML URLs for PLOS
-            plos_downloader.create_jats_urls()
-
-            # Create PDF URLs for PLOS
-            plos_downloader.create_pdf_urls()
-
-            # Download  JATSXML URLs
-            whi
+            # Download  JATS XML URLs
 
             breakpoint()
             quit()
