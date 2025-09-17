@@ -87,7 +87,7 @@ class Downloader(ABC):
         self.paper_dois["pdf"] = data
 
 
-def download(journal_downloader: Downloader) -> None:
+def download_content(journal_downloader: Downloader) -> None:
     # Create URLs
     journal_downloader.create_html_urls()
     journal_downloader.create_jats_urls()

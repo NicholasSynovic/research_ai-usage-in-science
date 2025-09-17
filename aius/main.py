@@ -7,7 +7,10 @@ import pandas
 from pandas import DataFrame
 
 import aius
-import aius.download.plos as plos_download
+import aius.download as aius_download
+import aius.download.plos as plos_downloader
+
+# import aius.download.nature as nature_downloader
 import aius.filter as aius_filter
 import aius.search.nature as nature_search
 import aius.search.plos as plos_search
@@ -201,10 +204,8 @@ def main() -> None:
             nature_data_df: DataFrame = data_df[data_df["journal"] == "nature"]
 
             # Handle PLOS data first
-
-            # Download and store PLOS data
-            plos_downloader: plos_download.PLOS = plos_download.PLOS(
-                paper_dois=plos_data_df,
+            aius_download.download_content(
+                journal_downloader=plos_downloader.PLOS(paper_dois=plos_data_df),
             )
 
             # Download  JATS XML URLs
