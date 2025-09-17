@@ -118,20 +118,8 @@ class DB:
             Column("_id", Integer, primary_key=True),
             Column("ns_paper_id", Integer, ForeignKey("ns_papers._id")),
             Column("html", String),
-            Column("html_raw", String),
-            Column("html_token_count", Integer),
             Column("jats", String),
-            Column("jats_raw", String),
-            Column("jats_token_count", Integer),
-            Column("md_html", String),
-            Column("md_html_token_count", Integer),
-            Column("md_jats", String),
-            Column("md_jats_token_count", Integer),
-            Column("md_pdf", String),
-            Column("md_pdf_token_count", Integer),
             Column("pdf", String),
-            Column("pdf_raw", BLOB),
-            Column("pdf_token_count", Integer),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)

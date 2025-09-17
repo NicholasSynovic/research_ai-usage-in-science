@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections.abc import Generator
 from string import Template
 
@@ -62,7 +62,7 @@ class Downloader(ABC):
                 data.append(soup.prettify())
                 bar.next()
 
-        self.paper_dois["html_raw"] = data
+        self.paper_dois["html"] = data
 
     def download_jats_content(self) -> None:
         data: list[str] = []
@@ -73,7 +73,7 @@ class Downloader(ABC):
                 data.append(resp.content.decode())
                 bar.next()
 
-        self.paper_dois["jats_raw"] = data
+        self.paper_dois["jats"] = data
 
     def download_pdf_content(self) -> None:
         data: list[bytes] = []
@@ -84,15 +84,16 @@ class Downloader(ABC):
                 data.append(resp.content)
                 bar.next()
 
-        self.paper_dois["pdf_raw"] = data
+        self.paper_dois["pdf"] = data
 
 
-def download(journal_downloader: Downloader) -> DataFrame:
+def download(journal_downloader: Downloader) -> None:
     # Create URLs
     journal_downloader.create_html_urls()
     journal_downloader.create_jats_urls()
     journal_downloader.create_pdf_urls()
 
     # Download content
-
-    return journal_downloader.paper_dois
+    journal_downloader.download_html_content()
+    journal_downloader.download_jats_content()
+    journal_downloader.download_pdf_content()
