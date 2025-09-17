@@ -1,19 +1,23 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
+from collections.abc import Generator
 
 from pandas import DataFrame, Series
-from progress.bar import Bar
 from requests import Response, get
-
-import aius
 
 
 class Downloader(ABC):
     def __init__(self, paper_dois: DataFrame) -> None:
         self.paper_dois = paper_dois
+        self.paper_count: int = self.paper_dois.shape[0]
 
-    def _get(self, url: str, timeout: int = 60) -> Response:
-        return get(url=url, timeout=timeout)
+    @abstractmethod
+    def create_html_urls(self) -> None:
+        """
+        Modifies self.paper_dois in place to add a new column `html_urls`.
+
+        This column contains links to the PDF content of paper DOIs.
+        """
+        ...
 
     @abstractmethod
     def create_jats_urls(self) -> None:
@@ -34,14 +38,22 @@ class Downloader(ABC):
         ...
 
     @abstractmethod
-    def get_jats(self) -> Response:
-        """Yield JATS URL `requests.Response` objects"""
-        ...
+    def extract_html_content(self) -> None: ...
 
     @abstractmethod
-    def get_pdfs(self) -> Response:
-        """Yield PDF URL `requests.Response` objects"""
-        ...
+    def extract_jats_content(self) -> None: ...
+
+    @abstractmethod
+    def extract_pdf_content(self) -> None: ...
+
+    def get_documents(
+        self,
+        column: str,
+        timeout: int = 60,
+    ) -> Generator[Response, None, None]:
+        row: Series
+        for _, row in self.paper_dois.iterrows():
+            yield get(url=row[column], timeout=timeout)
 
 
 # class Downloader:

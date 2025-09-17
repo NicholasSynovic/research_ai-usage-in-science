@@ -205,7 +205,16 @@ def main() -> None:
                 paper_dois=plos_data_df,
             )
 
-            print(plos_data_df)
+            # Create JATS XML URLs for PLOS
+            plos_downloader.create_jats_urls()
+
+            # Create PDF URLs for PLOS
+            plos_downloader.create_pdf_urls()
+
+            # Download  JATSXML URLs
+            whi
+
+            breakpoint()
             quit()
 
             # Create downloader object
