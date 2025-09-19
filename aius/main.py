@@ -206,12 +206,17 @@ def main() -> None:
             pd: aius_download.Downloader
             nd: aius_download.Downloader
 
-            pd = plos_downloader.PLOS(paper_dois=plos_data_df)
-            nd = nature_downloader.Nature(paper_dois=nature_data_df)
+            pd = plos_downloader.PLOS(
+                paper_dois=plos_data_df,
+                output_dir=namespace[f"{subparser_keyword}.directory"][0],
+            )
+            # nd = nature_downloader.Nature(paper_dois=nature_data_df)
 
-            # Download documents
-            aius_download.download_content(journal_downloader=pd)  # PLOS docs
-            # aius_download.download_content(journal_downloader=nd)  # Nature docs
+            # Download documents and write to filesystem
+            aius_download.download_and_write_to_fs_content(
+                journal_downloader=pd
+            )  # PLOS docs
+            # aius_download.download_and_write_to_fs_content(journal_downloader=nd)  # Nature docs
 
             # Join data
             data_df: DataFrame = pandas.concat(
@@ -219,7 +224,7 @@ def main() -> None:
                 ignore_index=True,
             )
 
-            # Write data
+            # Write data to database
             data_df.to_sql(
                 name="ns_paper_downloads",
                 con=db.engine,

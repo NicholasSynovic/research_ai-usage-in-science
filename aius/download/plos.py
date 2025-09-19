@@ -1,3 +1,4 @@
+from pathlib import Path
 from string import Template
 
 from pandas import DataFrame
@@ -6,8 +7,8 @@ from aius.download import Downloader
 
 
 class PLOS(Downloader):
-    def __init__(self, paper_dois: DataFrame) -> None:
-        super().__init__(paper_dois)
+    def __init__(self, paper_dois: DataFrame, output_dir: Path) -> None:
+        super().__init__(paper_dois, output_dir=output_dir)
 
         self.html_url_template: Template = Template(
             template="https://journals.plos.org/plosone/article/file?id=${doi_prefix_suffix}"
