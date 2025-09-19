@@ -11,7 +11,7 @@ class PLOS(Downloader):
         super().__init__(paper_dois, output_dir=output_dir)
 
         self.html_url_template: Template = Template(
-            template="https://journals.plos.org/plosone/article/file?id=${doi_prefix_suffix}"
+            template="https://journals.plos.org/plosone/article?id=${doi_prefix_suffix}"
         )
         self.jats_url_template: Template = Template(
             template="https://journals.plos.org/plosone/article/file?id=${doi_prefix_suffix}&type=manuscript"

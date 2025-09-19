@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from pandas import DataFrame, Series
 from progress.bar import Bar
 from requests import Response, get
+from requests.exceptions import HTTPError
 
 
 class Downloader(ABC):
@@ -16,11 +17,6 @@ class Downloader(ABC):
 
         # Output directory
         self.output_dir: Path = output_dir
-
-        # Override these in implmentation classes
-        self.html_url_template: Template = Template("")
-        self.jats_url_template: Template = Template("")
-        self.pdf_url_template: Template = Template("")
 
     @abstractmethod
     def create_html_urls(self) -> None: ...
@@ -53,6 +49,12 @@ class Downloader(ABC):
         resp: Response
         with Bar("Downloading HTML content...", max=self.paper_count) as bar:
             for resp in self.get_documents(column="html_url"):
+                if resp.status_code != 200:
+                    raise HTTPError(
+                        f"{resp.status_code, resp.url, resp.reason}",
+                        response=resp,
+                    )
+
                 soup: BeautifulSoup = BeautifulSoup(
                     markup=resp.content,
                     features="lxml",
@@ -69,6 +71,12 @@ class Downloader(ABC):
         resp: Response
         with Bar("Downloading JATS XML content...", max=self.paper_count) as bar:
             for resp in self.get_documents(column="jats_url"):
+                if resp.status_code != 200:
+                    raise HTTPError(
+                        f"{resp.status_code, resp.url, resp.reason}",
+                        response=resp,
+                    )
+
                 soup: BeautifulSoup = BeautifulSoup(
                     markup=resp.content,
                     features="lxml-xml",
@@ -85,6 +93,12 @@ class Downloader(ABC):
         resp: Response
         with Bar("Downloading PDF content...", max=self.paper_count) as bar:
             for resp in self.get_documents(column="pdf_url"):
+                if resp.status_code != 200:
+                    raise HTTPError(
+                        f"{resp.status_code, resp.url, resp.reason}",
+                        response=resp,
+                    )
+
                 data.append(resp.content)
                 bar.next()
 
