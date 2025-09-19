@@ -8,9 +8,8 @@ from pandas import DataFrame
 
 import aius
 import aius.download as aius_download
+import aius.download.nature as nature_downloader
 import aius.download.plos as plos_downloader
-
-# import aius.download.nature as nature_downloader
 import aius.filter as aius_filter
 import aius.search.nature as nature_search
 import aius.search.plos as plos_search
@@ -189,7 +188,7 @@ def main() -> None:
 
             # Get data
             sql_query: str = """
-                SELECT DISTINCT s.journal, p.doi FROM searches s
+                SELECT DISTINCT ns._id, s.journal, p.doi FROM searches s
                 JOIN searches_to_papers sbt ON s._id = sbt.search_id
                 JOIN ns_papers ns ON ns.paper_id = sbt.paper_id
                 JOIN papers p ON p._id = ns.paper_id;
@@ -197,30 +196,37 @@ def main() -> None:
             data_df: DataFrame = pandas.read_sql_query(
                 sql=sql_query,
                 con=db.engine,
-            )
+            ).rename(columns={"_id": "ns_paper_id"})
 
             # Split the data into PLOS and Nature data
             plos_data_df: DataFrame = data_df[data_df["journal"] == "plos"]
             nature_data_df: DataFrame = data_df[data_df["journal"] == "nature"]
 
-            # Handle PLOS data first
-            aius_download.download_content(
-                journal_downloader=plos_downloader.PLOS(paper_dois=plos_data_df),
+            # Create downloaders
+            pd: aius_download.Downloader
+            nd: aius_download.Downloader
+
+            pd = plos_downloader.PLOS(paper_dois=plos_data_df)
+            nd = nature_downloader.Nature(paper_dois=nature_data_df)
+
+            # Download documents
+            aius_download.download_content(journal_downloader=pd)  # PLOS docs
+            # aius_download.download_content(journal_downloader=nd)  # Nature docs
+
+            # Join data
+            data_df: DataFrame = pandas.concat(
+                objs=[pd.paper_dois],
+                ignore_index=True,
             )
 
-            # Download  JATS XML URLs
-
-            breakpoint()
-            quit()
-
-            # Create downloader object
-            downloader: Downloader = Downloader(
-                data=data_df,
-                pdf_dir=namespace["download.directory"][0],
+            # Write data
+            data_df.to_sql(
+                name="ns_paper_downloads",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
             )
-
-            # Download papers
-            downloader.download()
 
         case _:
             sys.exit(1)

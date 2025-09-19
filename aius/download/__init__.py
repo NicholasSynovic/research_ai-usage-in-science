@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections.abc import Generator
 from string import Template
 
@@ -10,7 +10,7 @@ from requests import Response, get
 
 class Downloader(ABC):
     def __init__(self, paper_dois: DataFrame) -> None:
-        self.paper_dois = paper_dois
+        self.paper_dois = paper_dois.copy()
         self.paper_count: int = self.paper_dois.shape[0]
 
         # Override these in implmentation classes
@@ -18,26 +18,14 @@ class Downloader(ABC):
         self.jats_url_template: Template = Template("")
         self.pdf_url_template: Template = Template("")
 
-    def create_html_urls(self) -> None:
-        self.paper_dois["html_url"] = self.paper_dois["doi"].apply(
-            lambda x: self.jats_url_template.substitute(
-                doi_prefix_suffix=x.replace("https://doi.org/", ""),
-            )
-        )
+    @abstractmethod
+    def create_html_urls(self) -> None: ...
 
-    def create_jats_urls(self) -> None:
-        self.paper_dois["jats_url"] = self.paper_dois["doi"].apply(
-            lambda x: self.jats_url_template.substitute(
-                doi_prefix_suffix=x.replace("https://doi.org/", ""),
-            )
-        )
+    @abstractmethod
+    def create_jats_urls(self) -> None: ...
 
-    def create_pdf_urls(self) -> None:
-        self.paper_dois["pdf_url"] = self.paper_dois["doi"].apply(
-            lambda x: self.pdf_url_template.substitute(
-                doi_prefix_suffix=x.replace("https://doi.org/", ""),
-            )
-        )
+    @abstractmethod
+    def create_pdf_urls(self) -> None: ...
 
     def get_documents(
         self,
@@ -70,7 +58,12 @@ class Downloader(ABC):
         resp: Response
         with Bar("Downloading JATS XML content...", max=self.paper_count) as bar:
             for resp in self.get_documents(column="jats_url"):
-                data.append(resp.content.decode())
+                soup: BeautifulSoup = BeautifulSoup(
+                    markup=resp.content,
+                    features="lxml-xml",
+                )
+
+                data.append(soup.prettify())
                 bar.next()
 
         self.paper_dois["jats"] = data
