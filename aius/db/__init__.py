@@ -111,20 +111,6 @@ class DB:
             Column("paper_id", Integer, ForeignKey("papers._id")),
         )
 
-        # Natural Science Downloaded Documents
-        _: Table = Table(
-            "ns_paper_downloads",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("ns_paper_id", Integer, ForeignKey("ns_papers._id")),
-            Column("html", String),
-            Column("html_url", String),
-            Column("jats", String),
-            Column("jats_url", String),
-            Column("pdf", String),
-            Column("pdf_url", String),
-        )
-
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def _write_constants(self) -> None:
