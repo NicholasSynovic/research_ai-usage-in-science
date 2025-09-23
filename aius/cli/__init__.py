@@ -35,7 +35,6 @@ class CLI:
         self.add_extract_documents()  # Extract documents from journal search
         self.add_openalex()  # Get document metadata from OpenAlex
         self.add_document_filter()  # Filter for Natural Science documents
-        self.add_download()  # Download natural science PDF documents
 
         # Add version argument
         self.parser.add_argument(
@@ -134,33 +133,6 @@ class CLI:
             type=self._resolve_path,
             help=self.db_help,
             dest="filter.db",
-        )
-
-    def add_download(self) -> None:
-        download_parser: ArgumentParser = self.subparsers.add_parser(
-            name="download",
-            help="Download Natural Science PDF documents",
-            description="Step 5",
-        )
-
-        download_parser.add_argument(
-            "-d",
-            "--db",
-            nargs=1,
-            default=self.database_path,
-            type=self._resolve_path,
-            help=self.db_help,
-            dest="download.db",
-        )
-
-        download_parser.add_argument(
-            "-s",
-            "--directory",
-            nargs=1,
-            required=True,
-            type=self._resolve_path,
-            help="Directory to write PDFs to",
-            dest="download.directory",
         )
 
     def parse(self) -> Namespace:

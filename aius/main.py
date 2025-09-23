@@ -182,57 +182,6 @@ def main() -> None:
                 index_label="_id",
             )
 
-        case "download":
-            # Instantiate the database
-            db: DB = DB(db_path=db_path)
-
-            # Get data
-            sql_query: str = """
-                SELECT DISTINCT ns._id, s.journal, p.doi FROM searches s
-                JOIN searches_to_papers sbt ON s._id = sbt.search_id
-                JOIN ns_papers ns ON ns.paper_id = sbt.paper_id
-                JOIN papers p ON p._id = ns.paper_id;
-            """
-            data_df: DataFrame = pandas.read_sql_query(
-                sql=sql_query,
-                con=db.engine,
-            ).rename(columns={"_id": "ns_paper_id"})
-
-            # Split the data into PLOS and Nature data
-            plos_data_df: DataFrame = data_df[data_df["journal"] == "plos"]
-            nature_data_df: DataFrame = data_df[data_df["journal"] == "nature"]
-
-            # Create downloaders
-            pd: aius_download.Downloader
-            nd: aius_download.Downloader
-
-            pd = plos_downloader.PLOS(
-                paper_dois=plos_data_df,
-                output_dir=namespace[f"{subparser_keyword}.directory"][0],
-            )
-            # nd = nature_downloader.Nature(paper_dois=nature_data_df)
-
-            # Download documents and write to filesystem
-            aius_download.download_and_write_to_fs_content(
-                journal_downloader=pd
-            )  # PLOS docs
-            # aius_download.download_and_write_to_fs_content(journal_downloader=nd)  # Nature docs
-
-            # Join data
-            data_df: DataFrame = pandas.concat(
-                objs=[pd.paper_dois],
-                ignore_index=True,
-            )
-
-            # Write data to database
-            data_df.to_sql(
-                name="ns_paper_downloads",
-                con=db.engine,
-                if_exists="append",
-                index=True,
-                index_label="_id",
-            )
-
         case _:
             sys.exit(1)
 
