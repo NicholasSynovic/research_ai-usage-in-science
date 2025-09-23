@@ -183,3 +183,5 @@ pyinstaller/
 *.zip
 data/*
 !data/.gitkeep
+!data/all_of_plos
+*.xml
