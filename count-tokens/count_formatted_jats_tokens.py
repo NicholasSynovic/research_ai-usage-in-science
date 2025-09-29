@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pandas
 import tiktoken
+from bs4 import BeautifulSoup
+from bs4.element import Tag
 from pandas import DataFrame
 from progress.bar import Bar
 
@@ -33,15 +35,40 @@ with Bar("Computing tokens...", max=df["filename"].size) as bar:
             data["filename"].append(file)
 
             with z.open(file) as f:
-                text: str = (
-                    f.read().decode("utf-8").replace("\n", "")
-                )  # convert bytes → string
+                soup: BeautifulSoup = BeautifulSoup(
+                    markup=f.read(),
+                    features="lxml-xml",
+                )
+
+                soup.find(name="back").decompose()  # Remove citations
+                soup.find(name="journal-meta").decompose()  # Remove journal
+
+                # Remove all frontmatter except for the title and abstract
+                frontmatter_tag: Tag = soup.find(name="article-meta")
+
+                child_tag: Tag
+                for child_tag in frontmatter_tag.children:
+                    if child_tag.name == None:
+                        continue
+
+                    if child_tag.name == "title-group":
+                        continue
+
+                    if child_tag.name == "abstract":
+                        continue
+
+                    child_tag.decompose()
+
+                text: str = soup.prettify()
                 data["tokens"].append(len(encoding.encode(text=text)))
                 data["content"].append(text)
                 f.close()
 
+                print(text)
+                quit()
+
             bar.next()
         z.close()
 
-with open(file="unformatted_jats_tokens.pickle", mode="wb") as jt:
+with open(file="formatted_jats_tokens.pickle", mode="wb") as jt:
     pickle.dump(obj=data, file=jt)
