@@ -1,6 +1,11 @@
 from math import ceil
+from pathlib import Path
 from string import Template
+from textwrap import fill
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pandas import DataFrame
 from progress.bar import Bar
 from requests import Response, get
 
@@ -32,6 +37,7 @@ OA_FIELD_WORKS: dict[str, int] = {
     "Neuroscience": 3086383,
     "Immunology and Microbiology": 2108297,
 }
+FIG_PATH: Path = Path("figE.pdf").resolve()
 
 
 def _get_topic_results(page: int) -> list[dict]:
@@ -101,4 +107,21 @@ def count_works_per_field() -> dict[str, int]:
     return data
 
 
-count_works_per_field()
+def plot() -> None:
+    # Sort data
+    data: dict[str, int] = dict(
+        sorted(OA_FIELD_WORKS.items(), key=lambda item: item[1], reverse=True),
+    )
+
+    sns.barplot(data=data)
+    plt.title(label="Number Of Natural Science Works Indexed By OpenAlex")
+    plt.xlabel(xlabel="OpenAlex Field")
+    plt.ylabel(ylabel="Number Of Works")
+
+    plt.xticks(rotation=45, ha="right")
+
+    plt.tight_layout()
+    plt.savefig(FIG_PATH)
+
+
+plot()
