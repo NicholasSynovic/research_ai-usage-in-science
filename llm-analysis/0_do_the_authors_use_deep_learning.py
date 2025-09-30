@@ -100,9 +100,12 @@ def query_ollama(
             "deepseek-r1:70b",
             "gemma3:27b",
             "llama4:16x17b",
+            "gemma3:4b",
         ],
         case_sensitive=True,
     ),
+    default="gemma3:4b",
+    show_default=True,
 )
 @click.option(
     "--ollama-api",
@@ -126,13 +129,15 @@ def main(
         for _, row in df.iterrows():
             resp: Response = query_ollama(
                 text=repr(row["content"]),
-                model=model,
+                model=repr(model),
                 ollama_api=ollama_api,
             )
             data.append((row["filename"], resp))
             bar.next()
 
-    pickle.dump(obj=data, file=output_path.open(mode="wb"))
+    with open(file=output_path, mode="wb") as pf:
+        pickle.dump(obj=data, file=pf)
+        pf.close()
 
 
 if __name__ == "__main__":
