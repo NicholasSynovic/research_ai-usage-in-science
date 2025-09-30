@@ -56,25 +56,23 @@ def query_ollama(
     context_window_size: int,
     ollama_api: str,
 ) -> Response:
-    jsonData: dict = {
-        "model": model,
-        "stream": False,
-        "prompt": text,
-        "system": SYSTEM_PROMPT,
-        "options": {
-            "temperature": 0.1,
-            "top_k": 1,
-            "top_p": 0.1,
-            "num_predict": 10,
-            "num_ctx": context_window_size,
-            "seed": 42,
-        },
-    }
-
     return post(
         url=f"http://{ollama_api}/api/generate",
-        json=jsonData,
         timeout=360000,
+        json={
+            "model": model,
+            "stream": False,
+            "prompt": text,
+            "system": SYSTEM_PROMPT,
+            "options": {
+                "temperature": 0.1,
+                "top_k": 1,
+                "top_p": 0.1,
+                "num_predict": 10,
+                "num_ctx": context_window_size,
+                "seed": 42,
+            },
+        },
     )
 
 
