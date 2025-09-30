@@ -27,6 +27,7 @@ def read_file_from_archive(filename: str, archive: ZipFile) -> BeautifulSoup:
         features="lxml-xml",
     )
 
+
 def count_tokens(text: str, encoding: Encoding) -> int:
     return len(encoding.encode(text=text))
 
