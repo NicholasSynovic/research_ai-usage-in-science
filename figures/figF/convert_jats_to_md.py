@@ -3,7 +3,6 @@ import zipfile
 from pathlib import Path
 
 import pandas
-import tiktoken
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from pandas import DataFrame
@@ -17,19 +16,17 @@ FROM papers a
 JOIN ns_papers b ON a._id = b.paper_id;
 """
 
-data: dict[str, list] = {"filename": [], "tokens": [], "content": []}
+data: dict[str, list] = {"filename": [], "content": []}
 
 all_of_plos_archive: Path = Path("../data/all_of_plos.zip").resolve()
 db: DB = DB(db_path=Path("../AIUS.sqlite3").resolve())
-
-encoding = tiktoken.encoding_for_model("gpt-4")
 
 df: DataFrame = pandas.read_sql_query(sql=sql_query, con=db.engine)
 df = df[df["doi"].str.contains(pat="doi.org/10.1371")]
 df["filename"] = df["doi"].str.replace(pat="https://doi.org/10.1371/", repl="") + ".xml"
 
 
-with Bar("Computing tokens...", max=df["filename"].size) as bar:
+with Bar("Converting JATS XML to MD (formatted)...", max=df["filename"].size) as bar:
     with zipfile.ZipFile(all_of_plos_archive, "r") as z:
         for file in df["filename"]:
             data["filename"].append(file)
@@ -60,12 +57,9 @@ with Bar("Computing tokens...", max=df["filename"].size) as bar:
                     child_tag.decompose()
 
                 text: str = soup.prettify()
-                data["tokens"].append(len(encoding.encode(text=text)))
+
                 data["content"].append(text)
                 f.close()
-
-                print(text)
-                quit()
 
             bar.next()
         z.close()
