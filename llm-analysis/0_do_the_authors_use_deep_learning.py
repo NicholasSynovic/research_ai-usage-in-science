@@ -7,6 +7,8 @@ from pandas import DataFrame, Series
 from progress.bar import Bar
 from requests import Response, post
 
+CONTEXT_WNDOW_SIZE: int = 64926
+
 SYSTEM_PROMPT: str = """
 (C) Context:
 You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine readable format.
@@ -53,7 +55,6 @@ def compute_context_window_size(df: DataFrame) -> int:
 def query_ollama(
     text: str,
     model: str,
-    context_window_size: int,
     ollama_api: str,
 ) -> Response:
     return post(
@@ -69,7 +70,7 @@ def query_ollama(
                 "top_k": 1,
                 "top_p": 0.1,
                 "num_predict": 10,
-                "num_ctx": context_window_size,
+                "num_ctx": CONTEXT_WNDOW_SIZE,
                 "seed": 42,
             },
         },
@@ -119,21 +120,19 @@ def main(
     data: list[tuple[str, Response]] = []
 
     df: DataFrame = load_parquet(fp=input_path)
-    context_window_size: int = compute_context_window_size(df=df)
 
     with Bar("Running analysis...", max=df.shape[0]) as bar:
         row: Series
         for _, row in df.iterrows():
             resp: Response = query_ollama(
-                text=row["content"],
+                text=repr(row["content"]),
                 model=model,
-                context_window_size=context_window_size,
                 ollama_api=ollama_api,
             )
             data.append((row["filename"], resp))
             bar.next()
 
-    pickle.dump(obj=data, file=output_path.open(mode="rb"))
+    pickle.dump(obj=data, file=output_path.open(mode="wb"))
 
 
 if __name__ == "__main__":
