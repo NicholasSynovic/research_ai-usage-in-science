@@ -137,10 +137,7 @@ def main(
                 ollama_api=ollama_api,
             )
             data["filename"].append(row["filename"])
-            try:
-                data["json"].append(loads(s=resp.json()["response"]))
-            except JSONDecodeError:
-                print(resp.content)
+            data["json"].append(loads(s=resp.json()["response"]))
 
             bar.next()
 
