@@ -1,5 +1,6 @@
 import pickle
 from json import dumps
+from json.decoder import JSONDecodeError
 from pathlib import Path
 
 import click
@@ -132,11 +133,14 @@ def main(
         for _, row in input_df.iterrows():
             resp: Response = query_ollama(
                 text=row["content"],
-                model=eval(model),
+                model=model,
                 ollama_api=ollama_api,
             )
             data["filename"].append(row["filename"])
-            data["json"].append(dumps(obj=resp.json(), indent=4))
+            try:
+                data["json"].append(dumps(obj=resp.json(), indent=4))
+            except JSONDecodeError:
+                print(resp.content)
 
             bar.next()
 
