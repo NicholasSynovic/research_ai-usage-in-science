@@ -1,4 +1,5 @@
 import pickle
+from json import dumps
 from pathlib import Path
 
 import click
@@ -16,7 +17,9 @@ Your sole responsibility is to evaluate the paper's content and determine whethe
 Your response will be consumed by downstream systems that require structured JSON.
 
 (O) Objective:
-Your task is to output only a JSON object containing a single key-value pair, where the key is "result" and the value is a boolean (true or false) based on whether the input text use deep learning models or methods in their methodology.
+Your task is to output only a JSON object containing a key-value pairs, where:
+- the key "result" value is a boolean (true or false) based on whether the input text use deep learning models or methods in their methodology, and
+- the key "pose" value is the most salient evidence of deep learning usage in the paper.
 No explanations or extra output are allowed.
 
 (S) Style:
@@ -33,11 +36,10 @@ Human readability is irrelevant.
 (R) Response:
 Return only a JSON object of the form:
 
-{"result": true}
-
-or
-
-{"result": false}
+{
+    "result": Boolean,
+    "prose": String,
+}
 
 Nothing else should ever be returned.
 """
@@ -65,11 +67,13 @@ def query_ollama(
             "stream": False,
             "prompt": text,
             "system": SYSTEM_PROMPT,
+            "format": "json",
+            "keep_alive": "30m",
             "options": {
                 "temperature": 0.1,
                 "top_k": 1,
                 "top_p": 0.1,
-                "num_predict": 10,
+                "num_predict": 1000,
                 "num_ctx": CONTEXT_WNDOW_SIZE,
                 "seed": 42,
             },
@@ -100,7 +104,6 @@ def query_ollama(
             "deepseek-r1:70b",
             "gemma3:27b",
             "llama4:16x17b",
-            "gemma3:4b",
         ],
         case_sensitive=True,
     ),
@@ -120,24 +123,25 @@ def main(
     model: str,
     ollama_api: str,
 ) -> None:
-    data: list[tuple[str, Response]] = []
+    data: dict[str, list[str]] = {"filename": [], "json": []}
 
-    df: DataFrame = load_parquet(fp=input_path)
+    input_df: DataFrame = load_parquet(fp=input_path)
 
-    with Bar("Running analysis...", max=df.shape[0]) as bar:
+    with Bar("Running analysis...", max=input_df.shape[0]) as bar:
         row: Series
-        for _, row in df.iterrows():
+        for _, row in input_df.iterrows():
             resp: Response = query_ollama(
-                text=repr(row["content"]),
-                model=repr(model),
-                ollama_api=ollama_api,
+                text=row["content"].strip("'"),
+                model=model.strip("'"),
+                ollama_api=ollama_api.strip("'"),
             )
-            data.append((row["filename"], resp))
+            data["filename"].append(row["filename"])
+            data["json"].append(dumps(obj=resp.json(), indent=4))
+
             bar.next()
 
-    with open(file=output_path, mode="wb") as pf:
-        pickle.dump(obj=data, file=pf)
-        pf.close()
+    output_df: DataFrame = DataFrame(data=data)
+    output_df.to_json(path_or_buf=output_path, indent=4)
 
 
 if __name__ == "__main__":
