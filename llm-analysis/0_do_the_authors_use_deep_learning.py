@@ -107,7 +107,7 @@ def query_ollama(
         ],
         case_sensitive=True,
     ),
-    default="gemma3:4b",
+    default="gemma3:27b",
     show_default=True,
 )
 @click.option(
@@ -131,9 +131,9 @@ def main(
         row: Series
         for _, row in input_df.iterrows():
             resp: Response = query_ollama(
-                text=row["content"].strip("'"),
-                model=model.strip("'"),
-                ollama_api=ollama_api.strip("'"),
+                text=row["content"],
+                model=eval(model),
+                ollama_api=ollama_api,
             )
             data["filename"].append(row["filename"])
             data["json"].append(dumps(obj=resp.json(), indent=4))
