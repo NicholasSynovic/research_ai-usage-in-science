@@ -1,5 +1,5 @@
 import pickle
-from json import dumps
+from json import loads
 from json.decoder import JSONDecodeError
 from pathlib import Path
 
@@ -138,14 +138,14 @@ def main(
             )
             data["filename"].append(row["filename"])
             try:
-                data["json"].append(resp.json())
+                data["json"].append(loads(s=resp.json()["response"]))
             except JSONDecodeError:
                 print(resp.content)
 
             bar.next()
 
     output_df: DataFrame = DataFrame(data=data)
-    output_df.to_json(path_or_buf=output_path, indent=4)
+    output_df.to_json(path_or_buf=output_path, indent=4, orient="index")
 
 
 if __name__ == "__main__":
