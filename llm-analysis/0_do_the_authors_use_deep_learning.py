@@ -138,7 +138,7 @@ def main(
             )
             data["filename"].append(row["filename"])
             try:
-                data["json"].append(dumps(obj=resp.json(), indent=4))
+                data["json"].append(resp.json())
             except JSONDecodeError:
                 print(resp.content)
 
