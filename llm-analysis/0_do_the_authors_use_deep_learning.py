@@ -101,9 +101,12 @@ def query_ollama(
     help="LLM to use for analysis",
     type=click.Choice(
         choices=[
-            "gpt-oss:20b",
-            "deepseek-r1:32b",
+            "granite3.3:8b",
+            "phi3:14b",
             "gemma3:27b",
+            "gpt-oss:20b",
+            "magistral:24b",
+            "deepseek-r1:70b",
             "llama4:16x17b",
         ],
         case_sensitive=True,
