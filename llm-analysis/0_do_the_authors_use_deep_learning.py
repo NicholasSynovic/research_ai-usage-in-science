@@ -20,7 +20,7 @@ Your response will be consumed by downstream systems that require structured JSO
 (O) Objective:
 Your task is to output only a JSON object containing a key-value pairs, where:
 - the key "result" value is a boolean (true or false) based on whether the input text use deep learning models or methods in their methodology, and
-- the key "pose" value is the most salient evidence of deep learning usage in the paper.
+- the key "pose" value is the most salient excerpt from the paper that shows concrete evidence of deep learning usage in the paper.
 No explanations or extra output are allowed.
 
 (S) Style:
