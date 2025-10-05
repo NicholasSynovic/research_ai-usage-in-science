@@ -102,7 +102,7 @@ def query_ollama(
     type=click.Choice(
         choices=[
             "gpt-oss:20b",
-            "deepseek-r1:70b",
+            "deepseek-r1:32b",
             "gemma3:27b",
             "llama4:16x17b",
         ],
