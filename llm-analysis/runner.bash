@@ -13,7 +13,7 @@ for MODEL in $MODELS; do
     SAFE_MODEL=$(echo "$MODEL" | tr ':' '_')
 
     for PROMPT in $PROMPTS; do
-        OUTPUT="${SAFE_MODEL}_${PROMPT}_analysis.pkl"
+        OUTPUT="${SAFE_MODEL}_${PROMPT}_analysis.pickle"
 
         echo "=== Running analysis.py for model: $MODEL | prompt: $PROMPT ==="
         python analysis.py \
