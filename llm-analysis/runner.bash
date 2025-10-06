@@ -22,3 +22,4 @@ for MODEL in $MODELS; do
             -m "$MODEL" \
             -p "$PROMPT"
     done
+done
