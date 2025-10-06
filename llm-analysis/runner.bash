@@ -8,7 +8,7 @@ for MODEL in $MODELS; do
 
     for i in {0..3}; do
         SCRIPT="question_${i}.py"
-        OUTPUT="${SAFE_NAME}_question_${i}_code.parquet"
+        OUTPUT="${SAFE_NAME}_question_${i}_code.pickle"
 
         echo "→ Running $SCRIPT with model $MODEL"
         python "$SCRIPT" -m "$MODEL" -i ../data/prompt_testing_dataset.parquet -o "$OUTPUT"

@@ -102,7 +102,7 @@ def query_ollama(
 @click.option(
     "-o",
     "--output-path",
-    help="Path to write output Parquet file",
+    help="Path to write output pickle file",
     type=lambda x: Path(x).resolve(),
 )
 @click.option(
@@ -161,7 +161,7 @@ def main(
             bar.next()
 
     output_df: DataFrame = DataFrame(data=data)
-    output_df.to_parquet(path=output_path, engine="pyarrow")
+    output_df.to_pickle(path=output_path)
 
 
 if __name__ == "__main__":
