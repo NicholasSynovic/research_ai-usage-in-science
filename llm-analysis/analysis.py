@@ -1,4 +1,5 @@
 from json import loads
+from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any
 
@@ -184,9 +185,12 @@ def main(
             data["filename"].append(row["filename"])
             data["response_obj"].append(resp)
 
-            if json_formatting:
-                data["json"].append(loads(s=resp.json()["response"]))
-            else:
+            try:
+                if json_formatting:
+                    data["json"].append(loads(s=resp.json()["response"]))
+                else:
+                    data["json"].append({})
+            except JSONDecodeError:
                 data["json"].append({})
 
             bar.next()
