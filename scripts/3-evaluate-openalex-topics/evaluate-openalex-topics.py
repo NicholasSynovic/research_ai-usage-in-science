@@ -1,6 +1,7 @@
 import pickle
 from pathlib import Path
 
+import click
 import pandas
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
@@ -30,11 +31,21 @@ def get_all_pages(total_count: int = 4600, per_page: int = 100) -> DataFrame:
     return pandas.concat(objs=dfs, ignore_index=True)
 
 
-def main() -> None:
+@click.command()
+@click.option(
+    "-o",
+    "--output-fp",
+    default=Path("openalex-topics.parquet"),
+    required=False,
+    show_default=True,
+    help="Path to store OpenAlex data as an Apache Parquet File",
+    type=lambda x: Path(x).resolve(),
+)
+def main(output_fp: Path) -> None:
     # Load data if it exists else get the data
     topic_df: DataFrame
-    if PICKLE_PATH.exists():
-        topic_df = pickle.load(file=PICKLE_PATH.open(mode="rb"))
+    if output_fp.exists():
+        topic_df = pandas.read_parquet(path=output_fp, engine="pyarrow")
     else:
         topic_df = get_all_pages()
         PICKLE_PATH.write_bytes(data=pickle.dumps(obj=topic_df))
