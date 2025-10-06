@@ -1,6 +1,4 @@
-import pickle
 from json import loads
-from json.decoder import JSONDecodeError
 from pathlib import Path
 
 import click
@@ -10,6 +8,7 @@ from progress.bar import Bar
 from requests import Response, post
 
 CONTEXT_WNDOW_SIZE: int = 64926
+POST_TIMEOUT: int = 360000
 
 SYSTEM_PROMPT: str = """
 (C) Context:
@@ -59,27 +58,30 @@ def query_ollama(
     text: str,
     model: str,
     ollama_api: str,
+    json_format: bool = True,
 ) -> Response:
-    return post(
-        url=f"http://{ollama_api}/api/generate",
-        timeout=360000,
-        json={
-            "model": model,
-            "stream": False,
-            "prompt": text,
-            "system": SYSTEM_PROMPT,
-            "format": "json",
-            "keep_alive": "30m",
-            "options": {
-                "temperature": 0.1,
-                "top_k": 1,
-                "top_p": 0.1,
-                "num_predict": 1000,
-                "num_ctx": CONTEXT_WNDOW_SIZE,
-                "seed": 42,
-            },
+    url: str = f"http://{ollama_api}/api/generate"
+
+    json_data: dict = {
+        "model": model,
+        "stream": False,
+        "prompt": text,
+        "system": SYSTEM_PROMPT,
+        "keep_alive": "30m",
+        "options": {
+            "temperature": 0.1,
+            "top_k": 1,
+            "top_p": 0.1,
+            "num_predict": 1000,
+            "num_ctx": CONTEXT_WNDOW_SIZE,
+            "seed": 42,
         },
-    )
+    }
+
+    if json_format:
+        json_data["format"] = "json"
+
+    return post(url=url, timeout=POST_TIMEOUT, json=json_data)
 
 
 @click.command()
@@ -92,7 +94,7 @@ def query_ollama(
 @click.option(
     "-o",
     "--output-path",
-    help="Path to write output JSON file",
+    help="Path to write output Parquet file",
     type=lambda x: Path(x).resolve(),
 )
 @click.option(
@@ -127,7 +129,11 @@ def main(
     model: str,
     ollama_api: str,
 ) -> None:
-    data: dict[str, list[str]] = {"filename": [], "json": []}
+    data: dict[str, list[str | Response]] = {
+        "filename": [],
+        "response_obj": [],
+        "json": [],
+    }
 
     input_df: DataFrame = load_parquet(fp=input_path)
 
@@ -138,14 +144,16 @@ def main(
                 text=row["content"],
                 model=model,
                 ollama_api=ollama_api,
+                json_format=False if model == "gpt-oss:20b" else True,
             )
             data["filename"].append(row["filename"])
+            data["response_obj"].append(resp)
             data["json"].append(loads(s=resp.json()["response"]))
 
             bar.next()
 
     output_df: DataFrame = DataFrame(data=data)
-    output_df.to_json(path_or_buf=output_path, indent=4, orient="index")
+    output_df.to_parquet(path=output_path, engine="pyarrow")
 
 
 if __name__ == "__main__":
