@@ -12,7 +12,7 @@ def get_papers_openalex_data(db: DB) -> DataFrame:
     sql: str = """
         SELECT openalex.*, papers.doi FROM openalex
         JOIN papers ON openalex.paper_id = papers._id
-        WHERE json_extract(openalex.json, '$.open_access.is_oa') = 1
+        WHERE openalex.open_access = 1
         AND openalex.cited_by_count > 0;
     """
 
