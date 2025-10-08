@@ -141,12 +141,28 @@ def query_ollama(
     default="localhost:11434",
     show_default=True,
 )
+@click.option(
+    "--si",
+    help="Starting index",
+    type=int,
+    default=0,
+    show_default=True,
+)
+@click.option(
+    "--ei",
+    help="Ending index",
+    type=int,
+    default=100,
+    show_default=True,
+)
 def main(
     input_path: Path,
     output_path: Path,
     model: str,
     ollama_api: str,
     prompt_choice: str,
+    si: int = 0,
+    ei: int = 100,
 ) -> None:
     # Setup storage data structure
     data: dict[str, list[str | Response | dict[str, Any]]] = {
@@ -162,7 +178,7 @@ def main(
     system_prompt: str = set_system_prompt(prompt_choice=prompt_choice)
 
     # Load data
-    input_df: DataFrame = load_parquet(fp=input_path)
+    input_df: DataFrame = load_parquet(fp=input_path)[si:ei]
 
     # Run analysis
 
