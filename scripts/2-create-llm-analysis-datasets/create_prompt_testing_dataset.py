@@ -19,6 +19,8 @@ def load_dois(ds: str) -> list[str]:
             data = SMALL_SAMPLE
         case "manual-review":
             data = MANUAL_REVIEWED_POPULTION
+        case "plos":
+            data = PLOS_NS_PAPERS
 
     return data
 
@@ -138,7 +140,7 @@ def encode_documents(encoding: Encoding, documents: list[str]) -> list[int]:
     required=False,
     show_default=True,
     help="Dataset size",
-    type=click.Choice(choices=["small", "manual-review"]),
+    type=click.Choice(choices=["small", "manual-review", "plos"]),
 )
 @click.option(
     "-o",

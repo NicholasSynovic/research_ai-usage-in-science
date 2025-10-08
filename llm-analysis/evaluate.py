@@ -21,8 +21,6 @@ def parse_responses(df: DataFrame) -> None:
 
         print(filename)
         print(resp.json()["response"])
-        print("===\n")
-        input()
 
 
 @click.command()
