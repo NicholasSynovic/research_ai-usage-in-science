@@ -186,7 +186,7 @@ def main(
         row: Series
         for _, row in input_df.iterrows():
             # Get text from DataFrame row
-            text: str = row["formatted_markdown_tokens"]
+            text: str = row["formatted_markdown"]
 
             # Query Ollama API
             resp: Response = query_ollama(
@@ -196,10 +196,6 @@ def main(
                 system_prompt=system_prompt,
                 json_format=json_formatting,
             )
-
-            if resp.status_code != 200:
-                print("ERROR")
-                breakpoint()
 
             # Handle response
             data["filename"].append(row["dois"])
