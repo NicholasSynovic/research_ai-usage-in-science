@@ -197,8 +197,12 @@ def main(
                 json_format=json_formatting,
             )
 
+            if resp.status_code != 200:
+                print("ERROR")
+                breakpoint()
+
             # Handle response
-            data["filename"].append(row["filename"])
+            data["filename"].append(row["dois"])
             data["response_obj"].append(resp)
 
             try:

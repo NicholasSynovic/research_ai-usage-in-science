@@ -1,6 +1,5 @@
 INPUT="prompt_testing_dataset_plos.parquet"
-OUTPUT=""
-MODEL="ph3:14b"
+MODEL="phi3:14b"
 SAFE_MODEL="phi3"
 PROMPT="uses-dl"
 
