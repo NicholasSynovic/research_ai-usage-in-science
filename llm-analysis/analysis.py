@@ -186,7 +186,7 @@ def main(
         row: Series
         for _, row in input_df.iterrows():
             # Get text from DataFrame row
-            text: str = row["content"]
+            text: str = row["formatted_markdown_tokens"]
 
             # Query Ollama API
             resp: Response = query_ollama(

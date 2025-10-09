@@ -1,4 +1,4 @@
-INPUT="../data/prompt_testing_dataset.parquet"
+INPUT="prompt_testing_dataset_plos.parquet"
 OUTPUT=""
 MODEL="ph3:14b"
 SAFE_MODEL="phi3"
