@@ -1,1 +1,1 @@
-Count tokens from JAT XML, formatted JAT XML, MD, and formatted MD.
+Box and whisker plots of token counts computed using the GPT 4 tokenizer
