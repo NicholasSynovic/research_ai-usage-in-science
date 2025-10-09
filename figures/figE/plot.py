@@ -1,88 +1,23 @@
-from math import ceil
 from pathlib import Path
 from string import Template
-from textwrap import fill
 
 import matplotlib.pyplot as plt
+import pandas
 import seaborn as sns
 from pandas import DataFrame
 from progress.bar import Bar
-from requests import Response, get
+from requests import Response, Session, get
+from requests.adapters import HTTPAdapter, Retry
 
 from aius import FIELD_FILTER
 
-OA_TOPIC_URL_TEMPLATE: Template = Template(
-    template="https://api.openalex.org/topics?per_page=100&page=${page}"
-)
-OA_FIELD_URL_TEMPLATE: Template = Template(
-    template="https://api.openalex.org/fields/${field_number}"
-)
-PAGES: int = ceil(4516 / 100)
-GOOD_STATUS_CODE: int = 200
-OA_FIELD_NUMBERS: dict[str, int] = {
-    "Agricultural and Biological Sciences": 11,
-    "Environmental Science": 23,
-    "Earth and Planetary Sciences": 19,
-    "Physics and Astronomy": 31,
-    "Chemistry": 16,
-    "Neuroscience": 28,
-    "Immunology and Microbiology": 24,
-}
-OA_FIELD_WORKS: dict[str, int] = {
-    "Agricultural and Biological Sciences": 10328653,
-    "Environmental Science": 9191866,
-    "Earth and Planetary Sciences": 4290599,
-    "Physics and Astronomy": 7186862,
-    "Chemistry": 5206967,
-    "Neuroscience": 3086383,
-    "Immunology and Microbiology": 2108297,
-}
-FIG_PATH: Path = Path("figE.pdf").resolve()
+# Create a Requests Session that implements expontial backoff
+SESSION: Session = Session()
+RETRIES = Retry(total=5, backoff_factor=1)
+SESSION.mount("https://", HTTPAdapter(max_retries=RETRIES))
 
 
-def _get_topic_results(page: int) -> list[dict]:
-    # Using the OpenAlex topic API, get the JSON data
-    url: str = OA_TOPIC_URL_TEMPLATE.substitute(page=page)
-    resp: Response = get(url=url, timeout=60)
-
-    if resp.status_code != GOOD_STATUS_CODE:
-        raise ValueError(f"Invalid response: {url} {resp.status_code}")
-
-    json: dict = resp.json()
-    return json["results"]
-
-
-def _get_topic_field(topic: dict) -> tuple[str, int] | None:
-    # From an OpenAlex topic API result item, extract the field and field number
-    topic_field: str = topic["field"]["display_name"]
-    topic_number: int = int(topic["field"]["id"].split("/")[-1])
-    if topic_field in FIELD_FILTER:
-        return (topic_field, topic_number)
-    else:
-        return None
-
-
-def identify_topic_field_number() -> dict[str, int]:
-    # Create a `dict` of the OpenAlex field and number from the topic API
-    data: dict[str, int] = {}
-
-    with Bar("Identifying OpenAlex field numbers...", max=PAGES) as bar:
-        page: int
-        for page in range(1, PAGES):
-            results: list[dict] = _get_topic_results(page=page)
-
-            result: dict
-            for result in results:
-                field: tuple[str, int] | None = _get_topic_field(topic=result)
-
-                if field is None:
-                    continue
-
-                data[field[0]] = field[1]
-
-            bar.next()
-
-    return data
+FIG_PATH: Path = Path("figE.pdf")
 
 
 def count_works_per_field() -> dict[str, int]:
@@ -107,13 +42,96 @@ def count_works_per_field() -> dict[str, int]:
     return data
 
 
-def plot() -> None:
-    # Sort data
-    data: dict[str, int] = dict(
-        sorted(OA_FIELD_WORKS.items(), key=lambda item: item[1], reverse=True),
+def get_oa_topic_api_responses() -> list[Response]:
+    # Data strcture to store responses
+    data: list[Response] = []
+
+    # Set defaults based on OpenAlex constants
+    oa_topic_api_pages: int = 46
+    oa_topic_api_template: Template = Template(
+        template="https://api.openalex.org/topics?per_page=100&page=${page}",
     )
 
-    sns.barplot(data=data)
+    # For each OpenAlex topic API page, get the HTTP GET response for future
+    # parsing
+    with Bar(
+        "Getting OpenAlex Topic API Responses...",
+        max=oa_topic_api_pages,
+    ) as bar:
+        page_num: int
+        for page_num in range(1, oa_topic_api_pages):
+            url: str = oa_topic_api_template.substitute(page=page_num)
+            resp: Response = SESSION.get(url=url, timeout=60)
+            data.append(resp)
+            bar.next()
+
+    return data
+
+
+# From OpenAlex topic API page get the field number of each topic
+def get_oa_topic_field_from_response(resps: list[Response]) -> dict[str, int]:
+    # Data structure to store data
+    data: dict[str, int] = {}
+
+    with Bar(
+        "Extracting field numbers from topic responses...",
+        max=len(resps),
+    ) as bar:
+        resp: Response
+        for resp in resps:
+            # Get the response JSON
+            json_data: dict = resp.json()
+
+            # Iterate through the topics and extract the name and field number
+            topic: dict
+            for topic in json_data["results"]:  # A list of dicts for each topic
+                field_dict: dict[str, str] = topic["field"]
+                field_name: str = field_dict["display_name"]
+                field_num: int = int(field_dict["id"].split(sep="/")[-1])
+                data[field_name] = field_num
+
+            bar.next()
+
+    return data
+
+
+# For each field, get the total number of works for that field
+def get_oa_field_works(field_name_number: dict[str, str | int]) -> DataFrame:
+    # Create the data structure
+    data: dict[str, list[str | int]] = {
+        "field_name": [],
+        "field_num": [],
+        "field_works": [],
+    }
+
+    # Set defaults based on OpenAlex constants
+    oa_field_api_template: Template = Template(
+        template="https://api.openalex.org/fields/${field_number}"
+    )
+
+    # For each OpenAlex field, extract the works for each OpenAlex Field
+    with Bar(
+        "Getting OpenAlex Topic API Responses...",
+        max=len(field_name_number.keys()),
+    ) as bar:
+        field_name: str
+        field_num: int
+        for field_name, field_num in field_name_number.items():
+            url: str = oa_field_api_template.substitute(field_number=field_num)
+            resp: Response = SESSION.get(url=url, timeout=60)
+            field_works: int = resp.json()["works_count"]
+
+            data["field_name"].append(field_name)
+            data["field_num"].append(field_num)
+            data["field_works"].append(field_works)
+
+            bar.next()
+
+    return DataFrame(data=data)
+
+
+def plot(df: DataFrame) -> None:
+    sns.barplot(data=df, x="field_name", y="field_works")
     plt.title(label="Number Of Natural Science Works Indexed By OpenAlex")
     plt.xlabel(xlabel="OpenAlex Field")
     plt.ylabel(ylabel="Number Of Works")
@@ -121,7 +139,44 @@ def plot() -> None:
     plt.xticks(rotation=45, ha="right")
 
     plt.tight_layout()
-    plt.savefig(FIG_PATH)
+    plt.savefig("figE.pdf")
 
 
-plot()
+def main() -> None:
+    oa_field_data_fp: Path = Path("openalex_field_works.parquet").resolve()
+
+    oa_field_data: DataFrame
+    if oa_field_data_fp.exists():
+        oa_field_data = pandas.read_parquet(path=oa_field_data_fp, engine="pyarrow")
+    else:
+        # Get all OpenAlex topic API responses
+        oa_topic_api_responses: list[Response] = get_oa_topic_api_responses()
+        # Extract field names and numbers from topic responses
+        oa_field_names_numbers: dict[str, int] = get_oa_topic_field_from_response(
+            resps=oa_topic_api_responses,
+        )
+        # Get the works for each field
+        oa_field_data: DataFrame = get_oa_field_works(
+            field_name_number=oa_field_names_numbers,
+        )
+        # Write data to file
+        oa_field_data.to_parquet(
+            path=Path("openalex_field_works.parquet"),
+            engine="pyarrow",
+        )
+
+    # Get only the natural science fields
+    oa_field_data = oa_field_data[
+        oa_field_data["field_name"].isin(FIELD_FILTER)
+    ].sort_values(
+        by="field_works",
+        ascending=False,
+        ignore_index=True,
+    )
+
+    # Get the PLOS papers
+    plot(df=oa_field_data)
+
+
+if __name__ == "__main__":
+    main()
