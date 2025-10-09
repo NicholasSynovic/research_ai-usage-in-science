@@ -20,6 +20,7 @@ for MODEL in $MODELS; do
             -i "$INPUT" \
             -o "$OUTPUT" \
             -m "$MODEL" \
-            -p "$PROMPT"
+            -p "$PROMPT" \
+            -si
     done
 done
