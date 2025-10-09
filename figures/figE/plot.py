@@ -1,12 +1,13 @@
 from pathlib import Path
 from string import Template
 
+import click
 import matplotlib.pyplot as plt
 import pandas
 import seaborn as sns
 from pandas import DataFrame
 from progress.bar import Bar
-from requests import Response, Session, get
+from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 
 from aius import FIELD_FILTER
@@ -15,31 +16,6 @@ from aius import FIELD_FILTER
 SESSION: Session = Session()
 RETRIES = Retry(total=5, backoff_factor=1)
 SESSION.mount("https://", HTTPAdapter(max_retries=RETRIES))
-
-
-FIG_PATH: Path = Path("figE.pdf")
-
-
-def count_works_per_field() -> dict[str, int]:
-    data: dict[str, int] = {}
-
-    with Bar("Getting the works per OpenAlex field...", max=7) as bar:
-        key: str
-        key_number: int
-        for key, key_number in OA_FIELD_NUMBERS.items():
-            url: str = OA_FIELD_URL_TEMPLATE.substitute(field_number=key_number)
-            resp: Response = get(url=url, timeout=60)
-
-            if resp.status_code != GOOD_STATUS_CODE:
-                raise ValueError(f"Invalid response: {url} {resp.status_code}")
-
-            json: dict = resp.json()
-
-            data[key] = json["works_count"]
-
-            bar.next()
-
-    return data
 
 
 def get_oa_topic_api_responses() -> list[Response]:
@@ -96,7 +72,7 @@ def get_oa_topic_field_from_response(resps: list[Response]) -> dict[str, int]:
 
 
 # For each field, get the total number of works for that field
-def get_oa_field_works(field_name_number: dict[str, str | int]) -> DataFrame:
+def get_oa_field_works(field_name_number: dict[str, int]) -> DataFrame:
     # Create the data structure
     data: dict[str, list[str | int]] = {
         "field_name": [],
@@ -142,12 +118,19 @@ def plot(df: DataFrame) -> None:
     plt.savefig("figE.pdf")
 
 
-def main() -> None:
-    oa_field_data_fp: Path = Path("openalex_field_works.parquet").resolve()
-
+@click.command()
+@click.option(
+    "-i",
+    "--input-fp",
+    required=False,
+    type=lambda x: Path(x).resolve(),
+    default=Path"openalex_field_works.parquet",
+    help="Path to OpenAlex Field Works Apache Parquet file",
+)
+def main(input_fp: Path) -> None:
     oa_field_data: DataFrame
-    if oa_field_data_fp.exists():
-        oa_field_data = pandas.read_parquet(path=oa_field_data_fp, engine="pyarrow")
+    if input_fp.exists():
+        oa_field_data = pandas.read_parquet(path=input_fp, engine="pyarrow")
     else:
         # Get all OpenAlex topic API responses
         oa_topic_api_responses: list[Response] = get_oa_topic_api_responses()
@@ -160,10 +143,7 @@ def main() -> None:
             field_name_number=oa_field_names_numbers,
         )
         # Write data to file
-        oa_field_data.to_parquet(
-            path=Path("openalex_field_works.parquet"),
-            engine="pyarrow",
-        )
+        oa_field_data.to_parquet(path=Path(input_fp), engine="pyarrow")
 
     # Get only the natural science fields
     oa_field_data = oa_field_data[
