@@ -55,10 +55,10 @@ class DB:
         """Create tables in the database if they do not already exist."""
         # Search table
         _: Table = Table(
-            "searches",
+            "plos_searches",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("html", String),
+            Column("json", String),
             Column("journal", String),
             Column("keyword", String),
             Column("page", Integer),
@@ -70,7 +70,7 @@ class DB:
 
         # Papers table
         _: Table = Table(
-            "papers",
+            "plos_paper_dois",
             self.metadata,
             Column("_id", Integer, primary_key=True),
             Column("doi", String),
@@ -78,11 +78,11 @@ class DB:
 
         # Searches to Papers table
         _: Table = Table(
-            "searches_to_papers",
+            "plos_searches_to_paper_dois",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("search_id", Integer, ForeignKey("searches._id")),
-            Column("paper_id", Integer, ForeignKey("papers._id")),
+            Column("search_id", Integer, ForeignKey("plos_searches._id")),
+            Column("paper_id", Integer, ForeignKey("plos_paper_dois._id")),
         )
 
         # OpenAlex table
