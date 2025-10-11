@@ -174,16 +174,16 @@ class CLI:
         """
         Parse and return command-line arguments as a Namespace object.
 
-        This method encapsulates the parsing of command-line inputs into structured
-        data, enabling access to specific options and their values through
-        attributes derived from the parsed arguments. It serves as an entry point
-        for accessing detailed information about user commands, facilitating further
-        processing within the CLI framework.
+        This method encapsulates the parsing of command-line inputs into
+        structured data, enabling access to specific options and their values
+        through attributes derived from the parsed arguments. It serves as an
+        entry point for accessing detailed information about user commands,
+        facilitating further processing within the CLI framework.
 
         Returns:
             Namespace: An object containing all parsed command-line arguments,
-                allowing developers to easily reference and utilize these inputs in
-                subsequent operations.
+                allowing developers to easily reference and utilize these inputs
+                in subsequent operations.
 
         """
         return self.parser.parse_args()

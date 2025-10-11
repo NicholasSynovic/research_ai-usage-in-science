@@ -1,3 +1,10 @@
+"""
+Main entry point to `aius`
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 import sys
 from itertools import product
 from pathlib import Path
@@ -7,9 +14,7 @@ import pandas
 from pandas import DataFrame
 
 import aius
-import aius.download as aius_download
-import aius.download.nature as nature_downloader
-import aius.download.plos as plos_downloader
+
 import aius.filter as aius_filter
 import aius.search.nature as nature_search
 import aius.search.plos as plos_search
@@ -22,10 +27,6 @@ from aius.search import JournalSearch, search_all_keyword_year_products
 
 def get_subparser_keyword_from_namespace(namespace: dict[str, list[Any]]) -> str:
     return next(iter(namespace.keys())).split(sep=".")[0]
-
-
-def initialize_db(db_path: Path) -> DB:
-    return DB(db_path=db_path)
 
 
 def instantiate_journal_search(
