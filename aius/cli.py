@@ -5,7 +5,7 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
-from argparse import ArgumentParser, Namespace, _SubParsersAction
+from argparse import ArgumentParser, _SubParsersAction
 from importlib.metadata import version
 from pathlib import Path
 

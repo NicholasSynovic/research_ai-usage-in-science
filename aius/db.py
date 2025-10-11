@@ -9,7 +9,6 @@ from pathlib import Path
 from string import Template
 
 from sqlalchemy import (
-    BLOB,
     Boolean,
     Column,
     DateTime,
