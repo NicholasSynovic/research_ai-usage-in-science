@@ -1,3 +1,12 @@
+"""
+Global variables for `aius`.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
+from pandas import DataFrame
+
 MODULE_NAME: str = "aius"
 PROGRAM_NAME: str = "AIUS"
 PROGRAM_DESCRIPTION: str = "Identify AI usage in Natural Science research papers"
@@ -27,9 +36,6 @@ KEYWORD_LIST: list[str] = [
     r'"Pre-Trained Model"',
 ]
 YEAR_LIST: list[int] = list(range(2014, 2025))
-
-
-from pandas import DataFrame
 
 YEARS: DataFrame = DataFrame(data={"year": list(range(2014, 2025))})
 

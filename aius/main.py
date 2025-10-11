@@ -1,16 +1,16 @@
 """
-Main entry point to `aius`
+Main entry point to `aius`.
 
 Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
 import sys
+from collections.abc import Iterable
 from itertools import product
-from pathlib import Path
-from typing import Any, Iterable, Literal
+from typing import Any
 
-import pandas
+import pandas as pd
 from pandas import DataFrame
 
 import aius
@@ -24,10 +24,60 @@ from aius.openalex import OpenAlex
 
 
 def create_keyword_year_product() -> Iterable:
+    """
+    Generate all combinations of keywords and years.
+
+    This function utilizes the `itertools.product` to create a Cartesian product
+    of two lists: `aius.KEYWORD_LIST`, which contains various search terms, and
+    `aius.YEAR_LIST`, encompassing different publication years. The output is an
+    iterable that can be directly used in loops, list comprehensions, or any
+    context requiring combinations of keywords with years.
+
+    Returns:
+        Iterable[tuple]: An iterator yielding tuples where each tuple consists
+        of a keyword from `aius.KEYWORD_LIST` and a year from `aius.YEAR_LIST`.
+        This allows for efficient generation of all possible keyword-year pairs
+        without explicitly constructing them in memory.
+
+    Notes:
+        The use of this function is particularly useful in scenarios where
+        operations need to be performed across multiple combinations of keywords
+        and years, such as filtering documents, generating reports, or preparing
+        datasets for analysis. It abstracts away the manual iteration over these
+        combinations, providing a concise and efficient means to access all
+        possible pairs.
+
+    Example:
+        >>> from your_module import create_keyword_year_product
+        >>> for keyword, year in create_keyword_year_product():
+        ...     print(f"Keyword: {keyword}, Year: {year}")
+        Keyword: 'AI' Year: 2018
+        Keyword: 'AI' Year: 2019
+        ...
+        Keyword: 'Quantum Computing' Year: 2023
+
+    """
     return product(aius.KEYWORD_LIST, aius.YEAR_LIST)
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0914
+    """
+    Orchestrate the execution of the `aius` CLI commands.
+
+    This function serves as the entry point for running the suite of tools
+    provided by the AI-Util-Suite. It parses command-line arguments, selects and
+    initializes the appropriate sub-command based on user input, and executes
+    the corresponding functionality to process, analyze, or store data according
+    to the selected operation.
+
+    The main function encapsulates the workflow of the CLI application, ensuring
+    that each step from parsing inputs to executing specific operations is
+    handled in a structured manner. It leverages Python's `match` statement for
+    conditional execution based on parsed arguments, facilitating clean and
+    readable code by directly mapping command names to their respective
+    processing logic.
+
+    """
     # Parse command line args
     cli: CLI = CLI()
     args: dict[str, Any] = cli.parse
@@ -56,11 +106,8 @@ def main() -> None:
             )
 
         case "ed":  # Extract papers from searches
-            # Instantiate the database
-            db: DB = DB(db_path=db_path)
-
             # Get search data
-            search_data: DataFrame = pandas.read_sql_table(
+            search_data: DataFrame = pd.read_sql_table(
                 table_name="searches",
                 con=db.engine,
             )
@@ -100,13 +147,10 @@ def main() -> None:
 
         case "oa":  # Get paper metadata from OpenAlex
             # Get the email address from the CLI
-            email: str = namespace[f"{subparser_keyword}.email"][0]
-
-            # Instantiate the database
-            db: DB = DB(db_path=db_path)
+            email: str = args[f"{subparser}.email"][0]
 
             # Get papers data
-            papers_df: DataFrame = pandas.read_sql_table(
+            papers_df: DataFrame = pd.read_sql_table(
                 table_name="papers", con=db.engine, index_col="_id"
             )
 
@@ -126,9 +170,6 @@ def main() -> None:
             )
 
         case "filter":
-            # Instantiate the database
-            db: DB = DB(db_path=db_path)
-
             # Get data
             data_df: DataFrame = aius_filter.get_papers_openalex_data(db=db)
 
