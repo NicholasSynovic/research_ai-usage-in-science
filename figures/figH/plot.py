@@ -32,6 +32,7 @@ def get_oa_indexed_plos_paper_count(db: DB) -> int:
         connection.close()
     return int(result.first()[0])
 
+
 # Get the number of PLOS papers indexed by OpenAlex with more than one citation
 def get_oa_indexed_plos_papers_w_ciations_count(db: DB) -> int:
     sql_query: TextClause = text(
@@ -41,6 +42,7 @@ def get_oa_indexed_plos_papers_w_ciations_count(db: DB) -> int:
         result: CursorResult = connection.execute(statement=sql_query)
         connection.close()
     return int(result.first()[0])
+
 
 # Get the number of Natural Sciece PLOS papers indexed by OpenAlex with more than one citation
 def get_ns_plos_papers_w_ciations_count(db: DB) -> int:
@@ -52,13 +54,15 @@ def get_ns_plos_papers_w_ciations_count(db: DB) -> int:
         connection.close()
     return int(result.first()[0])
 
-def plot(df: DataFrame) ->  None:
+
+def plot(df: DataFrame) -> None:
     sns.barplot(data=df)
     plt.title(label="Number Of Papers per Filtering Criteria")
     plt.ylabel(ylabel="Number Of Papers")
     plt.xlabel(xlabel="Filtering Criteria")
     plt.tight_layout()
     plt.savefig("figH.pdf")
+
 
 @click.command()
 @click.option(
@@ -86,7 +90,6 @@ def main(input_fp: Path) -> None:
     df: DataFrame = DataFrame(data=data)
     plot(df=df)
     print(df)
-
 
 
 if __name__ == "__main__":

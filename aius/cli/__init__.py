@@ -13,7 +13,32 @@ import aius
 
 
 class CLI:
+    """
+    CLI for interacting with the `aius` software.
+
+    Attributes:
+        db_help (str): Database path help string.
+        database_path (Path): Default SQLite3 database file location within the program directory.
+        parser (ArgumentParser): Top-level ArgumentParser instance configured with program name, description, and epilog.
+        subparsers (_SubParsersAction[ArgumentParser]): Subparsers for organizing different CLI commands.
+
+    Methods:
+        add_search(): Configures and adds a search sub-parser for journals to find papers by keywords.
+        add_extract_documents(): Configures and adds an 'extract-documents' sub-parser for extracting documents from journal searches.
+        add_openalex(): Configures and adds an 'openalex' sub-parser for retrieving document metadata from OpenAlex.
+        add_document_filter(): Configures and adds a 'filter' sub-parser to filter documents by Natural Science category.
+        parse(): Parses command line arguments into Namespace objects.
+
+    """
+
     def __init__(self) -> None:
+        """
+        Initialize the CLI.
+
+        Initialize with common help strings, default database path,
+        ArgumentParser instance, and subparsers for different commands.
+
+        """
         # Set common CLI argument help strings
         self.db_help: str = "Database path"
 
@@ -44,10 +69,11 @@ class CLI:
             version=version(distribution_name=aius.MODULE_NAME),
         )
 
-    def _resolve_path(self, path_string: str) -> Path:
-        return Path(path_string).resolve()
-
     def add_search(self) -> None:
+        """
+        Add a sub-parser for searching journals for papers with keywords.
+        """
+
         search_parser: ArgumentParser = self.subparsers.add_parser(
             name="search",
             help="Search journals for papers with keywords",
@@ -59,7 +85,7 @@ class CLI:
             "--db",
             nargs=1,
             default=self.database_path,
-            type=self._resolve_path,
+            type=lambda x: Path(x).resolve(),
             help=self.db_help,
             dest="search.db",
         )
@@ -76,6 +102,10 @@ class CLI:
         )
 
     def add_extract_documents(self) -> None:
+        """
+        Add a sub-parser for extracting documents from journal searches.
+        """
+
         extract_documents_parser: ArgumentParser = self.subparsers.add_parser(
             name="extract-documents",
             help="Extract documents from journal searches",
@@ -87,12 +117,15 @@ class CLI:
             "--db",
             nargs=1,
             default=self.database_path,
-            type=self._resolve_path,
+            type=lambda x: Path(x).resolve(),
             help=self.db_help,
             dest="ed.db",
         )
 
     def add_openalex(self) -> None:
+        """
+        Configure a sub-parser for retrieving document metadata from OpenAlex.
+        """
         openalex_parser: ArgumentParser = self.subparsers.add_parser(
             name="openalex",
             help="Get document metadata from OpenAlex",
@@ -104,7 +137,7 @@ class CLI:
             "--db",
             nargs=1,
             default=self.database_path,
-            type=self._resolve_path,
+            type=lambda x: Path(x).resolve(),
             help=self.db_help,
             dest="oa.db",
         )
@@ -119,6 +152,9 @@ class CLI:
         )
 
     def add_document_filter(self) -> None:
+        """
+        Add a sub-parser to filter documents by Natural Science category.
+        """
         document_filter_parser: ArgumentParser = self.subparsers.add_parser(
             name="filter",
             help="Filter for Natural Science documents",
@@ -130,7 +166,7 @@ class CLI:
             "--db",
             nargs=1,
             default=self.database_path,
-            type=self._resolve_path,
+            type=lambda x: Path(x).resolve(),
             help=self.db_help,
             dest="filter.db",
         )
