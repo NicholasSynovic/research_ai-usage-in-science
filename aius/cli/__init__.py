@@ -18,16 +18,24 @@ class CLI:
 
     Attributes:
         db_help (str): Database path help string.
-        database_path (Path): Default SQLite3 database file location within the program directory.
-        parser (ArgumentParser): Top-level ArgumentParser instance configured with program name, description, and epilog.
-        subparsers (_SubParsersAction[ArgumentParser]): Subparsers for organizing different CLI commands.
+        database_path (Path): Default SQLite3 database file location within the
+            program directory.
+        parser (ArgumentParser): Top-level ArgumentParser instance configured
+            with program name, description, and epilog.
+        subparsers (_SubParsersAction[ArgumentParser]): Subparsers for
+            organizing different CLI commands.
 
     Methods:
-        add_search(): Configures and adds a search sub-parser for journals to find papers by keywords.
-        add_extract_documents(): Configures and adds an 'extract-documents' sub-parser for extracting documents from journal searches.
-        add_openalex(): Configures and adds an 'openalex' sub-parser for retrieving document metadata from OpenAlex.
-        add_document_filter(): Configures and adds a 'filter' sub-parser to filter documents by Natural Science category.
+        add_search(): Configures and adds a search sub-parser for journals to
+            find papers by keywords.
+        add_extract_documents(): Configures and adds an 'extract-documents'
+            sub-parser for extracting documents from journal searches.
+        add_openalex(): Configures and adds an 'openalex' sub-parser for
+            retrieving document metadata from OpenAlex.
+        add_document_filter(): Configures and adds a 'filter' sub-parser to
+            filter documents by Natural Science category.
         parse(): Parses command line arguments into Namespace objects.
+
 
     """
 
@@ -70,10 +78,7 @@ class CLI:
         )
 
     def add_search(self) -> None:
-        """
-        Add a sub-parser for searching journals for papers with keywords.
-        """
-
+        """Add a sub-parser for searching journals for papers with keywords."""
         search_parser: ArgumentParser = self.subparsers.add_parser(
             name="search",
             help="Search journals for papers with keywords",
@@ -102,10 +107,7 @@ class CLI:
         )
 
     def add_extract_documents(self) -> None:
-        """
-        Add a sub-parser for extracting documents from journal searches.
-        """
-
+        """Add a sub-parser for extracting documents from journal searches."""
         extract_documents_parser: ArgumentParser = self.subparsers.add_parser(
             name="extract-documents",
             help="Extract documents from journal searches",
@@ -123,9 +125,7 @@ class CLI:
         )
 
     def add_openalex(self) -> None:
-        """
-        Configure a sub-parser for retrieving document metadata from OpenAlex.
-        """
+        """Configure a sub-parser for retrieving metadata from OpenAlex."""
         openalex_parser: ArgumentParser = self.subparsers.add_parser(
             name="openalex",
             help="Get document metadata from OpenAlex",
@@ -152,9 +152,7 @@ class CLI:
         )
 
     def add_document_filter(self) -> None:
-        """
-        Add a sub-parser to filter documents by Natural Science category.
-        """
+        """Add a sub-parser to filter documents by Natural Science category."""
         document_filter_parser: ArgumentParser = self.subparsers.add_parser(
             name="filter",
             help="Filter for Natural Science documents",
@@ -171,5 +169,21 @@ class CLI:
             dest="filter.db",
         )
 
+    @property
     def parse(self) -> Namespace:
+        """
+        Parse and return command-line arguments as a Namespace object.
+
+        This method encapsulates the parsing of command-line inputs into structured
+        data, enabling access to specific options and their values through
+        attributes derived from the parsed arguments. It serves as an entry point
+        for accessing detailed information about user commands, facilitating further
+        processing within the CLI framework.
+
+        Returns:
+            Namespace: An object containing all parsed command-line arguments,
+                allowing developers to easily reference and utilize these inputs in
+                subsequent operations.
+
+        """
         return self.parser.parse_args()
