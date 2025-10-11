@@ -87,18 +87,18 @@ class DB:
 
         # OpenAlex table
         _: Table = Table(
-            "openalex",
+            "plos_paper_openalex_metadata",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("cited_by_count", Integer),
-            Column("json", String),
-            Column("open_access", Boolean),
             Column("paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-            Column("status_code", Integer),
+            Column("json", String),
+            Column("cited_by_count", Integer),
+            Column("open_access", Boolean),
             Column("topic_0", String),
             Column("topic_1", String),
             Column("topic_2", String),
             Column("url", String),
+            Column("timestamp", DateTime),
         )
 
         # Natural Science Papers

@@ -136,39 +136,6 @@ def main() -> None:
                 index_label="_id",
             )
 
-            # # Get the journal extractor class
-            # journal_extractor: JournalExtractor = JournalExtractor(
-            #     search_data=plos_search_df,
-            # )
-
-            # # Extract papers
-            # papers_df: DataFrame = journal_extractor.extract_all_papers()
-
-            # # Organize papers
-            # unique_papers_df: DataFrame
-            # search_paper_relationships: DataFrame
-            # unique_papers_df, search_paper_relationships = (
-            #     journal_extractor.organize_papers(
-            #         papers_df=papers_df,
-            #     )
-            # )
-
-            # # Write data to the database
-            # unique_papers_df.to_sql(
-            #     name="papers",
-            #     con=db.engine,
-            #     if_exists="append",
-            #     index=True,
-            #     index_label="_id",
-            # )
-            # search_paper_relationships.to_sql(
-            #     name="searches_to_papers",
-            #     con=db.engine,
-            #     if_exists="append",
-            #     index=True,
-            #     index_label="_id",
-            # )
-
         case "oa":  # Get paper metadata from OpenAlex
             # Get the email address from the CLI
             email: str = args[f"{subparser}.email"][0]
