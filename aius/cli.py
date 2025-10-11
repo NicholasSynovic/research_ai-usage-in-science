@@ -64,7 +64,7 @@ class CLI:
         )
 
         # Create sub-parsers
-        self.add_search()  # Search journals for papers
+        self.add_search_plos()  # Search PLOS for papers
         self.add_extract_documents()  # Extract documents from journal search
         self.add_openalex()  # Get document metadata from OpenAlex
         self.add_document_filter()  # Filter for Natural Science documents
@@ -77,11 +77,11 @@ class CLI:
             version=version(distribution_name=aius.MODULE_NAME),
         )
 
-    def add_search(self) -> None:
-        """Add a sub-parser for searching journals for papers with keywords."""
+    def add_search_plos(self) -> None:
+        """Add a sub-parser for searching PLOS for papers with keywords."""
         search_parser: ArgumentParser = self.subparsers.add_parser(
-            name="search",
-            help="Search journals for papers with keywords",
+            name="search-plos",
+            help="Search PLOS for papers",
             description="Step 1",
         )
 
@@ -92,18 +92,7 @@ class CLI:
             default=self.database_path,
             type=lambda x: Path(x).resolve(),
             help=self.db_help,
-            dest="search.db",
-        )
-
-        search_parser.add_argument(
-            "-j",
-            "--journal",
-            nargs=1,
-            type=str,
-            required=True,
-            choices=["nature", "plos"],
-            help="Journal to search through",
-            dest="search.journal",
+            dest="search_plos.db",
         )
 
     def add_extract_documents(self) -> None:
@@ -170,9 +159,9 @@ class CLI:
         )
 
     @property
-    def parse(self) -> Namespace:
+    def parse(self) -> dict:
         """
-        Parse and return command-line arguments as a Namespace object.
+        Parse and return command-line arguments as a `dict` object.
 
         This method encapsulates the parsing of command-line inputs into
         structured data, enabling access to specific options and their values
@@ -181,9 +170,9 @@ class CLI:
         facilitating further processing within the CLI framework.
 
         Returns:
-            Namespace: An object containing all parsed command-line arguments,
+            dict: An object containing all parsed command-line arguments,
                 allowing developers to easily reference and utilize these inputs
                 in subsequent operations.
 
         """
-        return self.parser.parse_args()
+        return self.parser.parse_args().__dict__

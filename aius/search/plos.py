@@ -18,6 +18,8 @@ class PLOS(JournalSearch):
             template="https://journals.plos.org/plosone/dynamicSearch?filterStartDate=${year}-01-01&filterEndDate=${year}-12-31&resultsPerPage=100&q=${keyword}&sortOrder=DATE_NEWEST_FIRST&page=${page}&filterArticleTypes=Research Article&unfilteredQuery=${keyword}"  # noqa: E501
         )
 
+        super().__init__()
+
     def _construct_url(self, year: int, keyword: str, page: int) -> str:
         return self.search_url_template.substitute(
             keyword=keyword,

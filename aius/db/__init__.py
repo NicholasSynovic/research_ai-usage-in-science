@@ -12,6 +12,7 @@ from sqlalchemy import (
     BLOB,
     Boolean,
     Column,
+    DateTime,
     Engine,
     ForeignKey,
     Integer,
@@ -50,7 +51,6 @@ class DB:
 
         # Create tables and write constants if they do not exists
         self._create_tables()
-        self._write_constants()
 
     def _create_tables(self) -> None:
         """Create tables in the database if they do not already exist."""
@@ -66,6 +66,7 @@ class DB:
             Column("status_code", Integer),
             Column("url", String),
             Column("year", Integer),
+            Column("timestamp", DateTime),
         )
 
         # Papers table
@@ -112,14 +113,6 @@ class DB:
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
-
-    def _write_constants(self) -> None:
-        """
-        Writs any necessary constants to the database.
-
-        This could be extended to include default values or configuration
-        settings.
-        """
 
     def get_last_row_id(self, table_name: str) -> int:
         """

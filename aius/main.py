@@ -14,28 +14,13 @@ import pandas
 from pandas import DataFrame
 
 import aius
-
 import aius.filter as aius_filter
-import aius.search.nature as nature_search
+import aius.search as aius_search
 import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
 from aius.extract_documents import JournalExtractor
 from aius.openalex import OpenAlex
-from aius.search import JournalSearch, search_all_keyword_year_products
-
-
-def get_subparser_keyword_from_namespace(namespace: dict[str, list[Any]]) -> str:
-    return next(iter(namespace.keys())).split(sep=".")[0]
-
-
-def instantiate_journal_search(
-    journal_name: Literal["plos", "nature"],
-) -> JournalSearch:
-    if journal_name == "plos":
-        return plos_search.PLOS()
-    else:
-        return nature_search.Nature()
 
 
 def create_keyword_year_product() -> Iterable:
@@ -45,45 +30,24 @@ def create_keyword_year_product() -> Iterable:
 def main() -> None:
     # Parse command line args
     cli: CLI = CLI()
-    namespace: dict[str, Any] = cli.parse().__dict__
-    subparser_keyword: str = get_subparser_keyword_from_namespace(
-        namespace=namespace,
-    )
+    args: dict[str, Any] = cli.parse
+
+    # Get the subparser used
+    subparser: str = next(iter(args.keys())).split(sep=".")[0]
 
     # Instantiate the database
-    try:
-        db_path: Path = namespace[f"{subparser_keyword}.db"][0]
-    except TypeError:
-        db_path: Path = namespace[f"{subparser_keyword}.db"]
+    db: DB = DB(db_path=args[f"{subparser}.db"][0])
 
-    db: DB = DB(db_path=db_path)
-
-    match subparser_keyword:
-        case "search":  # Search journals for papers
-            # Get the total number of existing rows of the `search` table
-            row_count: int = db.get_last_row_id(table_name="searches")
-
-            # Get the journal class
-            journal_search: JournalSearch = instantiate_journal_search(
-                journal_name=namespace["search.journal"][0],
+    match subparser:
+        case "search_plos":  # Search PLOS for papers
+            # Search PLOS
+            df: DataFrame = aius_search.search(
+                journal_search=plos_search.PLOS(),
+                keyword_year_products=create_keyword_year_product(),
             )
-
-            # Create an extended list of keywords and years
-            keyword_year_products = create_keyword_year_product()
-
-            # Iterate through products
-            data_df: DataFrame = search_all_keyword_year_products(
-                journal_search=journal_search,
-                keyword_year_products=keyword_year_products,
-            )
-
-            # Update index to accomodate for the existing row count if row_count > 0
-            if row_count > 0:
-                # Offset by 1 to accomodate 0th index
-                data_df.index += row_count + 1
 
             # Write data to the database
-            data_df.to_sql(
+            df.to_sql(
                 name="searches",
                 con=db.engine,
                 if_exists="append",
