@@ -118,6 +118,24 @@ def main() -> None:
                 plos_search_df=plos_search_df
             )
 
+            # Write PLOS paper dois to the database
+            ppi.plos_searches_and_papers_df.to_sql(
+                name="plos_paper_dois",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+
+            # Write PLOS searches to paper doi mapping to the database
+            ppi.searches_to_papers_mapping.to_sql(
+                name="plos_searches_to_paper_dois",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+
             # # Get the journal extractor class
             # journal_extractor: JournalExtractor = JournalExtractor(
             #     search_data=plos_search_df,
