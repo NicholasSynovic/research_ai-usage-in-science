@@ -98,7 +98,7 @@ def main() -> None:
 
             # Write data to the database
             df.to_sql(
-                name="searches",
+                name="plos_searches",
                 con=db.engine,
                 if_exists="append",
                 index=True,
@@ -108,7 +108,7 @@ def main() -> None:
         case "identify_documents":  # Identify papers from PLOS searches
             # Get search data
             plos_search_df: DataFrame = pd.read_sql_table(
-                table_name="searches",
+                table_name="plos_searches",
                 con=db.engine,
             )
 
@@ -119,7 +119,7 @@ def main() -> None:
             )
 
             # Write PLOS paper dois to the database
-            ppi.plos_searches_and_papers_df.to_sql(
+            ppi.plos_unique_papers_df.to_sql(
                 name="plos_paper_dois",
                 con=db.engine,
                 if_exists="append",

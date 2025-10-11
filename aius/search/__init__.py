@@ -45,12 +45,10 @@ class JournalSearch(ABC):
 
         data: dict[str, list] = {
             "year": [year],
+            "json": [resp.content.decode(errors="ignore")],
             "keyword": [keyword],
             "page": [page],
             "url": [resp.url],
-            "status_code": [resp.status_code],
-            "html": [resp.content.decode(errors="ignore")],
-            "journal": [self.name],
             "response_object": [resp],
             "timestamp": [Timestamp.utcnow()],
         }

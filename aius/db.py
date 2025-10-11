@@ -59,10 +59,8 @@ class DB:
             self.metadata,
             Column("_id", Integer, primary_key=True),
             Column("json", String),
-            Column("journal", String),
             Column("keyword", String),
             Column("page", Integer),
-            Column("status_code", Integer),
             Column("url", String),
             Column("year", Integer),
             Column("timestamp", DateTime),
@@ -81,8 +79,8 @@ class DB:
             "plos_searches_to_paper_dois",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("search_id", Integer, ForeignKey("plos_searches._id")),
-            Column("paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+            Column("plos_search_id", Integer, ForeignKey("plos_searches._id")),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
         )
 
         # OpenAlex table
@@ -90,7 +88,7 @@ class DB:
             "plos_paper_openalex_metadata",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
             Column("json", String),
             Column("cited_by_count", Integer),
             Column("open_access", Boolean),

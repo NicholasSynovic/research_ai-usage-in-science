@@ -138,7 +138,7 @@ class PLOSPaperIdentifier:
                 datum: dict[str, list] = datum_template.copy()
 
                 # Get JSON object
-                json_str: str = row["html"]
+                json_str: str = row["json"]
                 json_dict: dict = loads(s=json_str)
 
                 # Parse JSON for DOIs
@@ -216,4 +216,14 @@ class PLOSPaperIdentifier:
         doi_df = doi_df.reset_index(names="paper_id").set_index(keys="doi")
 
         # Join doi_df to search_to_paper by shared doi column
-        return search_to_paper_df.join(doi_df, on="doi").drop(columns="doi")
+        mapper: pd.DataFrame = search_to_paper_df.join(doi_df, on="doi").drop(
+            columns="doi",
+        )
+
+        # Rename columns
+        return mapper.rename(
+            columns={
+                "search_id": "plos_search_id",
+                "paper_id": "plos_paper_id",
+            }
+        )
