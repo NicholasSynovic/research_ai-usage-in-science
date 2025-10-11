@@ -93,7 +93,7 @@ class DB:
             Column("cited_by_count", Integer),
             Column("json", String),
             Column("open_access", Boolean),
-            Column("paper_id", Integer, ForeignKey("papers._id")),
+            Column("paper_id", Integer, ForeignKey("plos_paper_dois._id")),
             Column("status_code", Integer),
             Column("topic_0", String),
             Column("topic_1", String),
@@ -106,7 +106,7 @@ class DB:
             "ns_papers",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("paper_id", Integer, ForeignKey("papers._id")),
+            Column("paper_id", Integer, ForeignKey("plos_paper_dois._id")),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
