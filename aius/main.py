@@ -105,16 +105,16 @@ def main() -> None:  # noqa: PLR0914
                 index_label="_id",
             )
 
-        case "ed":  # Extract papers from searches
+        case "identify_documents":  # Identify papers from PLOS searches
             # Get search data
-            search_data: DataFrame = pd.read_sql_table(
+            plos_search_df: DataFrame = pd.read_sql_table(
                 table_name="searches",
                 con=db.engine,
             )
 
             # Get the journal extractor class
             journal_extractor: JournalExtractor = JournalExtractor(
-                search_data=search_data,
+                search_data=plos_search_df,
             )
 
             # Extract papers

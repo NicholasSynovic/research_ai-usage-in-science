@@ -28,8 +28,8 @@ class CLI:
     Methods:
         add_search(): Configures and adds a search sub-parser for journals to
             find papers by keywords.
-        add_extract_documents(): Configures and adds an 'extract-documents'
-            sub-parser for extracting documents from journal searches.
+        add_identify_papers(): Configures and adds an 'identify-documents'
+            sub-parser for identifying documents from journal searches.
         add_openalex(): Configures and adds an 'openalex' sub-parser for
             retrieving document metadata from OpenAlex.
         add_document_filter(): Configures and adds a 'filter' sub-parser to
@@ -65,7 +65,7 @@ class CLI:
 
         # Create sub-parsers
         self.add_search_plos()  # Search PLOS for papers
-        self.add_extract_documents()  # Extract documents from journal search
+        self.add_identify_papers()  # Extract documents from journal search
         self.add_openalex()  # Get document metadata from OpenAlex
         self.add_document_filter()  # Filter for Natural Science documents
 
@@ -95,11 +95,11 @@ class CLI:
             dest="search_plos.db",
         )
 
-    def add_extract_documents(self) -> None:
-        """Add a sub-parser for extracting documents from journal searches."""
+    def add_identify_papers(self) -> None:
+        """Add a sub-parser for identifying documents from journal searches."""
         extract_documents_parser: ArgumentParser = self.subparsers.add_parser(
-            name="extract-documents",
-            help="Extract documents from journal searches",
+            name="identify-documents",
+            help="Identify documents from journal searches",
             description="Step 2",
         )
 
@@ -110,7 +110,7 @@ class CLI:
             default=self.database_path,
             type=lambda x: Path(x).resolve(),
             help=self.db_help,
-            dest="ed.db",
+            dest="identify_documents.db",
         )
 
     def add_openalex(self) -> None:
