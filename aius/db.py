@@ -145,6 +145,26 @@ class DB:
             Column("ptm_name_reuse_type", String),
         )
 
+        # Author Agreement PLOS Papers
+        _: Table = Table(
+            "llm_prompts",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("prompt", String),
+            Column("tag", String),
+        )
+
+        _: Table = Table(
+            "llm_prompt_engineering_responses",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+            Column("llm_prompt_id", Integer, ForeignKey("llm_prompts._id")),
+            Column("llm_ollama_tag", String),
+            Column("response", String),
+            Column("json", String),
+        )
+
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def get_last_row_id(self, table_name: str) -> int:

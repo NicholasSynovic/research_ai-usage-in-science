@@ -71,6 +71,7 @@ class CLI:
         self.add_content_retriever()
         self.add_load_pilot_study()
         self.add_load_author_agreement()
+        self.add_load_llm_prompt_engineering()
 
         # Add version argument
         self.parser.add_argument(
@@ -248,6 +249,31 @@ class CLI:
             type=lambda x: Path(x).resolve(),
             help="Path to author agreement CSV file",
             dest="load_author_agreement.fp",
+        )
+
+    def add_load_llm_prompt_engineering(self) -> None:
+        author_agreement_parser: ArgumentParser = self.subparsers.add_parser(
+            name="load-llm-prompt-engineering",
+            help="Load LLM prompt engineering dataset",
+            description="Step 8",
+        )
+
+        author_agreement_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_llm_prompt_engineering.db",
+        )
+        author_agreement_parser.add_argument(
+            "--uses-dl",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to uses DL LLM prompt engineering CSV file",
+            dest="load_llm_prompt_engineering.uses_dl",
         )
 
     @property
