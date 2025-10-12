@@ -129,6 +129,9 @@ class DB:
             self.metadata,
             Column("_id", Integer, primary_key=True),
             Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+            Column("url", String),
+            Column("json", String),
+            Column("timestamp", DateTime),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)

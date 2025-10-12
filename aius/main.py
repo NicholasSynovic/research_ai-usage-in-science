@@ -21,6 +21,7 @@ import aius.search as aius_search
 import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
+from aius.load_pilot_study import LoadPilotStudy
 from aius.openalex import OpenAlex
 from aius.pandoc import PandocAPI
 from aius.retrieve_content import RetrieveContent
@@ -190,6 +191,22 @@ def main() -> None:
             # Write data
             rc.content_df.to_sql(
                 name="plos_natural_science_paper_content",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+
+        case "load_pilot_study":
+            pilot_study_csv: Path = args[f"{subparser}.fp"][0]
+
+            lps: LoadPilotStudy = LoadPilotStudy(
+                pilot_study_csv=pilot_study_csv,
+                db=db,
+            )
+
+            lps.df.to_sql(
+                name="plos_pilot_study_papers",
                 con=db.engine,
                 if_exists="append",
                 index=True,

@@ -17,10 +17,15 @@ class LoadPilotStudy:
             table_name="plos_paper_dois",
             con=db.engine,
         )
-        map_df["doi"] = map_df["doi"].apply(lambda x: x.replace("https://doi.org/", ""))
+        map_df["doi"] = map_df["doi"].str.strip(to_strip="https://doi.org/")
         map_df = map_df.set_index(keys="doi")
 
         # Map plos_paper_id to pilot study data
         self.df = self.df.join(other=map_df, on="doi")
+        self.df = self.df.drop(columns="doi")
 
-        print(self.df)
+        # Replace empty mappings with -1
+        self.df["_id"] = self.df["_id"].fillna(value=-1)
+
+        # Rename column
+        self.df = self.df.rename(columns={"_id": "plos_paper_id"})

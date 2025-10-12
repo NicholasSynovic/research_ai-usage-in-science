@@ -116,6 +116,7 @@ def main() -> None:
     # Save DataFrame to CSV file
     plos_responses_with_dois_df.to_csv(
         path_or_buf=Path("pilot_study.csv").resolve(),
+        index=False,
     )
 
 
