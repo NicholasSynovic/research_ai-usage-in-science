@@ -143,7 +143,7 @@ class CLI:
     def add_document_filter(self) -> None:
         """Add a sub-parser to filter documents by Natural Science category."""
         document_filter_parser: ArgumentParser = self.subparsers.add_parser(
-            name="filter",
+            name="filter-documents",
             help="Filter for Natural Science documents",
             description="Step 4",
         )
