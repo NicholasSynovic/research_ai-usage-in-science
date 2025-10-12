@@ -1,98 +1,122 @@
+"""
+Get the most cited paper per search query per year for review.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
+from itertools import product
 from pathlib import Path
 
-import click
-import pandas
-from pandas import DataFrame, Series
+import pandas as pd
 from progress.bar import Bar
-from requests import Response, get
+from requests import Response, Session
+from requests.adapters import HTTPAdapter, Retry
 
-from aius import KEYWORD_LIST, YEAR_LIST
+import aius
 from aius.search.plos import PLOS
 
+# Custom HTTPS session with exponential backoff enabled
+SESSION: Session = Session()
+SESSION.mount(
+    "https://",
+    HTTPAdapter(
+        max_retries=Retry(total=5, backoff_factor=1),
+    ),
+)
 
-def create_urls() -> list[str]:
-    urls: list[str] = []
+OUTPUT_PATH: Path = Path("pilot_study.csv").resolve()
+
+
+def create_plos_urls() -> list[str]:
+    # Instantiate PLOS class
     plos: PLOS = PLOS()
 
-    year: int
-    keyword: str
-    for year in YEAR_LIST:
-        for keyword in KEYWORD_LIST:
-            urls.append(
-                plos._construct_url(year=year, keyword=keyword, page=1)
-                .replace("DATE_NEWEST_FIRST", "MOST_CITED")
-                .replace("resultsPerPage=100", "resultsPerPage=1")
-            )
+    # Create data structure to store data
+    urls: list[str] = []
+
+    # Generate keyword-year pairings
+    pairs: product = product(aius.KEYWORD_LIST, aius.YEAR_LIST)
+
+    # Create URLs
+    pair: tuple[str, int]
+    for pair in pairs:
+        urls.append(
+            plos._construct_url(year=pair[1], keyword=pair[0], page=1)
+            .replace("DATE_NEWEST_FIRST", "MOST_CITED")
+            .replace("resultsPerPage=100", "resultsPerPage=1")
+        )
 
     return urls
 
 
-def get_all_pages(urls: list[str]) -> DataFrame:
-    data: dict[str, list[str | Response | dict]] = {
+def get_plos_pages(urls: list[str]) -> pd.DataFrame:
+    # Data structure to store results
+    data: dict[str, list[str | dict | pd.Timestamp]] = {
         "url": [],
-        "response": [],
         "json": [],
+        "timestamp": [],
     }
 
+    # Query PLOS URL
     with Bar("Getting PLOS pilot study pages...", max=len(urls)) as bar:
+        url: str
         for url in urls:
-            # Query PLOS URL
-            resp: Response = get(
+            timestamp: pd.Timestamp = pd.Timestamp.utcnow()
+
+            resp: Response = SESSION.get(
                 url=url,
                 timeout=60,
             )
 
             # Write data to data structure
             data["url"].append(url)
-            data["response"].append(resp)
-            data["json"].append(resp.json()["searchResults"]["docs"])
+            data["json"].append(resp.json())
+            data["timestamp"].append(timestamp)
 
             bar.next()
 
-    return DataFrame(data=data)
+    return pd.DataFrame(data=data)
 
 
-def get_document_ids(df: DataFrame) -> set[str]:
+def extract_document_doi(plos_response_df: pd.DataFrame) -> pd.DataFrame:
+    # Data structure to store DOIs
     data: list[str] = []
 
-    json_data: Series = df["json"]
+    # Make a copy of the DataFrame to edit
+    df: pd.DataFrame = plos_response_df.copy()
 
-    row: list[dict]
-    for row in json_data:
-        if len(row) > 0:
-            data.append(row[0]["id"])
+    row: pd.Series
+    for _, row in df.iterrows():
+        # Get relevant JSON per response
+        json_data: dict = row["json"]["searchResults"]["docs"]
 
-    return set(data)
+        # If the length of JSON data == 0, append an empty string
+        if len(json_data) == 0:
+            data.append("")
+        else:
+            data.append(json_data[0]["id"])
+
+    df["doi"] = data
+    return df
 
 
-@click.command()
-@click.option(
-    "-o",
-    "--output",
-    type=lambda x: Path(x).resolve(),
-    required=False,
-    show_default=True,
-    default=Path("pilot_study.pickle").resolve(),
-    help="Path to store output Python Pickle file",
-)
-def main(output: Path) -> None:
-    df: DataFrame
-    if output.exists():
-        # Load data if it exists
-        df = pandas.read_pickle(filepath_or_buffer=output)
-    else:
-        # Query PLOS for data and write to disk
-        plos_urls: list[str] = create_urls()
-        df: DataFrame = get_all_pages(urls=plos_urls)
-        df.to_pickle(path=output)
+def main() -> None:
+    # Create PLOS URLs
+    urls: list[str] = create_plos_urls()
 
-    # Get the set of PLOS document IDs
-    plos_document_ids: set[str] = get_document_ids(df=df)
+    # Query PLOS
+    plos_responses_df: pd.DataFrame = get_plos_pages(urls=urls)
 
-    # Print the set of PLOS document IDs
-    _id: str
-    for _id in sorted(plos_document_ids, reverse=True):
-        print(_id)
+    # Extract DOIs from responses
+    plos_responses_with_dois_df: pd.DataFrame = extract_document_doi(
+        plos_response_df=plos_responses_df
+    )
+
+    # Save DataFrame to CSV file
+    plos_responses_with_dois_df.to_csv(
+        path_or_buf=Path("pilot_study.csv").resolve(),
+    )
 
 
 if __name__ == "__main__":

@@ -123,6 +123,14 @@ class DB:
             Column("formatted_md_token_count", Integer),
         )
 
+        # Pilot Study PLOS Paper
+        _: Table = Table(
+            "plos_pilot_study_papers",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        )
+
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def get_last_row_id(self, table_name: str) -> int:

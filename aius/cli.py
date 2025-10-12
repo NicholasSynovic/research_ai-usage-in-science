@@ -69,6 +69,7 @@ class CLI:
         self.add_openalex()  # Get document metadata from OpenAlex
         self.add_document_filter()  # Filter for Natural Science documents
         self.add_content_retriever()
+        self.add_load_pilot_study()
 
         # Add version argument
         self.parser.add_argument(
@@ -193,6 +194,33 @@ class CLI:
             default=["http://localhost:3030"],
             help="Pandoc server URL",
             dest="content_retriever.pandoc_url",
+        )
+
+    def add_load_pilot_study(self) -> None:
+        """Add a sub-parser to retrieve PLOS Natural Science paper content."""
+        load_pilot_study_parser: ArgumentParser = self.subparsers.add_parser(
+            name="load-pilot-study",
+            help="Load pilot study dataset",
+            description="Step 6",
+        )
+
+        load_pilot_study_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_pilot_study.db",
+        )
+        load_pilot_study_parser.add_argument(
+            "-i",
+            "--input-fp",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to pilot study CSV file",
+            dest="load_pilot_study.fp",
         )
 
     @property
