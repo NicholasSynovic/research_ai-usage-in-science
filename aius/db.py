@@ -23,6 +23,8 @@ from sqlalchemy import (
     text,
 )
 
+import aius
+
 
 class DB:
     """
@@ -154,18 +156,10 @@ class DB:
             Column("tag", String),
         )
 
-        _: Table = Table(
-            "llm_prompt_engineering_responses",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-            Column("llm_prompt_id", Integer, ForeignKey("llm_prompts._id")),
-            Column("llm_ollama_tag", String),
-            Column("response", String),
-            Column("json", String),
-        )
-
         self.metadata.create_all(bind=self.engine, checkfirst=True)
+
+    def write_constants(self) -> None:
+        aius.LLM_PROMPTS.to_sql(name="llm_prompts", con=self.engine)
 
     def get_last_row_id(self, table_name: str) -> int:
         """

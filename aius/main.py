@@ -230,8 +230,13 @@ def main() -> None:  # noqa: PLR0914
                 index_label="_id",
             )
 
-        case "load_llm_prompt_engineering";
-            uses_dl_csv: Path = args[f"{subparser}.uses_dl"]
+        case "load_llm_prompts":
+            aius.LLM_PROMPTS.to_sql(
+                name="llm_prompts",
+                con=db.engine,
+                index=True,
+                index_label="_id",
+            )
 
         case _:
             sys.exit(1)
