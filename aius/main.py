@@ -15,17 +15,17 @@ import pandas as pd
 from pandas import DataFrame
 
 import aius
-import aius.filter_documents as aius_filter
-import aius.identify_documents as aius_id
-import aius.search as aius_search
-import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
+from aius.filter_documents import NaturalScienceFilter
+from aius.identify_documents import PLOSPaperIdentifier
 from aius.load_author_agreement import LoadAuthorAgreement
 from aius.load_pilot_study import LoadPilotStudy
 from aius.openalex import OpenAlex
 from aius.pandoc import PandocAPI
 from aius.retrieve_content import RetrieveContent
+from aius.search import search
+from aius.search.plos import PLOS
 
 
 def create_keyword_year_product() -> Iterable:
@@ -65,7 +65,7 @@ def create_keyword_year_product() -> Iterable:
     return product(aius.KEYWORD_LIST, aius.YEAR_LIST)
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0914
     """
     Orchestrate the execution of the `aius` CLI commands.
 
@@ -96,8 +96,8 @@ def main() -> None:
     match subparser:
         case "search_plos":  # Search PLOS for papers
             # Search PLOS
-            df: DataFrame = aius_search.search(
-                journal_search=plos_search.PLOS(),
+            df: DataFrame = search(
+                journal_search=PLOS(),
                 keyword_year_products=create_keyword_year_product(),
             )
 
@@ -119,7 +119,7 @@ def main() -> None:
 
             # Identify documents from the search results and create a mapping
             # between search result and documents
-            ppi: aius_id.PLOSPaperIdentifier = aius_id.PLOSPaperIdentifier(
+            ppi: PLOSPaperIdentifier = PLOSPaperIdentifier(
                 plos_search_df=plos_search_df
             )
 
@@ -165,7 +165,7 @@ def main() -> None:
 
         case "doucment_filter":
             # Filter for documents
-            ns_papers: DataFrame = aius_filter.NaturalScienceFilter(db=db).df
+            ns_papers: DataFrame = NaturalScienceFilter(db=db).df
 
             # Write data
             ns_papers.to_sql(
