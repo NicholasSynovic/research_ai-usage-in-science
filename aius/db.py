@@ -107,6 +107,22 @@ class DB:
             Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
         )
 
+        # PLOS Natural Science Paper Content
+        _: Table = Table(
+            "plos_natural_science_paper_content",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+            Column("raw_jats_xml", String),
+            Column("formatted_jats_xml", String),
+            Column("raw_md", String),
+            Column("formatted_md", String),
+            Column("raw_jats_xml_token_count", Integer),
+            Column("formatted_jats_xml_token_count", Integer),
+            Column("raw_md_token_count", Integer),
+            Column("formatted_md_token_count", Integer),
+        )
+
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def get_last_row_id(self, table_name: str) -> int:

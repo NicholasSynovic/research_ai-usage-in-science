@@ -187,6 +187,15 @@ def main() -> None:
                 db=db, archive_path=archive_path, pandoc_api=pandoc_api
             )
 
+            # Write data
+            rc.content_df.to_sql(
+                name="plos_natural_science_paper_content",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+
         case _:
             sys.exit(1)
 
