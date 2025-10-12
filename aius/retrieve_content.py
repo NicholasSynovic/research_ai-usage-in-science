@@ -5,6 +5,7 @@ from zipfile import ZipFile
 import pandas as pd
 from bs4 import BeautifulSoup, Tag
 from progress.bar import Bar
+from tiktoken import Encoding, encoding_for_model
 
 from aius.db import DB
 from aius.pandoc import PandocAPI
@@ -47,6 +48,7 @@ class RetrieveContent:
         self.format_jats()  # Operates on self.content_df directly
         self.convert_jats(column_name="raw_md")
         self.convert_jats(column_name="formatted_md")
+        self.compute_tokens()
 
     def extract_content(self) -> pd.DataFrame:
         # Data structure to store content
@@ -137,3 +139,26 @@ class RetrieveContent:
                 bar.next()
 
         self.content_df[column_name] = data
+
+    def compute_tokens(self) -> None:
+        encoding: Encoding = encoding_for_model(model_name="gpt-4")
+
+        print("Computing token count for raw JATS XML...")
+        self.content_df["raw_jats_xml_token_count"] = self.content_df[
+            "raw_jats_xml"
+        ].apply(lambda x: len(encoding.encode(text=x)))
+
+        print("Computing token count for formatted JATS XML...")
+        self.content_df["formatted_jats_xml_token_count"] = self.content_df[
+            "formatted_jats_xml"
+        ].apply(lambda x: len(encoding.encode(text=x)))
+
+        print("Computing token count for raw MD...")
+        self.content_df["raw_md_token_count"] = self.content_df["raw_md"].apply(
+            lambda x: len(encoding.encode(text=x))
+        )
+
+        print("Computing token count for formatted MD...")
+        self.content_df["formatted_md_token_count"] = self.content_df[
+            "formatted_md"
+        ].apply(lambda x: len(encoding.encode(text=x)))
