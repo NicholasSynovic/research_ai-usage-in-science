@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 from zipfile import ZipFile
 
 import pandas as pd
@@ -44,6 +45,8 @@ class RetrieveContent:
         # Run retrieval
         self.content_df: pd.DataFrame = self.extract_content()
         self.format_jats()  # Operates on self.content_df directly
+        self.convert_jats(column_name="raw_md")
+        self.convert_jats(column_name="formatted_md")
 
     def extract_content(self) -> pd.DataFrame:
         # Data structure to store content
@@ -107,3 +110,30 @@ class RetrieveContent:
                 bar.next()
 
         self.content_df["formatted_jats_xml"] = data
+
+    def convert_jats(self, column_name: Literal["raw_md", "formatted_md"]) -> None:
+        # Data structure to store content
+        data: list[str] = []
+
+        with Bar(max=self.doi_count) as bar:
+            jats_xml_series: pd.Series
+
+            # Match on column name
+            match column_name:
+                case "raw_md":
+                    bar.message = "Converting raw JATS XML to MD..."
+                    jats_xml_series = self.content_df["raw_jats_xml"]
+                case "formatted_md":
+                    bar.message = "Converting formatted JATS XML to MD..."
+                    jats_xml_series = self.content_df["formatted_jats_xml"]
+
+            jats_xml: str
+            for jats_xml in jats_xml_series:
+                data.append(
+                    self.pandoc_api.convert_jats_to_md(
+                        jats_xml=jats_xml,
+                    )
+                )
+                bar.next()
+
+        self.content_df[column_name] = data
