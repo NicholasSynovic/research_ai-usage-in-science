@@ -14,7 +14,7 @@ import pandas as pd
 from pandas import DataFrame
 
 import aius
-import aius.filter as aius_filter
+import aius.filter.filter_documents as aius_filter
 import aius.identify_documents as aius_id
 import aius.search as aius_search
 import aius.search.plos as plos_search
