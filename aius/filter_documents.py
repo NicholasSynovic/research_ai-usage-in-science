@@ -1,37 +1,46 @@
-import json
+"""
+Filter for Natural Science PLOS documents.
 
-import pandas
-from pandas import DataFrame, Series
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
+import pandas as pd
+from pandas import DataFrame
 
 import aius
 from aius.db import DB
 
 
-def get_papers_openalex_data(db: DB) -> DataFrame:
-    # Get papers that are open access and have at least 1 citation
-    sql: str = """
-        SELECT openalex.*, papers.doi FROM openalex
-        JOIN papers ON openalex.paper_id = papers._id
-        WHERE openalex.open_access = 1
-        AND openalex.cited_by_count > 0;
-    """
+class NaturalScienceFilter:
+    def __init__(self, db: DB) -> None:
+        # SQLite3 query for OpenAlex metadata and where documents are both
+        # open_access and cited_by_count > 0
+        sql_query: str = """
+            SELECT ppom.plos_paper_id, ppom.topic_0, ppom.topic_1, ppom.topic_2
+            FROM plos_paper_openalex_metadata AS ppom
+            WHERE ppom.open_access = 1
+            AND ppom.cited_by_count > 0;
+        """
 
-    return pandas.read_sql_query(sql=sql, con=db.engine, index_col="_id")
+        # Execute SQL query
+        self.df: DataFrame = pd.read_sql_query(sql=sql_query, con=db.engine)
 
-
-def apply_filters(data_df: DataFrame) -> DataFrame:
-    # Filter for at least two topics
-    mask = (
-        data_df.apply(
-            lambda row: row.isin(aius.FIELD_FILTER).sum(),
-            axis=1,
+        # Create mask selecting rows that have at least two Natural Science
+        # fields
+        mask = (
+            self.df.apply(
+                lambda row: row.isin(aius.FIELD_FILTER).sum(),
+                axis=1,
+            )
+            >= 2
         )
-        >= 2
-    )
-    filtered_on_topics: DataFrame = data_df[mask]
 
-    # Cleanup data
-    filtered_on_topics = filtered_on_topics.sort_values(by="paper_id")
-    filtered_on_topics = filtered_on_topics.reset_index(drop=True)
-
-    return filtered_on_topics
+        # Apply mask
+        self.df = (
+            self.df[mask]
+            .reset_index(drop=True)
+            .drop(
+                columns=["topic_0", "topic_1", "topic_2"],
+            )
+        )

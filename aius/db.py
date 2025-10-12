@@ -99,12 +99,12 @@ class DB:
             Column("timestamp", DateTime),
         )
 
-        # Natural Science Papers
+        # PLOS Natural Science Papers
         _: Table = Table(
-            "ns_papers",
+            "plos_natural_science_papers",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)

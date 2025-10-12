@@ -155,7 +155,7 @@ class CLI:
             default=self.database_path,
             type=lambda x: Path(x).resolve(),
             help=self.db_help,
-            dest="filter.db",
+            dest="doucment_filter.db",
         )
 
     @property

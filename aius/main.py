@@ -14,7 +14,7 @@ import pandas as pd
 from pandas import DataFrame
 
 import aius
-import aius.filter.filter_documents as aius_filter
+import aius.filter_documents as aius_filter
 import aius.identify_documents as aius_id
 import aius.search as aius_search
 import aius.search.plos as plos_search
@@ -158,19 +158,13 @@ def main() -> None:
                 index_label="_id",
             )
 
-        case "filter":
-            # Get data
-            data_df: DataFrame = aius_filter.get_papers_openalex_data(db=db)
-
-            # Apply filter
-            ns_data: DataFrame = aius_filter.apply_filters(data_df=data_df)
-
-            # Drop irrelevant columns
-            ns_papers: DataFrame = ns_data[["paper_id"]]
+        case "doucment_filter":
+            # Filter for documents
+            ns_papers: DataFrame = aius_filter.NaturalScienceFilter(db=db).df
 
             # Write data
             ns_papers.to_sql(
-                name="ns_papers",
+                name="plos_natural_science_papers",
                 con=db.engine,
                 if_exists="append",
                 index=True,
