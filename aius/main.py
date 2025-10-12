@@ -8,6 +8,7 @@ Copyright 2025 (C) Nicholas M. Synovic
 import sys
 from collections.abc import Iterable
 from itertools import product
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -21,6 +22,7 @@ import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
 from aius.openalex import OpenAlex
+from aius.retrieve_content import RetrieveContent
 
 
 def create_keyword_year_product() -> Iterable:
@@ -169,6 +171,16 @@ def main() -> None:
                 if_exists="append",
                 index=True,
                 index_label="_id",
+            )
+
+        case "content_retriever":
+            # Get All of PLOS zip file path
+            archive_path: Path = args[f"{subparser}.fp"][0]
+
+            # Retrieve content from the zip file
+            rc: RetrieveContent = RetrieveContent(
+                db=db,
+                archive_path=archive_path,
             )
 
         case _:

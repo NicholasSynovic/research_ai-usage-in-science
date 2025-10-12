@@ -68,6 +68,7 @@ class CLI:
         self.add_identify_papers()  # Extract documents from journal search
         self.add_openalex()  # Get document metadata from OpenAlex
         self.add_document_filter()  # Filter for Natural Science documents
+        self.add_content_retriever()
 
         # Add version argument
         self.parser.add_argument(
@@ -156,6 +157,33 @@ class CLI:
             type=lambda x: Path(x).resolve(),
             help=self.db_help,
             dest="doucment_filter.db",
+        )
+
+    def add_content_retriever(self) -> None:
+        """Add a sub-parser to retrieve PLOS Natural Science paper content."""
+        content_retriever_parser: ArgumentParser = self.subparsers.add_parser(
+            name="retrieve-content",
+            help="Retrieve content from PLOS Natural Science documents",
+            description="Step 5",
+        )
+
+        content_retriever_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="content_retriever.db",
+        )
+        content_retriever_parser.add_argument(
+            "-i",
+            "--input-fp",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to All of PLOS zip file",
+            dest="content_retriever.fp",
         )
 
     @property
