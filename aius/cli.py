@@ -185,6 +185,15 @@ class CLI:
             help="Path to All of PLOS zip file",
             dest="content_retriever.fp",
         )
+        content_retriever_parser.add_argument(
+            "-p",
+            "--pandoc-url",
+            nargs=1,
+            type=str,
+            default=["http://localhost:3030"],
+            help="Pandoc server URL",
+            dest="content_retriever.pandoc_url",
+        )
 
     @property
     def parse(self) -> dict:

@@ -22,6 +22,7 @@ import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
 from aius.openalex import OpenAlex
+from aius.pandoc import PandocAPI
 from aius.retrieve_content import RetrieveContent
 
 
@@ -176,11 +177,14 @@ def main() -> None:
         case "content_retriever":
             # Get All of PLOS zip file path
             archive_path: Path = args[f"{subparser}.fp"][0]
+            pandoc_url: str = args[f"{subparser}.pandoc_url"][0]
+
+            # Instantiate PandocAPI
+            pandoc_api: PandocAPI = PandocAPI(pandoc_url=pandoc_url)
 
             # Retrieve content from the zip file
             rc: RetrieveContent = RetrieveContent(
-                db=db,
-                archive_path=archive_path,
+                db=db, archive_path=archive_path, pandoc_api=pandoc_api
             )
 
         case _:

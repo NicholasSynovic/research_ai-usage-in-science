@@ -6,12 +6,19 @@ from bs4 import BeautifulSoup, Tag
 from progress.bar import Bar
 
 from aius.db import DB
+from aius.pandoc import PandocAPI
 
 
 class RetrieveContent:
-    def __init__(self, db: DB, archive_path: Path) -> None:
+    def __init__(
+        self,
+        db: DB,
+        archive_path: Path,
+        pandoc_api: PandocAPI,
+    ) -> None:
         # Global variables
         self.archive_path: Path = archive_path.resolve()
+        self.pandoc_api: PandocAPI = pandoc_api
 
         # SQLite3 query Get natural science PLOS DOIs
         sql_query: str = """

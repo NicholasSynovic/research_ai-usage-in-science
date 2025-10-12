@@ -25,6 +25,7 @@ FIELD_FILTER: set[str] = {
 
 
 GET_TIMEOUT: int = 60
+POST_TIMEOUT: int = 60
 
 KEYWORD_LIST: list[str] = [
     r'"Deep Learning"',
