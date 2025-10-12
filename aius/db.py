@@ -134,6 +134,17 @@ class DB:
             Column("timestamp", DateTime),
         )
 
+        # Author Agreement PLOS Papers
+        _: Table = Table(
+            "plos_author_agreement_papers",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+            Column("uses_dl", Boolean),
+            Column("uses_ptms", Boolean),
+            Column("ptm_name_reuse_type", String),
+        )
+
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
     def get_last_row_id(self, table_name: str) -> int:

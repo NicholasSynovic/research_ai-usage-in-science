@@ -70,6 +70,7 @@ class CLI:
         self.add_document_filter()  # Filter for Natural Science documents
         self.add_content_retriever()
         self.add_load_pilot_study()
+        self.add_load_author_agreement()
 
         # Add version argument
         self.parser.add_argument(
@@ -221,6 +222,32 @@ class CLI:
             type=lambda x: Path(x).resolve(),
             help="Path to pilot study CSV file",
             dest="load_pilot_study.fp",
+        )
+
+    def add_load_author_agreement(self) -> None:
+        author_agreement_parser: ArgumentParser = self.subparsers.add_parser(
+            name="load-author-agreement",
+            help="Load author agreement dataset",
+            description="Step 7",
+        )
+
+        author_agreement_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_author_agreement.db",
+        )
+        author_agreement_parser.add_argument(
+            "-i",
+            "--input-fp",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to author agreement CSV file",
+            dest="load_author_agreement.fp",
         )
 
     @property

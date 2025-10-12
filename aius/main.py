@@ -21,6 +21,7 @@ import aius.search as aius_search
 import aius.search.plos as plos_search
 from aius.cli import CLI
 from aius.db import DB
+from aius.load_author_agreement import LoadAuthorAgreement
 from aius.load_pilot_study import LoadPilotStudy
 from aius.openalex import OpenAlex
 from aius.pandoc import PandocAPI
@@ -207,6 +208,22 @@ def main() -> None:
 
             lps.df.to_sql(
                 name="plos_pilot_study_papers",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+
+        case "load_author_agreement":
+            author_agreement_csv: Path = args[f"{subparser}.fp"][0]
+
+            laa: LoadAuthorAgreement = LoadAuthorAgreement(
+                pilot_study_csv=author_agreement_csv,
+                db=db,
+            )
+
+            laa.df.to_sql(
+                name="plos_author_agreement_papers",
                 con=db.engine,
                 if_exists="append",
                 index=True,
