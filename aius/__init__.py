@@ -96,5 +96,3 @@ Nothing else should ever be returned.
         ],
     }
 )
-
-print(LLM_PROMPTS["prompt"][0])

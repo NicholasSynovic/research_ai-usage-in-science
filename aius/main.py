@@ -234,6 +234,7 @@ def main() -> None:  # noqa: PLR0914
             aius.LLM_PROMPTS.to_sql(
                 name="llm_prompts",
                 con=db.engine,
+                if_exists="append",
                 index=True,
                 index_label="_id",
             )
