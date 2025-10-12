@@ -128,7 +128,7 @@ class CLI:
             default=self.database_path,
             type=lambda x: Path(x).resolve(),
             help=self.db_help,
-            dest="oa.db",
+            dest="openalex.db",
         )
         openalex_parser.add_argument(
             "-e",
@@ -137,7 +137,7 @@ class CLI:
             type=str,
             help="Email address to access OpenAlex polite pool",
             required=True,
-            dest="oa.email",
+            dest="openalex.email",
         )
 
     def add_document_filter(self) -> None:

@@ -136,24 +136,22 @@ def main() -> None:
                 index_label="_id",
             )
 
-        case "oa":  # Get paper metadata from OpenAlex
+        case "openalex":  # Get paper metadata from OpenAlex
             # Get the email address from the CLI
             email: str = args[f"{subparser}.email"][0]
 
             # Get papers data
-            papers_df: DataFrame = pd.read_sql_table(
-                table_name="papers", con=db.engine, index_col="_id"
+            doi_df: DataFrame = pd.read_sql_table(
+                table_name="plos_paper_dois",
+                con=db.engine,
+                index_col="_id",
             )
 
             # Instantiate OpenAlex object
-            oa: OpenAlex = OpenAlex(email=email, papers_df=papers_df)
+            oa: OpenAlex = OpenAlex(email=email, doi_df=doi_df)
 
-            # Request for metadata from OpenAlex
-            oa_df: DataFrame = oa.get_metadata()
-
-            # Write data to database
-            oa_df.to_sql(
-                name="openalex",
+            oa.metadata.to_sql(
+                name="plos_paper_openalex_metadata",
                 con=db.engine,
                 if_exists="append",
                 index=True,
