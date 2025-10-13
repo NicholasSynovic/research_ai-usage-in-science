@@ -34,10 +34,6 @@ cd ${PBS_O_WORKDIR}
 mkdir -p ${ARRAY_INDEX_UNIQUE_DIR}
 cd ${ARRAY_INDEX_UNIQUE_DIR}
 
-# TODO: Test if this is necessary
-# sleep 20
-
-
 echo "ollama at $(which ollama)" | tee $LOGFILE
 echo "result $(hostname) index $PBS_ARRAY_INDEX date $(date)" | tee $LOGFILE
 
