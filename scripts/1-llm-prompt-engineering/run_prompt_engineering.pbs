@@ -8,7 +8,7 @@
 #PBS -l filesystems=home:eagle
 #PBS -j oe
 #PBS -r y
-#PBS -J 0-3
+#PBS -J 0-2
 #PBS -o logs
 #PBS -e logs
 
@@ -117,18 +117,16 @@ start_ollama_server() {
     return $pid
 }
 
-ollama_prompt() {
+run_aius() {
     local model="$1"
-    local prompt="$2"
     local port="$3"
-    local filename="$4"
 
     local host="127.0.0.1"
     local addr="${host}:${port}"
 
     export OLLAMA_HOST="$addr"
-    echo "💬 Running ollama model '$model' on ${OLLAMA_HOST} at port ${port} to filename ${filename}..."
-    echo "$prompt" | ollama run "$model" | tee "$filename"
+    echo "💬 Running aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model '$model' --prompt uses_dl --ollama '$OLLAMA_HOST'..."
+    aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model ${model} --prompt uses_dl --ollama ${OLLAMA_HOST}
 }
 
 
@@ -151,7 +149,13 @@ main() {
     # Example usage:
     NUMBER=$PBS_ARRAY_INDEX
 
-    ollama_prompt "llama3.2" "Can you tell $NUMBER facts about the number $NUMBER?" "$port" "facts-about-$NUMBER.out"
+    if [[ $NUMBER -eq 0 ]]; then
+        run_aius "phi3:14b" "$port"
+    elif [[ $NUMBER -eq 1 ]]; then
+        run_aius "gpt-oss:20b" "$port"
+    else
+        run_aius "magistral:24b" "$port"
+    fi
 }
 
 echo "Starting inferencing" | tee $LOGFILE
