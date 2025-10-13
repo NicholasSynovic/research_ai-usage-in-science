@@ -13,13 +13,13 @@
 
 # Set variables
 PATH=$PATH:/eagle/EVITA/ollama/bin
-OLLAMA_MODELS=/eagle/EVITA/ollama-models
 FQJI=job-$(echo $PBS_JOBID | cut -d'[' -f1)-$PBS_JOBNAME # Fully qualified job id
 ARRAY_INDEX_UNIQUE_DIR="${FQJI}/${PBS_ARRAY_INDEX}"
 LOGFILE=log-${PBS_ARRAY_INDEX}.logging
 OLLAMA_LOGFILE=ollama-${PBS_ARRAY_INDEX}.log
 OLLAMA_PORT_START=11400
 OLLAMA_PORT_END=11500
+export OLLAMA_MODELS=/eagle/EVITA/ollama-models
 
 # Load necessary module files
 module use /soft/modulefiles
