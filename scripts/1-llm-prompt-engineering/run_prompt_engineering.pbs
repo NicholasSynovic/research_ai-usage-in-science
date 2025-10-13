@@ -1,9 +1,8 @@
 #!/bin/bash -l
 
-#PBS -l select=1
-#PBS -l place=scatter
+#PBS -l select=2
 #PBS -l walltime=1:00:00
-#PBS -q preemptable
+#PBS -q by-gpu
 #PBS -A EVITA
 #PBS -l filesystems=home:eagle
 #PBS -j oe
@@ -109,6 +108,7 @@ start_ollama_server() {
     local pid=$!
 
     sleep "$sleep_time"
+
     echo "✅ Ollama started (PID $pid) on $addr"
     echo "  logging to $OLLAMA_LOGFILE"
     echo "To connect, run:"
@@ -132,7 +132,7 @@ run_aius() {
 
 main() {
     local port
-    port=$(find_free_port)
+    port=$(find_free_ollama_port)
 
     sleep_time=10
 
