@@ -19,7 +19,7 @@ class LLMPromptEngineering:
     ) -> None:
         # Global variables
         self.model: str = model
-        self.ollama_uri: str = f"http://{ollama_uri}/api"
+        self.ollama_uri: str = f"http://{ollama_uri}/api/generate"
         self.output_path: Path = Path(
             f"{model.replace(':', '-')}_{prompt_tag}.parquet"
         ).resolve()
