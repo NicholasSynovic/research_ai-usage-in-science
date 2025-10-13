@@ -97,4 +97,5 @@ class LLMPromptEngineering:
 
                 bar.next()
 
+        print(data)
         DataFrame(data=data).to_parquet(path=self.output_path, engine="pyarrow")
