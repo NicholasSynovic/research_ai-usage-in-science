@@ -43,10 +43,10 @@ class LLMUsesDL:
         # Get prompt engineering papers
         # TODO: Modify this SQL to grab all NS paper content
         prompt_engineering_paper_query: str = """
-        SELECT plpep.*, pnspc.formatted_md, pnspc.formatted_md_token_count
-        FROM plos_llm_prompt_engineering_papers plpep
+        SELECT source.*, pnspc.formatted_md, pnspc.formatted_md_token_count
+        FROM plos_natural_science_papers source
         JOIN plos_natural_science_paper_content pnspc
-        ON pnspc.plos_paper_id = plpep.plos_paper_id;
+        ON pnspc.plos_paper_id = source.plos_paper_id;
         """
         self.papers: DataFrame = pandas.read_sql_query(
             sql=prompt_engineering_paper_query,

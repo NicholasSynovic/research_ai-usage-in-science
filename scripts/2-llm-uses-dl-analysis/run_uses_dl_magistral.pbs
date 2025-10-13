@@ -19,7 +19,7 @@ LOGFILE=log-${PBS_ARRAY_INDEX}.logging
 OLLAMA_LOGFILE=ollama-${PBS_ARRAY_INDEX}.log
 OLLAMA_PORT_START=11400
 OLLAMA_PORT_END=11500
-MODEL="phi3:14b"    # TODO: Change me to analyze with a different model
+MODEL="magistral:24b"    # TODO: Change me to analyze with a different model
 STRIDE=150
 
 export OLLAMA_MODELS=/eagle/EVITA/ollama-models
