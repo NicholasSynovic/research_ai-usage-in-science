@@ -74,6 +74,7 @@ class CLI:
         self.add_load_llm_prompts()
         self.add_load_llm_prompt_engineering_papers()
         self.add_run_llm_prompt_engineering()
+        self.add_run_llm_uses_dl_analysis()
 
         # Add version argument
         self.parser.add_argument(
@@ -333,6 +334,70 @@ class CLI:
             required=True,
             help="Ollama URI",
             dest="run_llm_prompt_engineering.ollama",
+        )
+
+    def add_run_llm_uses_dl_analysis(self) -> None:
+        llm_uses_dl_analysis: ArgumentParser = self.subparsers.add_parser(
+            name="run-llm-uses-dl-analysis",
+            help="Run LLM uses DL  analysis",
+            description="Step 11",
+        )
+
+        llm_uses_dl_analysis.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="run_llm_uses_dl_analysis.db",
+        )
+
+        llm_uses_dl_analysis.add_argument(
+            "-m",
+            "--model",
+            type=str,
+            required=True,
+            choices=["phi3:14b", "gpt-oss:20b", "magistral:24b"],
+            help="LLM to run prompt engineering analysis on",
+            dest="run_llm_uses_dl_analysis.model",
+        )
+
+        llm_uses_dl_analysis.add_argument(
+            "-p",
+            "--prompt",
+            type=str,
+            required=True,
+            choices=["uses_dl"],
+            help="Prompt to use",
+            dest="run_llm_uses_dl_analysis.prompt",
+        )
+
+        llm_uses_dl_analysis.add_argument(
+            "--ollama",
+            nargs=1,
+            type=str,
+            required=True,
+            help="Ollama URI",
+            dest="run_llm_uses_dl_analysis.ollama",
+        )
+
+        llm_uses_dl_analysis.add_argument(
+            "--index",
+            nargs=1,
+            type=int,
+            default=[0],
+            help="Starting index of the dataset used for processing a subset of the dataset",
+            dest="run_llm_uses_dl_analysis.index",
+        )
+
+        llm_uses_dl_analysis.add_argument(
+            "--stride",
+            nargs=1,
+            type=int,
+            default=[1],
+            help="Step value to iterate through the dataset",
+            dest="run_llm_uses_dl_analysis.stride",
         )
 
     @property

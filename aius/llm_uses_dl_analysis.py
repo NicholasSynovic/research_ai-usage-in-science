@@ -1,4 +1,5 @@
 import itertools
+from math import ceil
 from pathlib import Path
 
 import pandas
@@ -51,7 +52,7 @@ class LLMUsesDL:
             sql=prompt_engineering_paper_query,
             con=db.engine,
         )
-        self.paper_count: int = self.papers.shape[0]
+        self.paper_count: int = ceil(self.papers.shape[0] / self.stride)
 
         # Get the max number of tokens to instantiate the model to use
         self.max_tokens: int = (
