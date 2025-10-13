@@ -147,13 +147,21 @@ class DB:
             Column("ptm_name_reuse_type", String),
         )
 
-        # Author Agreement PLOS Papers
+        # LLM Prompts
         _: Table = Table(
             "llm_prompts",
             self.metadata,
             Column("_id", Integer, primary_key=True),
             Column("prompt", String),
             Column("tag", String),
+        )
+
+        # PLOS LLM Prompt Engineering papers
+        _: Table = Table(
+            "plos_llm_prompt_engineering_papers",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)

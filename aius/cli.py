@@ -72,6 +72,7 @@ class CLI:
         self.add_load_pilot_study()
         self.add_load_author_agreement()
         self.add_load_llm_prompts()
+        self.add_load_llm_prompt_engineering_papers()
 
         # Add version argument
         self.parser.add_argument(
@@ -266,6 +267,25 @@ class CLI:
             type=lambda x: Path(x).resolve(),
             help=self.db_help,
             dest="load_llm_prompts.db",
+        )
+
+    def add_load_llm_prompt_engineering_papers(self) -> None:
+        llm_prompt_engineering_papers_parser: ArgumentParser = (
+            self.subparsers.add_parser(
+                name="load-llm-prompt-engineering-papers",
+                help="Load LLM prompt engineering papers into the database",
+                description="Step 9",
+            )
+        )
+
+        llm_prompt_engineering_papers_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_llm_prompt_prompt_engineering_papers.db",
         )
 
     @property

@@ -21,6 +21,7 @@ from aius.filter_documents import NaturalScienceFilter
 from aius.identify_documents import PLOSPaperIdentifier
 from aius.load_author_agreement import LoadAuthorAgreement
 from aius.load_pilot_study import LoadPilotStudy
+from aius.load_prompt_engineering_papers import LoadPromptEngineeringPapers
 from aius.openalex import OpenAlex
 from aius.pandoc import PandocAPI
 from aius.retrieve_content import RetrieveContent
@@ -233,6 +234,17 @@ def main() -> None:  # noqa: PLR0914
         case "load_llm_prompts":
             aius.LLM_PROMPTS.to_sql(
                 name="llm_prompts",
+                con=db.engine,
+                if_exists="append",
+                index=True,
+                index_label="_id",
+            )
+
+        case "load_llm_prompt_prompt_engineering_papers":
+            lpep: LoadPromptEngineeringPapers = LoadPromptEngineeringPapers(db=db)
+
+            lpep.df.to_sql(
+                name="plos_llm_prompt_engineering_papers",
                 con=db.engine,
                 if_exists="append",
                 index=True,
