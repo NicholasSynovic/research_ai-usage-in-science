@@ -119,7 +119,7 @@ start_ollama_server() {
 
 run_aius() {
     local model="$1"
-    local port="$3"
+    local port="$2"
 
     local host="127.0.0.1"
     local addr="${host}:${port}"
