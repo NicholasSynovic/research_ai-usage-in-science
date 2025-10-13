@@ -126,7 +126,7 @@ run_aius() {
 
     export OLLAMA_HOST="$addr"
     echo "💬 Running aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model '$model' --prompt uses_dl --ollama '$addr'..."
-    aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model ${model} --prompt uses_dl --ollama ${addr}
+    aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model ${model} --prompt uses_dl --ollama ${addr} | tee $LOGFILE
 }
 
 
@@ -157,6 +157,9 @@ main() {
         run_aius "magistral:24b" "$port"
     fi
 }
+
+unset http_proxy
+unset https_proxy
 
 echo "Starting inferencing" | tee $LOGFILE
 main "$@"
