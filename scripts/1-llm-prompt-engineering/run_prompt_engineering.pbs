@@ -125,8 +125,8 @@ run_aius() {
     local addr="${host}:${port}"
 
     export OLLAMA_HOST="$addr"
-    echo "💬 Running aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model '$model' --prompt uses_dl --ollama '$OLLAMA_HOST'..."
-    aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model ${model} --prompt uses_dl --ollama ${OLLAMA_HOST}
+    echo "💬 Running aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model '$model' --prompt uses_dl --ollama '$addr'..."
+    aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model ${model} --prompt uses_dl --ollama ${addr}
 }
 
 

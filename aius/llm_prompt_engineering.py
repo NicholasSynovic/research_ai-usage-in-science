@@ -46,7 +46,7 @@ class LLMPromptEngineering:
         self.paper_count: int = self.papers.shape[0]
 
         # Get the max number of tokens to instantiate the model to use
-        self.max_tokens: int = self.papers["formatted_md_token_count"].max()
+        self.max_tokens: int = int(self.papers["formatted_md_token_count"].max())
 
     def run(self) -> None:
         # Data structure to store model responses
