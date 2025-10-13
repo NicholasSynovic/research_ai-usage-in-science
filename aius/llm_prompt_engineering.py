@@ -18,7 +18,7 @@ class LLMPromptEngineering:
         ollama_uri: str = "localhost:11434",
     ) -> None:
         # Global variables
-        self.model: str = model
+        self.model: str = model.replace("'", "").replace('"', "")
         self.ollama_uri: str = f"http://{ollama_uri}/api/generate"
         self.output_path: Path = Path(
             f"{model.replace(':', '-')}_{prompt_tag}.parquet"
