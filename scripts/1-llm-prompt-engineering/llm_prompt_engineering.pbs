@@ -7,7 +7,6 @@
 #PBS -l filesystems=home:eagle
 #PBS -j oe
 #PBS -r y
-#PBS -J 0-2
 #PBS -o logs
 #PBS -e logs
 

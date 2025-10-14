@@ -6,7 +6,7 @@
 MAX_JOBS=10
 USER_ID="nsynovic"
 POLL_INTERVAL=30  # seconds
-PBS_SCRIPT="llm_paper_uses_dl_analysis.pbs"
+PBS_SCRIPT="llm_prompt_engineering.pbs"
 
 # Models to process
 MODELS=(
@@ -29,7 +29,7 @@ for MODEL in "${MODELS[@]}"; do
       CURRENT_JOBS=$(qstat | grep "$USER_ID" | wc -l)
       if (( CURRENT_JOBS < MAX_JOBS )); then
         echo "[$(date)] Submitting: qsub -v AIUS_MODEL=\"$MODEL\",AIUS_PROMPT=\"$PROMPT\" $PBS_SCRIPT"
-        qsub -v AIUS_MODEL="$MODEL",AIUS_INDEX="$PROMPT "$PBS_SCRIPT"
+        qsub -v AIUS_MODEL="$MODEL",AIUS_INDEX="$PROMPT" "$PBS_SCRIPT"
         break
       else
         echo "[$(date)] $CURRENT_JOBS jobs active. Waiting for slots..."
