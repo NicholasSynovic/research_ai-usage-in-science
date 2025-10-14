@@ -322,7 +322,7 @@ class CLI:
             "--prompt",
             type=str,
             required=True,
-            choices=["uses_dl"],
+            choices=["uses_dl", "uses_ptms"],
             help="Prompt to use",
             dest="run_llm_prompt_engineering.prompt",
         )

@@ -1,6 +1,6 @@
 # Run LLM Uses DL Analysis
 
-> Run this on ALCF Polaris
+> Run this on ALCF Sophia
 
 ## How To Run
 

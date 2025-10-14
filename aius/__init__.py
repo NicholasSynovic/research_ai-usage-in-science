@@ -56,7 +56,7 @@ SEARCH_KEYWORDS: DataFrame = DataFrame(
 
 LLM_PROMPTS: DataFrame = DataFrame(
     data={
-        "tag": ["uses_dl"],
+        "tag": ["uses_dl", "uses_ptms"],
         "prompt": [
             text(
                 md="""
@@ -81,6 +81,46 @@ Neutral, objective, and machine-like.
 The audience is a machine system that parses JSON. Human readability is irrelevant.
 
 ## (R) Response
+Return only a JSON object of the form:
+
+```json
+{
+    "result": "boolean",
+    "prose": "string" | None,
+}
+```
+
+Nothing else should ever be returned.
+"""
+            ),
+            text(
+                md="""
+## (C) Context:
+
+You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine whether the authors use pre-trained deep learning models (PTMs) in their methodology. Your response will be consumed by downstream systems that require structured JSON.
+
+## (O) Objective:
+Your task is to output only a JSON object containing key-value pairs, where:
+
+- the key "result" value is a boolean (true or false) based on whether the input text indicates the use of pre-trained deep learning models (PTMs) in the methodology, and
+- the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of pre-trained model usage, or an empty string if no PTMs are used.
+
+No explanations or extra output are allowed.
+
+## (S) Style:
+
+Responses must be strictly machine-readable JSON. No natural language, commentary, or formatting beyond the JSON object is permitted.
+
+## (T) Tone:
+
+Neutral, objective, and machine-like.
+
+## (A) Audience:
+
+The audience is a machine system that parses JSON. Human readability is irrelevant.
+
+## (R) Response:
+
 Return only a JSON object of the form:
 
 ```json

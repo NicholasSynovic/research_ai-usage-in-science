@@ -11,15 +11,22 @@
 #PBS -o logs
 #PBS -e logs
 
-# Set variables
-PATH=$PATH:/eagle/EVITA/ollama/bin
+# Set logging variables
 FQJI=job-$(echo $PBS_JOBID | cut -d'[' -f1)-$PBS_JOBNAME # Fully qualified job id
-ARRAY_INDEX_UNIQUE_DIR="${FQJI}/${PBS_ARRAY_INDEX}"
-LOGFILE=log-${PBS_ARRAY_INDEX}.logging
-OLLAMA_LOGFILE=ollama-${PBS_ARRAY_INDEX}.log
+LOGFILE=log-${AIUS_INDEX}.logging
+JOB_UNIQUE_DIR="${FQJI}/${AIUS_INDEX}"
+
+# Set Ollama variables
+PATH=$PATH:/eagle/EVITA/ollama/bin
 OLLAMA_PORT_START=11400
 OLLAMA_PORT_END=11500
+OLLAMA_LOGFILE=ollama-${AIUS_INDEX}.log
 export OLLAMA_MODELS=/eagle/EVITA/ollama-models
+
+# Set AIUS input variables
+# AIUS_MODEL="gpt-oss:20b"  # Set this via qsub -v AIUS_MODEL="",...
+# AIUS_PROMPT="uses_dl"  # # Set this via qsub -v AIUS_PROMPT="",...
+
 
 # Load necessary module files
 module use /soft/modulefiles
@@ -31,8 +38,8 @@ conda activate python
 
 # Setup output directories
 cd ${PBS_O_WORKDIR}
-mkdir -p ${ARRAY_INDEX_UNIQUE_DIR}
-cd ${ARRAY_INDEX_UNIQUE_DIR}
+mkdir -p ${JOB_UNIQUE_DIR}
+cd ${JOB_UNIQUE_DIR}
 
 echo "ollama at $(which ollama)" | tee $LOGFILE
 echo "result $(hostname) index $PBS_ARRAY_INDEX date $(date)" | tee $LOGFILE
@@ -114,15 +121,20 @@ start_ollama_server() {
 }
 
 run_aius() {
-    local model="$1"
-    local port="$2"
+    local port="$1"
 
     local host="127.0.0.1"
     local addr="${host}:${port}"
 
     export OLLAMA_HOST="$addr"
-    echo "💬 Running aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model '$model' --prompt uses_dl --ollama '$addr'..."
-    aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model ${model} --prompt uses_dl --ollama ${addr} | tee $LOGFILE
+
+    echo "💬 Running aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model '$AIUS_MODEL' --prompt '$AIUS_PROMPT' --ollama '$addr' ..."
+
+    aius run-llm-prompt-engineering \
+        --db /home/nsynovic/aius_10-11-25.sqlite3 \
+        --model ${AIUS_MODEL} \
+        --prompt ${AIUS_PROMPT} \
+        --ollama ${addr}
 }
 
 
@@ -142,16 +154,8 @@ main() {
 
     echo "Checking ps to see if it is really running"
     ps auxww | grep ollama
-    # Example usage:
-    NUMBER=$PBS_ARRAY_INDEX
 
-    if [[ $NUMBER -eq 0 ]]; then
-        run_aius "phi3:14b" "$port"
-    elif [[ $NUMBER -eq 1 ]]; then
-        run_aius "gpt-oss:20b" "$port"
-    else
-        run_aius "magistral:24b" "$port"
-    fi
+    run_aius "$port"
 }
 
 unset http_proxy
