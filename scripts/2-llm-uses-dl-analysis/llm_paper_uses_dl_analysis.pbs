@@ -12,15 +12,15 @@
 
 # Set logging variables
 FQJI=job-$(echo $PBS_JOBID | cut -d'[' -f1)-$PBS_JOBNAME # Fully qualified job id
-LOGFILE=log-${PBS_ARRAY_INDEX}.logging
-OLLAMA_LOGFILE=ollama-${PBS_ARRAY_INDEX}.log
-JOB_UNIQUE_DIR="${FQJI}/${PBS_ARRAY_INDEX}"
+LOGFILE=log-${AIUS_INDEX}.logging
+JOB_UNIQUE_DIR="${FQJI}/${AIUS_INDEX}"
 
 
 # Set Ollama variables
 PATH=$PATH:/eagle/EVITA/ollama/bin
 OLLAMA_PORT_START=11400
 OLLAMA_PORT_END=11500
+OLLAMA_LOGFILE=ollama-${AIUS_INDEX}.log
 export OLLAMA_MODELS=/eagle/EVITA/ollama-models
 
 # Set AIUS input variables
