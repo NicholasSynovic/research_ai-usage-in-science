@@ -1,1 +1,3 @@
-qsub script to run llm prompt engineering analysis
+# Run LLM Uses DL Analysis
+
+> Run this on ALCF Polaris

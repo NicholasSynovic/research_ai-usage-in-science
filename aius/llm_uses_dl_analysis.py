@@ -97,7 +97,8 @@ class LLMUsesDL:
             max=self.paper_count,
         ) as bar:
             row: Series
-            for _, row in iterator:
+            for idx, row in iterator:
+                print(idx)
                 data["model"].append(self.model)
                 data["system_prompt_tag"].append(self.prompt_tag)
                 data["plos_prompt_enineering_paper_id"].append(row["_id"])
