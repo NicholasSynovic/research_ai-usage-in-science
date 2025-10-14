@@ -21,15 +21,16 @@ PROMPTS=(
   "uses_ptms"
 )
 
+
 # Main submission loop
 for MODEL in "${MODELS[@]}"; do
-  for PROMPT in $PROMPTS; do
+  for PROMPT in "${PROMPTS[@]}"; do
     # Throttle logic
     while true; do
       CURRENT_JOBS=$(qstat | grep "$USER_ID" | wc -l)
       if (( CURRENT_JOBS < MAX_JOBS )); then
         echo "[$(date)] Submitting: qsub -v AIUS_MODEL=\"$MODEL\",AIUS_PROMPT=\"$PROMPT\" $PBS_SCRIPT"
-        qsub -v AIUS_MODEL="$MODEL",AIUS_INDEX="$PROMPT" "$PBS_SCRIPT"
+        qsub -v AIUS_MODEL="$MODEL",AIUS_PROMPT="$PROMPT" "$PBS_SCRIPT"
         break
       else
         echo "[$(date)] $CURRENT_JOBS jobs active. Waiting for slots..."
