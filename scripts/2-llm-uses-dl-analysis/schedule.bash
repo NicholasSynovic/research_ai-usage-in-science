@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 # NOTE: Stide = 20, so:
 # the minimum AIUS_INDEX == 1, and
