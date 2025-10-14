@@ -14,7 +14,7 @@ PROGRAM_DESCRIPTION: str = "Identify AI usage in Natural Science research papers
 PROGRAM_EPILOG: str = "Copyright 2025 (C) Nicholas M. Synovic"
 JOURNALS: DataFrame = DataFrame(data={"journal": ["Nature", "PLOS", "Science"]})
 GET_TIMEOUT: int = 60
-POST_TIMEOUT: int = 60
+POST_TIMEOUT: int = 36000
 YEAR_LIST: list[int] = list(range(2014, 2025))
 YEARS: DataFrame = DataFrame(data={"year": YEAR_LIST})
 
