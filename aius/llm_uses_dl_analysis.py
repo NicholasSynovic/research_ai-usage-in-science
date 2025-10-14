@@ -98,7 +98,6 @@ class LLMUsesDL:
         ) as bar:
             row: Series
             for idx, row in iterator:
-                print(idx)
                 data["model"].append(self.model)
                 data["system_prompt_tag"].append(self.prompt_tag)
                 data["plos_prompt_enineering_paper_id"].append(row["_id"])
