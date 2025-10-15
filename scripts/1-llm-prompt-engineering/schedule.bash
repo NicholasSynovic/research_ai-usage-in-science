@@ -11,15 +11,16 @@ PBS_SCRIPT="llm_prompt_engineering.pbs"
 # Models to process
 MODELS=(
   "gpt-oss:20b"
-#   "magistral:24b"
-#   "granite4:small-h"
-#   "phi3:14b"
+  "magistral:24b"
+  "granite4:small-h"
+  "phi3:14b"
 )
 
 # Prompts
 PROMPTS=(
   "uses_dl"
   "uses_ptms"
+  "identify_ptms"
 )
 
 
