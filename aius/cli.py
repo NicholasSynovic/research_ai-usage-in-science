@@ -312,7 +312,12 @@ class CLI:
             "--model",
             type=str,
             required=True,
-            choices=["phi3:14b", "gpt-oss:20b", "magistral:24b"],
+            choices=[
+                "phi3:14b",
+                "gpt-oss:20b",
+                "magistral:24b",
+                "granite4:small-h",
+            ],
             help="LLM to run prompt engineering analysis on",
             dest="run_llm_prompt_engineering.model",
         )
@@ -322,7 +327,7 @@ class CLI:
             "--prompt",
             type=str,
             required=True,
-            choices=["uses_dl", "uses_ptms"],
+            choices=["uses_dl", "uses_ptms", "identify_ptms"],
             help="Prompt to use",
             dest="run_llm_prompt_engineering.prompt",
         )

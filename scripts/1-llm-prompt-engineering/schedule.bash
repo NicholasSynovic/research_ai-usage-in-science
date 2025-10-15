@@ -1,6 +1,6 @@
 #!/bin/bash
 # Throttled PBS job submission script
-# Submits jobs for multiple models and index values (0–19)
+# Submits jobs for multiple models and prompts
 # Keeps at most 10 jobs in the queue/running at once
 
 MAX_JOBS=10
@@ -11,8 +11,9 @@ PBS_SCRIPT="llm_prompt_engineering.pbs"
 # Models to process
 MODELS=(
   "gpt-oss:20b"
-  "magistral:24b"
-  "phi3:14b"
+#   "magistral:24b"
+#   "granite4:small-h"
+#   "phi3:14b"
 )
 
 # Prompts
