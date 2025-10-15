@@ -30,7 +30,9 @@ class LLMPromptEngineering:
             con=db.engine,
         )
         self.prompt_tag: str = prompt_tag
-        self.prompt: str = prompts_df[prompts_df["tag"] == self.prompt_tag]["prompt"][0]
+        self.prompt = prompts_df[prompts_df["tag"] == self.prompt_tag][
+            "prompt"
+        ].reset_index(drop=True)[0]
 
         # Get prompt engineering papers
         prompt_engineering_paper_query: str = """
