@@ -3,7 +3,7 @@ from typing import Literal
 from zipfile import ZipFile
 
 import pandas as pd
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, ResultSet, Tag
 from progress.bar import Bar
 from tiktoken import Encoding, encoding_for_model
 
@@ -73,7 +73,8 @@ class RetrieveContent:
                         # Add prettified JATS XML to the data structure
                         data["raw_jats_xml"].append(
                             BeautifulSoup(
-                                markup=fp.read().decode(), features="lxml-xml"
+                                markup=fp.read().decode().strip("\n"),
+                                features="lxml-xml",
                             ).prettify()
                         )
 
@@ -106,6 +107,36 @@ class RetrieveContent:
                 # Remove citations
                 back_tag: Tag = soup.find(name="back")
                 back_tag.decompose()
+
+                # Remove citations in the prose
+                citation_tags: ResultSet[Tag] = soup.find_all(name="xref")
+                citation_tag: Tag
+                for citation_tag in citation_tags:
+                    citation_tag.decompose()
+
+                # Remove figures in the prose
+                figure_tags: ResultSet[Tag] = soup.find_all(name="fig")
+                figure_tag: Tag
+                for figure_tag in figure_tags:
+                    figure_tag.decompose()
+
+                # Remove inline formulas in the prose
+                figure_tags: ResultSet[Tag] = soup.find_all(name="inline-formula")
+                figure_tag: Tag
+                for figure_tag in figure_tags:
+                    figure_tag.decompose()
+
+                # Remove display formulas in the prose
+                figure_tags: ResultSet[Tag] = soup.find_all(name="disp-formula")
+                figure_tag: Tag
+                for figure_tag in figure_tags:
+                    figure_tag.decompose()
+
+                # Remove display formulas in the prose
+                figure_tags: ResultSet[Tag] = soup.find_all(name="disp-quote")
+                figure_tag: Tag
+                for figure_tag in figure_tags:
+                    figure_tag.decompose()
 
                 # Append prettified content to list
                 data.append(soup.prettify())
