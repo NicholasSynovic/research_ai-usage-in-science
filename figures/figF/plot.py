@@ -6,29 +6,29 @@ import pandas
 import seaborn as sns
 from pandas import DataFrame
 
+from aius.db import DB
 
-def load_parquet(fp: Path) -> DataFrame:
-    # Read file contents from Apache Parquet file
-    return pandas.read_parquet(path=fp, engine="pyarrow")
+
+def get_data(db: DB) -> DataFrame:
+    sql_query: str = """
+    SELECT
+        plos_natural_science_paper_content.raw_jats_xml_token_count,
+        plos_natural_science_paper_content.formatted_jats_xml_token_count,
+        plos_natural_science_paper_content.raw_md_token_count,
+        plos_natural_science_paper_content.formatted_md_token_count
+    FROM plos_natural_science_paper_content;
+    """
+
+    return pandas.read_sql_query(sql=sql_query, con=db.engine)
 
 
 def preprocess_data(df: DataFrame) -> DataFrame:
-    df = df.drop(
-        columns=[
-            "raw_jats_xml",
-            "formatted_jats_xml",
-            "raw_markdown",
-            "formatted_markdown",
-            "dois",
-        ]
-    )
-
     df = df.rename(
         columns={
-            "raw_jats_xml_tokens": "JATS XML",
-            "formatted_jats_xml_tokens": "Formatted JATS XML",
-            "raw_markdown_tokens": "Markdown",
-            "formatted_markdown_tokens": "Formatted Markdown",
+            "raw_jats_xml_token_count": "JATS XML",
+            "formatted_jats_xml_token_count": "Formatted JATS XML",
+            "raw_md_token_count": "Markdown",
+            "formatted_md_token_count": "Formatted Markdown",
         }
     )
 
@@ -38,10 +38,51 @@ def preprocess_data(df: DataFrame) -> DataFrame:
 
 def plot(df: DataFrame) -> None:
     sns.boxplot(data=df, showfliers=False)
-    plt.suptitle("Size Of Document Types By Token Count")
-    plt.title(label="Tokens computed with `tiktoken/gpt-4`")
+    plt.title(label="Tokens per Document Format")
     plt.xlabel(xlabel="Document Format")
     plt.ylabel(ylabel="Token Count")
+
+    # Compute summary stats
+    summary = df.agg(
+        [
+            "min",
+            "median",
+            lambda s: s.quantile(0.75) + 1.5 * (s.quantile(0.75) - s.quantile(0.25)),
+        ]
+    ).T
+    summary.columns = ["min", "median", "q3"]
+
+    # Annotate each box
+    for i, (col, stats) in enumerate(summary.iterrows()):
+        min_val, median_val, q3_val = stats["min"], stats["median"], stats["q3"]
+
+        plt.text(
+            i,
+            q3_val,
+            f"{int(q3_val):,}",
+            ha="center",
+            va="bottom",
+            fontsize=8,
+            color="black",
+        )
+        plt.text(
+            i,
+            median_val + 2000,
+            f"{int(median_val):,}",
+            ha="center",
+            va="center",
+            fontsize=8,
+            color="white",
+        )
+        plt.text(
+            i,
+            min_val - 2000,
+            f"{int(min_val):,}",
+            ha="center",
+            va="top",
+            fontsize=8,
+            color="black",
+        )
 
     plt.tight_layout()
     plt.savefig("figF.pdf")
@@ -49,14 +90,13 @@ def plot(df: DataFrame) -> None:
 
 @click.command()
 @click.option(
-    "-i",
-    "--input-fp",
-    help="Path to dataset file created scripts/2-create-llm-analysis-datasets",
+    "--db-path",
+    help="Path to database",
     type=lambda x: Path(x).resolve(),
     required=True,
 )
-def main(input_fp: Path) -> None:
-    df: DataFrame = load_parquet(fp=input_fp)
+def main(db_path: Path) -> None:
+    df: DataFrame = get_data(db=DB(db_path=db_path))
 
     df = preprocess_data(df=df)
 

@@ -226,7 +226,7 @@ Reusing pre-trained deep learning models can take many forms, but the following 
 
 ```json
 {
-    "conceptual_reuse": ["Tensorflow", "PyTorch", "JAX", "FLAX", "reproduce"", "reimplementation", "recreate"],
+    "conceptual_reuse": ["Tensorflow", "PyTorch", "JAX", "FLAX", "reproduce", "reimplementation", "recreate"],
     "adaptation_reuse": ["fine-tuning", "knowledge distillation", "parameter efficient fine tuning (PEFT)", "low-rank adaptation (LoRA)"],
     "deployment_reuse": ["vLLM", "inference server", "quantize", "ONNX", "MLIR", "LiteRT", "ExecuTorch", "TorchScript"],
 }
