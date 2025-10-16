@@ -32,7 +32,7 @@ SIZES=(
 # Main submission loop
 for MODEL in "${MODELS[@]}"; do
     for PROMPT in "${PROMPTS[@]}"; do
-        for SIZE in "${[SIZES[@]}"; do
+        for SIZE in "${SIZES[@]}"; do
             # Throttle logic
             while true; do
                 CURRENT_JOBS=$(qstat | grep "$USER_ID" | wc -l)
