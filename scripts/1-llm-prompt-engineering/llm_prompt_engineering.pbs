@@ -131,7 +131,7 @@ run_aius() {
     echo ${OLLAMA_HOST} | tee $LOGFILE
 
     aius run-llm-prompt-engineering \
-        --db /home/nsynovic/aius_10-11-25.sqlite3 \
+        --db /home/nsynovic/aius.sqlite3 \
         --model ${AIUS_MODEL} \
         --prompt ${AIUS_PROMPT} \
         --ollama ${addr} \
