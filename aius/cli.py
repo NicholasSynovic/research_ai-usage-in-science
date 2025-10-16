@@ -25,18 +25,6 @@ class CLI:
         subparsers (_SubParsersAction[ArgumentParser]): Subparsers for
             organizing different CLI commands.
 
-    Methods:
-        add_search(): Configures and adds a search sub-parser for journals to
-            find papers by keywords.
-        add_identify_papers(): Configures and adds an 'identify-documents'
-            sub-parser for identifying documents from journal searches.
-        add_openalex(): Configures and adds an 'openalex' sub-parser for
-            retrieving document metadata from OpenAlex.
-        add_document_filter(): Configures and adds a 'filter' sub-parser to
-            filter documents by Natural Science category.
-        parse(): Parses command line arguments into Namespace objects.
-
-
     """
 
     def __init__(self) -> None:
@@ -64,16 +52,30 @@ class CLI:
         )
 
         # Create sub-parsers
-        self.add_search_plos()  # Search PLOS for papers
-        self.add_identify_papers()  # Extract documents from journal search
-        self.add_openalex()  # Get document metadata from OpenAlex
-        self.add_document_filter()  # Filter for Natural Science documents
-        self.add_content_retriever()
+        self.add_load_llm_prompts()
+
+        # Queries PLOS
+        self.add_search_plos()
+
+        # Organizes data; all commands related to papers come after this one
+        self.add_identify_papers()
+
+        # These load CSV files that reference papers by DOI
         self.add_load_pilot_study()
         self.add_load_author_agreement()
-        self.add_load_llm_prompts()
         self.add_load_llm_prompt_engineering_papers()
-        self.add_run_llm_prompt_engineering()
+
+        # Query OpenAlex
+        self.add_openalex()
+
+        # Identify Natural Science documents
+        self.add_document_filter()
+
+        # Load data from all_of_plos.zip and `pandoc`
+        self.add_content_retriever()
+
+        #
+        self.add_llm_prompt_engineering()
         self.add_run_llm_uses_dl_analysis()
 
         # Add version argument
@@ -82,6 +84,23 @@ class CLI:
             "--version",
             action="version",
             version=version(distribution_name=aius.MODULE_NAME),
+        )
+
+    def add_load_llm_prompts(self) -> None:
+        llm_prompt_parser: ArgumentParser = self.subparsers.add_parser(
+            name="load-llm-prompts",
+            help="Load LLM prompts into the database",
+            description="Step 0",
+        )
+
+        llm_prompt_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_llm_prompts.db",
         )
 
     def add_search_plos(self) -> None:
@@ -120,12 +139,84 @@ class CLI:
             dest="identify_documents.db",
         )
 
+    def add_load_pilot_study(self) -> None:
+        """Add a sub-parser to retrieve PLOS Natural Science paper content."""
+        load_pilot_study_parser: ArgumentParser = self.subparsers.add_parser(
+            name="load-pilot-study",
+            help="Load pilot study dataset",
+            description="Step 3",
+        )
+
+        load_pilot_study_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_pilot_study.db",
+        )
+        load_pilot_study_parser.add_argument(
+            "-i",
+            "--input-fp",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to pilot study CSV file",
+            dest="load_pilot_study.fp",
+        )
+
+    def add_load_author_agreement(self) -> None:
+        author_agreement_parser: ArgumentParser = self.subparsers.add_parser(
+            name="load-author-agreement",
+            help="Load author agreement dataset",
+            description="Step 4",
+        )
+
+        author_agreement_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_author_agreement.db",
+        )
+        author_agreement_parser.add_argument(
+            "-i",
+            "--input-fp",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to author agreement CSV file",
+            dest="load_author_agreement.fp",
+        )
+
+    def add_load_llm_prompt_engineering_papers(self) -> None:
+        llm_prompt_engineering_papers_parser: ArgumentParser = (
+            self.subparsers.add_parser(
+                name="load-llm-prompt-engineering-papers",
+                help="Load LLM prompt engineering papers into the database",
+                description="Step 5",
+            )
+        )
+
+        llm_prompt_engineering_papers_parser.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="load_llm_prompt_prompt_engineering_papers.db",
+        )
+
     def add_openalex(self) -> None:
         """Configure a sub-parser for retrieving metadata from OpenAlex."""
         openalex_parser: ArgumentParser = self.subparsers.add_parser(
             name="openalex",
             help="Get document metadata from OpenAlex",
-            description="Step 3",
+            description="Step 6",
         )
 
         openalex_parser.add_argument(
@@ -152,7 +243,7 @@ class CLI:
         document_filter_parser: ArgumentParser = self.subparsers.add_parser(
             name="filter-documents",
             help="Filter for Natural Science documents",
-            description="Step 4",
+            description="Step 7",
         )
 
         document_filter_parser.add_argument(
@@ -170,7 +261,7 @@ class CLI:
         content_retriever_parser: ArgumentParser = self.subparsers.add_parser(
             name="retrieve-content",
             help="Retrieve content from PLOS Natural Science documents",
-            description="Step 5",
+            description="Step 8",
         )
 
         content_retriever_parser.add_argument(
@@ -201,100 +292,11 @@ class CLI:
             dest="content_retriever.pandoc_url",
         )
 
-    def add_load_pilot_study(self) -> None:
-        """Add a sub-parser to retrieve PLOS Natural Science paper content."""
-        load_pilot_study_parser: ArgumentParser = self.subparsers.add_parser(
-            name="load-pilot-study",
-            help="Load pilot study dataset",
-            description="Step 6",
-        )
-
-        load_pilot_study_parser.add_argument(
-            "-d",
-            "--db",
-            nargs=1,
-            default=self.database_path,
-            type=lambda x: Path(x).resolve(),
-            help=self.db_help,
-            dest="load_pilot_study.db",
-        )
-        load_pilot_study_parser.add_argument(
-            "-i",
-            "--input-fp",
-            nargs=1,
-            required=True,
-            type=lambda x: Path(x).resolve(),
-            help="Path to pilot study CSV file",
-            dest="load_pilot_study.fp",
-        )
-
-    def add_load_author_agreement(self) -> None:
-        author_agreement_parser: ArgumentParser = self.subparsers.add_parser(
-            name="load-author-agreement",
-            help="Load author agreement dataset",
-            description="Step 7",
-        )
-
-        author_agreement_parser.add_argument(
-            "-d",
-            "--db",
-            nargs=1,
-            default=self.database_path,
-            type=lambda x: Path(x).resolve(),
-            help=self.db_help,
-            dest="load_author_agreement.db",
-        )
-        author_agreement_parser.add_argument(
-            "-i",
-            "--input-fp",
-            nargs=1,
-            required=True,
-            type=lambda x: Path(x).resolve(),
-            help="Path to author agreement CSV file",
-            dest="load_author_agreement.fp",
-        )
-
-    def add_load_llm_prompts(self) -> None:
-        llm_prompt_parser: ArgumentParser = self.subparsers.add_parser(
-            name="load-llm-prompts",
-            help="Load LLM prompts into the database",
-            description="Step 8",
-        )
-
-        llm_prompt_parser.add_argument(
-            "-d",
-            "--db",
-            nargs=1,
-            default=self.database_path,
-            type=lambda x: Path(x).resolve(),
-            help=self.db_help,
-            dest="load_llm_prompts.db",
-        )
-
-    def add_load_llm_prompt_engineering_papers(self) -> None:
-        llm_prompt_engineering_papers_parser: ArgumentParser = (
-            self.subparsers.add_parser(
-                name="load-llm-prompt-engineering-papers",
-                help="Load LLM prompt engineering papers into the database",
-                description="Step 9",
-            )
-        )
-
-        llm_prompt_engineering_papers_parser.add_argument(
-            "-d",
-            "--db",
-            nargs=1,
-            default=self.database_path,
-            type=lambda x: Path(x).resolve(),
-            help=self.db_help,
-            dest="load_llm_prompt_prompt_engineering_papers.db",
-        )
-
-    def add_run_llm_prompt_engineering(self) -> None:
+    def add_llm_prompt_engineering(self) -> None:
         llm_prompt_engineering_parser: ArgumentParser = self.subparsers.add_parser(
-            name="run-llm-prompt-engineering",
+            name="llm-prompt-engineering",
             help="Run LLM prompt engineering analysis",
-            description="Step 10",
+            description="Step 9",
         )
 
         llm_prompt_engineering_parser.add_argument(
@@ -316,7 +318,6 @@ class CLI:
                 "phi3:14b",
                 "gpt-oss:20b",
                 "magistral:24b",
-                "granite4:small-h",
             ],
             help="LLM to run prompt engineering analysis on",
             dest="run_llm_prompt_engineering.model",

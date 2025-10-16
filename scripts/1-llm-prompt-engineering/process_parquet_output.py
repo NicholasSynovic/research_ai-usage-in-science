@@ -99,6 +99,9 @@ def resolve_json(json_str: str, model_str: str) -> dict:
 def main(input_fp: Path, model: str) -> None:
     df: DataFrame = pandas.read_parquet(path=input_fp, engine="pyarrow")
 
+    print(df.shape)
+    quit()
+
     df["response_json"] = df["response_text"].apply(json.loads)
 
     # print(df["response_json"][0])

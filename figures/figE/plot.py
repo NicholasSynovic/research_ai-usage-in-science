@@ -124,7 +124,7 @@ def plot(df: DataFrame) -> None:
     "--input-fp",
     required=False,
     type=lambda x: Path(x).resolve(),
-    default=Path"openalex_field_works.parquet",
+    default=Path("openalex_field_works.parquet"),
     help="Path to OpenAlex Field Works Apache Parquet file",
 )
 def main(input_fp: Path) -> None:
