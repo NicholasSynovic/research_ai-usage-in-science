@@ -23,23 +23,30 @@ PROMPTS=(
   "identify_ptms"
 )
 
+# Dataset size
+SIZES=(
+  "small"
+  "large"
+)
 
 # Main submission loop
 for MODEL in "${MODELS[@]}"; do
-  for PROMPT in "${PROMPTS[@]}"; do
-    # Throttle logic
-    while true; do
-      CURRENT_JOBS=$(qstat | grep "$USER_ID" | wc -l)
-      if (( CURRENT_JOBS < MAX_JOBS )); then
-        echo "[$(date)] Submitting: qsub -v AIUS_MODEL=\"$MODEL\",AIUS_PROMPT=\"$PROMPT\" $PBS_SCRIPT"
-        qsub -v AIUS_MODEL="$MODEL",AIUS_PROMPT="$PROMPT" "$PBS_SCRIPT"
-        break
-      else
-        echo "[$(date)] $CURRENT_JOBS jobs active. Waiting for slots..."
-        sleep "$POLL_INTERVAL"
-      fi
+    for PROMPT in "${PROMPTS[@]}"; do
+        for SIZE in "${[SIZES[@]}"; do
+            # Throttle logic
+            while true; do
+                CURRENT_JOBS=$(qstat | grep "$USER_ID" | wc -l)
+                if (( CURRENT_JOBS < MAX_JOBS )); then
+                    echo "[$(date)] Submitting: qsub -v AIUS_MODEL=\"$MODEL\",AIUS_PROMPT=\"$PROMPT\",AIUS_SIZE=\"$SIZE\" $PBS_SCRIPT"
+                    qsub -v AIUS_MODEL="$MODEL",AIUS_PROMPT="$PROMPT",AIUS_SIZE="$SIZE" "$PBS_SCRIPT"
+                    break
+                else
+                    echo "[$(date)] $CURRENT_JOBS jobs active. Waiting for slots..."
+                    sleep "$POLL_INTERVAL"
+                fi
+            done
+        done
     done
-  done
 done
 
 echo "[$(date)] ✅ All jobs submitted successfully."

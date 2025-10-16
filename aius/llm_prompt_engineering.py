@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 import pandas
 from pandas import DataFrame, Series
@@ -16,43 +17,90 @@ class LLMPromptEngineering:
         prompt_tag: str,
         model: str,
         ollama_uri: str = "localhost:11434",
+        dataset_size: Literal["small", "large"] = "small",
     ) -> None:
-        # Global variables
+        # DB connection
+        self.db: DB = db
+
+        # Ensure proper naming of the Ollama model
         self.model: str = model.replace("'", "").replace('"', "")
+
+        # Create Ollama API endpoint
         self.ollama_uri: str = f"http://{ollama_uri}/api/generate"
+
+        # Resolve path to output parquet file
         self.output_path: Path = Path(
             f"{model.replace(':', '-')}_{prompt_tag}.parquet"
         ).resolve()
 
+        # LLM prompt tag and prompt
+        self.prompt_tag: str = prompt_tag.lower()
+        self.prompt = self.get_prompt_from_db()
+
+        # Get the paper content, number of papers, and maximum tokens of the
+        # content from the database given the dataset size
+        self.papers: DataFrame
+        self.paper_count: int
+        self.max_tokens: int
+        self.papers, self.paper_count, self.max_tokens = self.get_paper_content(
+            dataset_size=dataset_size,
+        )
+
+        # Run the analysis and save to an output file
+        self.run()
+
+    def get_prompt_from_db(self) -> str:
         # Get prompt from the database
         prompts_df: DataFrame = pandas.read_sql_table(
             table_name="llm_prompts",
-            con=db.engine,
+            con=self.db.engine,
         )
-        self.prompt_tag: str = prompt_tag
-        self.prompt = prompts_df[prompts_df["tag"] == self.prompt_tag][
-            "prompt"
-        ].reset_index(drop=True)[0]
 
-        # Get prompt engineering papers
-        prompt_engineering_paper_query: str = """
-        SELECT plpep.*, pnspc.formatted_md, pnspc.formatted_md_token_count
-        FROM plos_llm_prompt_engineering_papers plpep
-        JOIN plos_natural_science_paper_content pnspc
-        ON pnspc.plos_paper_id = plpep.plos_paper_id;
+        return prompts_df[prompts_df["tag"] == self.prompt_tag]["prompt"].reset_index(
+            drop=True
+        )[0]
+
+    def get_paper_content(
+        self,
+        dataset_size: Literal["small", "large"],
+    ) -> tuple[DataFrame, int, int]:
+        # Identify which table to source `plos_paper_id` from
+        table_name: str
+        match dataset_size:
+            case "small":
+                table_name = "plos_llm_prompt_engineering_papers"
+            case "large":
+                table_name = "plos_author_agreement_papers"
+
+        # Query to get the necessary data
+        db_query: str = f"""
+        SELECT
+            source.*,
+            pnspc.formatted_md,
+            pnspc.formatted_md_token_count
+        FROM
+            {table_name} source
+        JOIN
+            plos_natural_science_paper_content pnspc
+        ON
+            pnspc.plos_paper_id = source.plos_paper_id;
         """
-        self.papers: DataFrame = pandas.read_sql_query(
-            sql=prompt_engineering_paper_query,
-            con=db.engine,
+
+        # Get the papers from the database
+        df: DataFrame = pandas.read_sql_query(
+            sql=db_query,
+            con=self.db.engine,
         )
-        self.paper_count: int = self.papers.shape[0]
+
+        # Count the total number of papers returned
+        paper_count: int = df.shape[0]
 
         # Get the max number of tokens to instantiate the model to use
-        self.max_tokens: int = (
-            int(self.papers["formatted_md_token_count"].max()) + 10000
-        )
+        max_tokens: int = int(df["formatted_md_token_count"].max()) + 10000
 
-    def run(self) -> None:
+        return (df, paper_count, max_tokens)
+
+    def run(self) -> DataFrame:
         # Data structure to store model responses
         data: dict[str, list] = {
             "model": [],

@@ -254,14 +254,13 @@ def main() -> None:  # noqa: PLR0914
             )
 
         case "run_llm_prompt_engineering":
-            lpe: LLMPromptEngineering = LLMPromptEngineering(
+            LLMPromptEngineering(
                 db=db,
                 model=args[f"{subparser}.model"],
                 prompt_tag=args[f"{subparser}.prompt"],
                 ollama_uri=args[f"{subparser}.ollama"][0],
+                dataset_size=args[f"{subparser}.dataset_size"],
             )
-
-            lpe.run()
 
         case "run_llm_uses_dl_analysis":
             lul: LLMUsesDL = LLMUsesDL(

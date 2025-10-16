@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #PBS -l select=2
-#PBS -l walltime=1:00:00
+#PBS -l walltime=2:00:00
 #PBS -q by-gpu
 #PBS -A EVITA
 #PBS -l filesystems=home:eagle
@@ -24,7 +24,8 @@ export OLLAMA_MODELS=/eagle/EVITA/ollama-models
 
 # Set AIUS input variables
 # AIUS_MODEL="gpt-oss:20b"  # Set this via qsub -v AIUS_MODEL="",...
-# AIUS_PROMPT="uses_dl"  # # Set this via qsub -v AIUS_PROMPT="",...
+# AIUS_PROMPT="uses_dl"  # Set this via qsub -v AIUS_PROMPT="",...
+# AIUS_SIZE="small" # Set this via qsub -v AIUS_SIZE="",...
 
 
 # Load necessary module files
@@ -127,13 +128,14 @@ run_aius() {
 
     export OLLAMA_HOST="$addr"
 
-    echo "💬 Running aius run-llm-prompt-engineering --db /home/nsynovic/aius_10-11-25.sqlite3 --model '$AIUS_MODEL' --prompt '$AIUS_PROMPT' --ollama '$addr' ..."
+    echo ${OLLAMA_HOST} | tee $LOGFILE
 
     aius run-llm-prompt-engineering \
         --db /home/nsynovic/aius_10-11-25.sqlite3 \
         --model ${AIUS_MODEL} \
         --prompt ${AIUS_PROMPT} \
-        --ollama ${addr}
+        --ollama ${addr} \
+        --dataset-size ${AIUS_SIZE}
 }
 
 
@@ -149,7 +151,7 @@ main() {
     fi
 
     pid=$(start_ollama_server "$port" "$sleep_time")
-    echo "Ollama Server running on port $port with PID $pid"
+    echo "Ollama Server running on port $port with PID $pid" | tee $LOGFILE
 
     echo "Checking ps to see if it is really running"
     ps auxww | grep ollama
@@ -160,8 +162,9 @@ main() {
 unset http_proxy
 unset https_proxy
 
+echo ${AIUS_MODEL} | tee $LOGFILE
+echo ${AIUS_PROMPT} | tee $LOGFILE
+echo ${AIUS_SIZE} | tee $LOGFILE
 echo "Starting inferencing" | tee $LOGFILE
-main "$@"
 
-echo "Is Ollama running?" | tee $LOGFILE
-ps auxww  | grep ^nsynovic | tee $LOGFILE
+main "$@"

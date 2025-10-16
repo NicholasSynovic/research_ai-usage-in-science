@@ -341,6 +341,15 @@ class CLI:
             dest="run_llm_prompt_engineering.ollama",
         )
 
+        llm_prompt_engineering_parser.add_argument(
+            "--dataset-size",
+            type=str,
+            required=True,
+            choices=["small", "large"],
+            help="Dataset size to run prompt engineering on",
+            dest="run_llm_prompt_engineering.dataset_size",
+        )
+
     def add_run_llm_uses_dl_analysis(self) -> None:
         llm_uses_dl_analysis: ArgumentParser = self.subparsers.add_parser(
             name="run-llm-uses-dl-analysis",
