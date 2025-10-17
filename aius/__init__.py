@@ -149,7 +149,7 @@ Pre-trained deep learning models have many different names. The following is a l
     "multimodal_models": ["ALIGN", "AltCLIP", "Aria", "AyaVision", "BLIP", "BLIP-2", "BridgeTower", "BROS", "Chameleon", "Chinese-CLIP", "CLIP", "CLIPSeg", "CLVP", "Cohere2Vision", "ColPali", "ColQwen2", "Data2Vec", "DeepseekVL", "DeepseekVLHybrid", "DePlot", "Donut", "EdgeTAM", "EdgeTamVideo", "Emu3", "Evolla", "FLAVA", "Florence2", "Gemma3", "Gemma3n", "GIT", "glm4v", "glm4v_moe", "GOT-OCR2", "GraniteVision", "Grounding", "DINO", "GroupViT", "IDEFICS", "Idefics2", "Idefics3", "InstructBLIP", "InstructBlipVideo", "InternVL", "Janus", "KOSMOS-2", "KOSMOS-2.5", "LayoutLM", "LayoutLMV2", "LayoutLMV3", "LayoutXLM", "LFM2-VL", "LiLT", "Llama4", "LLaVA", "LLaVA-NeXT", "LLaVa-NeXT-Video", "LLaVA-Onevision", "LXMERT", "MatCha", "MetaCLIP 2", "MGP-STR", "Mistral3", "mllama", "MM Grounding DINO", "Nougat", "OmDet-Turbo", "OneFormer", "Ovis2", "OWL-ViT", "OWLv2", "PaliGemma", "Perceiver", "PerceptionLM", "Phi4", "Multimodal", "Pix2Struct", "Pixtral", "Qwen2.5-Omni", "Qwen2.5-VL", "Qwen2Audio", "Qwen2VL", "Qwen3-Omni-MoE", "Qwen3VL", "Qwen3VLMoe", "ShieldGemma2", "SigLIP", "SigLIP2", "SmolLM3", "SmolVLM", "Speech Encoder Decoder Models", "TAPAS", "TrOCR", "TVLT", "TVP", "UDOP", "VideoLlava", "ViLT", "VipLlava", "Vision Encoder Decoder Models", "Vision Text Dual Encoder", "VisualBERT", "Voxtral", "X-CLIP"]
     "reinforcement_learning_models": ["Decision Transformer", "Trajectory Transformer"],
     "time_series_models": ["Autoformer", "Informer", "PatchTSMixer", "PatchTST", "Time Series Transformer", "TimesFM"],
-    "graph_models": ["Graphormer"]
+    "graph_models": ["Graphormer"],
     "edge_cases": ["SignalP", "DeepMedic", "SecretomeP", "DeepLoc", "DeepLocPro"]
 }
 ```
@@ -211,7 +211,8 @@ Pre-trained deep learning models have many different names. The following is a l
     "multimodal_models": ["ALIGN", "AltCLIP", "Aria", "AyaVision", "BLIP", "BLIP-2", "BridgeTower", "BROS", "Chameleon", "Chinese-CLIP", "CLIP", "CLIPSeg", "CLVP", "Cohere2Vision", "ColPali", "ColQwen2", "Data2Vec", "DeepseekVL", "DeepseekVLHybrid", "DePlot", "Donut", "EdgeTAM", "EdgeTamVideo", "Emu3", "Evolla", "FLAVA", "Florence2", "Gemma3", "Gemma3n", "GIT", "glm4v", "glm4v_moe", "GOT-OCR2", "GraniteVision", "Grounding", "DINO", "GroupViT", "IDEFICS", "Idefics2", "Idefics3", "InstructBLIP", "InstructBlipVideo", "InternVL", "Janus", "KOSMOS-2", "KOSMOS-2.5", "LayoutLM", "LayoutLMV2", "LayoutLMV3", "LayoutXLM", "LFM2-VL", "LiLT", "Llama4", "LLaVA", "LLaVA-NeXT", "LLaVa-NeXT-Video", "LLaVA-Onevision", "LXMERT", "MatCha", "MetaCLIP 2", "MGP-STR", "Mistral3", "mllama", "MM Grounding DINO", "Nougat", "OmDet-Turbo", "OneFormer", "Ovis2", "OWL-ViT", "OWLv2", "PaliGemma", "Perceiver", "PerceptionLM", "Phi4", "Multimodal", "Pix2Struct", "Pixtral", "Qwen2.5-Omni", "Qwen2.5-VL", "Qwen2Audio", "Qwen2VL", "Qwen3-Omni-MoE", "Qwen3VL", "Qwen3VLMoe", "ShieldGemma2", "SigLIP", "SigLIP2", "SmolLM3", "SmolVLM", "Speech Encoder Decoder Models", "TAPAS", "TrOCR", "TVLT", "TVP", "UDOP", "VideoLlava", "ViLT", "VipLlava", "Vision Encoder Decoder Models", "Vision Text Dual Encoder", "VisualBERT", "Voxtral", "X-CLIP"]
     "reinforcement_learning_models": ["Decision Transformer", "Trajectory Transformer"],
     "time_series_models": ["Autoformer", "Informer", "PatchTSMixer", "PatchTST", "Time Series Transformer", "TimesFM"],
-    "graph_models": ["Graphormer"]
+    "graph_models": ["Graphormer"],
+    "edge_cases": ["SignalP", "DeepMedic", "SecretomeP", "DeepLoc", "DeepLocPro"]
 }
 ```
 

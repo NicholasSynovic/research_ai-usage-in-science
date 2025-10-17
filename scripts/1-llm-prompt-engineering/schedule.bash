@@ -12,7 +12,6 @@ PBS_SCRIPT="llm_prompt_engineering.pbs"
 MODELS=(
   "gpt-oss:20b"
   "magistral:24b"
-  "granite4:small-h"
   "phi3:14b"
 )
 
