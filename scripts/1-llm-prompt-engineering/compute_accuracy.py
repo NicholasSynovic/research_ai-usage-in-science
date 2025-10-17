@@ -20,33 +20,47 @@ def read_json(fp: Path) -> dict:
         return json.load(fp=jfp)
 
 
-def compute_uses_dl(data: dict, aa_df: DataFrame) -> Series:
-    accuracy: list[bool] = []
+def compute_uses_dl(data: dict, aa_df: DataFrame) -> DataFrame:
+    df_data: dict[str, list[bool]] = {
+        "value": [],
+        "accuracy": [],
+    }
 
     row: Series
     for _, row in aa_df.iterrows():
         ground_truth: bool = row["uses_dl"]
         computed_value: bool = data[str(row["_id"])]["result"]
-        accuracy.append(computed_value == ground_truth)
 
-    return Series(data=accuracy)
+        # Get only the unique values
+        df_data["value"].append(computed_value)
+        df_data["accuracy"].append(computed_value == ground_truth)
+
+    return DataFrame(data=df_data)
 
 
-def compute_uses_ptms(data: dict, aa_df: DataFrame) -> Series:
-    accuracy: list[bool] = []
+def compute_uses_ptms(data: dict, aa_df: DataFrame) -> DataFrame:
+    df_data: dict[str, list[bool]] = {
+        "value": [],
+        "accuracy": [],
+    }
 
     row: Series
     for _, row in aa_df.iterrows():
         ground_truth: bool = row["uses_ptms"]
         computed_value: bool = data[str(row["_id"])]["result"]
-        accuracy.append(computed_value == ground_truth)
 
-    return Series(data=accuracy)
+        # Get only the unique values
+        df_data["value"].append(computed_value)
+        df_data["accuracy"].append(computed_value == ground_truth)
+
+    return DataFrame(data=df_data)
 
 
-def compute_identify_ptms(data: dict, aa_df: DataFrame) -> Series:
-    # Compute accuracy per model identified, not by if the object matches 1 to 1
-    accuracy: list[bool] = []
+def compute_identify_ptms(data: dict, aa_df: DataFrame) -> DataFrame:
+    df_data: dict[str, list[set | bool]] = {
+        "value": [],
+        "accuracy": [],
+    }
 
     row: Series
     for _, row in aa_df.iterrows():
@@ -75,25 +89,28 @@ def compute_identify_ptms(data: dict, aa_df: DataFrame) -> Series:
             .replace("inceptionresnetv2", "incresnetv2")
             for gt in ground_truth
         }
-        computed_values = {
-            cv.replace("deeploc 1.0", "deeploc")
-            .replace("-", "")
-            .replace("inception resnet", "incresnet")
-            .replace("inceptionresnetv2", "incresnetv2")
-            for cv in computed_values
-        }
+        computed_values_set: set[str] = set(
+            [
+                cv.replace("deeploc 1.0", "deeploc")
+                .replace("-", "")
+                .replace("inception resnet", "incresnet")
+                .replace("inceptionresnetv2", "incresnetv2")
+                for cv in computed_values
+            ]
+        )
 
         # Get only the unique values
-        computed_values: set[str] = set(computed_values)
+        df_data["value"].append(computed_values_set)
+        df_data["accuracy"].append(computed_values_set == ground_truth)
 
-        accuracy.append(computed_values == ground_truth)
-
-    return Series(data=accuracy)
+    return DataFrame(data=df_data)
 
 
-def compute_identify_reuse(data: dict, aa_df: DataFrame) -> Series:
-    # Compute accuracy per model identified, not by if the object matches 1 to 1
-    accuracy: list[bool] = []
+def compute_identify_reuse(data: dict, aa_df: DataFrame) -> DataFrame:
+    df_data: dict[str, list[list[str] | bool]] = {
+        "value": [],
+        "accuracy": [],
+    }
 
     row: Series
     for _, row in aa_df.iterrows():
@@ -127,9 +144,11 @@ def compute_identify_reuse(data: dict, aa_df: DataFrame) -> Series:
             except ValueError:
                 pass
 
-        accuracy.append(computed_values == ground_truth)
+        # Get only the unique values
+        df_data["value"].append(computed_values)
+        df_data["accuracy"].append(computed_values == ground_truth)
 
-    return Series(data=accuracy)
+    return DataFrame(data=df_data)
 
 
 @click.command()
@@ -170,20 +189,57 @@ def main(
     identify_ptms: Path,
     identify_reuse: Path,
 ) -> None:
+    # Connect to the database
     db: DB = DB(db_path=db_path)
 
+    # Load data from the database
     aa_df: DataFrame = load_author_agreement_data(db=db)
+
+    # Read in JSON files
     uses_dl_data: dict = read_json(fp=uses_dl)
     uses_ptms_data: dict = read_json(fp=uses_ptms)
     identify_ptms_data: dict = read_json(fp=identify_ptms)
     identify_reuse_data: dict = read_json(fp=identify_reuse)
 
-    udl: Series = compute_uses_dl(data=uses_dl_data, aa_df=aa_df)
-    uptms: Series = compute_uses_ptms(data=uses_ptms_data, aa_df=aa_df)
-    idptms: Series = compute_identify_ptms(data=identify_ptms_data, aa_df=aa_df)
-    idreuse: Series = compute_identify_reuse(data=identify_reuse_data, aa_df=aa_df)
+    # Compute uses_dl accuracy
+    uses_dl_df: DataFrame = compute_uses_dl(data=uses_dl_data, aa_df=aa_df)
+    print(
+        "0. Accuracy:",
+        uses_dl_df["accuracy"].sum() / uses_dl_df.shape[0] * 100,
+        "Truthy:",
+        uses_dl_df[uses_dl_df["value"] == True].shape[0],
+    )
 
-    print(idreuse.sum() / idreuse.shape[0])
+    # Computes uses_ptms accuracy
+    uses_ptms_df: DataFrame = compute_uses_ptms(data=uses_ptms_data, aa_df=aa_df)
+    print(
+        "1. Accuracy:",
+        uses_ptms_df["accuracy"].sum() / uses_ptms_df.shape[0] * 100,
+        "Truthy:",
+        uses_ptms_df[uses_ptms_df["value"] == True].shape[0],
+    )
+
+    # Computes identify_ptms accuracy
+    identify_ptms_df: DataFrame = compute_identify_ptms(
+        data=identify_ptms_data, aa_df=aa_df
+    )
+    print(
+        "2. Accuracy:",
+        identify_ptms_df["accuracy"].sum() / identify_ptms_df.shape[0] * 100,
+        "Truthy:",
+        identify_ptms_df[identify_ptms_df["value"] != set()].shape[0],
+    )
+
+    # Computes identify_reuse accuracy
+    identify_reuse_df: DataFrame = compute_identify_reuse(
+        data=identify_reuse_data, aa_df=aa_df
+    )
+    print(
+        "3. Accuracy:",
+        identify_reuse_df["accuracy"].sum() / identify_reuse_df.shape[0] * 100,
+        "Truthy:",
+        identify_reuse_df[identify_reuse_df["value"].str.len() != 0].shape[0],
+    )
 
 
 if __name__ == "__main__":
