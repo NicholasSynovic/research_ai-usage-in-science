@@ -86,7 +86,46 @@ def compute_identify_ptms(data: dict, aa_df: DataFrame) -> Series:
         # Get only the unique values
         computed_values: set[str] = set(computed_values)
 
-        print(ground_truth, computed_values, computed_values == ground_truth)
+        accuracy.append(computed_values == ground_truth)
+
+    return Series(data=accuracy)
+
+
+def compute_identify_reuse(data: dict, aa_df: DataFrame) -> Series:
+    # Compute accuracy per model identified, not by if the object matches 1 to 1
+    accuracy: list[bool] = []
+
+    row: Series
+    for _, row in aa_df.iterrows():
+        ground_truth: list[str] = sorted(
+            json.loads(s=row["ptm_name_reuse_type"])["reuse"]
+        )
+
+        computed_value_list: list[dict | None] = data[str(row["_id"])]
+
+        computed_values: list[str] = []
+        if len(computed_value_list) > 0:
+            computed_values = sorted(
+                [
+                    x["classification"].lower().strip("_reuse")
+                    for x in computed_value_list
+                ]
+            )
+
+            try:
+                computed_values.remove("")
+            except ValueError:
+                pass
+
+            try:
+                computed_values.remove("none")
+            except ValueError:
+                pass
+
+            try:
+                computed_values.remove("non")
+            except ValueError:
+                pass
 
         accuracy.append(computed_values == ground_truth)
 
@@ -118,11 +157,18 @@ def compute_identify_ptms(data: dict, aa_df: DataFrame) -> Series:
     type=lambda x: Path(x).resolve(),
     help="Path to identify_ptms JSON file",
 )
+@click.option(
+    "--identify-reuse",
+    required=True,
+    type=lambda x: Path(x).resolve(),
+    help="Path to identify_reuse JSON file",
+)
 def main(
     db_path: Path,
     uses_dl: Path,
     uses_ptms: Path,
     identify_ptms: Path,
+    identify_reuse: Path,
 ) -> None:
     db: DB = DB(db_path=db_path)
 
@@ -130,14 +176,14 @@ def main(
     uses_dl_data: dict = read_json(fp=uses_dl)
     uses_ptms_data: dict = read_json(fp=uses_ptms)
     identify_ptms_data: dict = read_json(fp=identify_ptms)
+    identify_reuse_data: dict = read_json(fp=identify_reuse)
 
     udl: Series = compute_uses_dl(data=uses_dl_data, aa_df=aa_df)
     uptms: Series = compute_uses_ptms(data=uses_ptms_data, aa_df=aa_df)
     idptms: Series = compute_identify_ptms(data=identify_ptms_data, aa_df=aa_df)
+    idreuse: Series = compute_identify_reuse(data=identify_reuse_data, aa_df=aa_df)
 
-    # print(aa_df["ptm_name_reuse_type"][0])
-
-    print(idptms.sum() / idptms.shape[0])
+    print(idreuse.sum() / idreuse.shape[0])
 
 
 if __name__ == "__main__":
