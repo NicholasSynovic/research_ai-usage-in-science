@@ -20,6 +20,7 @@ PROMPTS=(
   "uses_dl"
   "uses_ptms"
   "identify_ptms"
+  "identify_reuse"
 )
 
 # Dataset size

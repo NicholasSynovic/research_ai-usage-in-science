@@ -27,6 +27,7 @@ export OLLAMA_MODELS=/eagle/EVITA/ollama-models
 AIUS_STRIDE=20
 # AIUS_MODEL="gpt-oss:20b"  # Set this via qsub -v AIUS_MODEL="",...
 # AIUS_INDEX=0  # # Set this via qsub -v AIUS_INDEX="",...
+# AIUS_PROMPT="uses_dl"  # Set this via qsub -v AIUS_PROMPT="",...
 
 # Load necessary module files
 module use /soft/modulefiles
@@ -129,8 +130,8 @@ run_aius() {
 
     export OLLAMA_HOST="$addr"
 
-    aius run-llm-uses-dl-analysis \
-    --db /home/nsynovic/aius_10-11-25.sqlite3 \
+    aius llm-analysis \
+    --db /home/nsynovic/aius.sqlite3 \
     --model ${AIUS_MODEL} \
     --prompt uses_dl \
     --ollama ${addr} \

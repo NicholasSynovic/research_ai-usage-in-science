@@ -351,9 +351,9 @@ class CLI:
             dest="run_llm_prompt_engineering.dataset_size",
         )
 
-    def add_run_llm_uses_dl_analysis(self) -> None:
+    def add_run_llm_analysis(self) -> None:
         llm_uses_dl_analysis: ArgumentParser = self.subparsers.add_parser(
-            name="run-llm-uses-dl-analysis",
+            name="llm-analysis",
             help="Run LLM uses DL  analysis",
             description="Step 11",
         )
@@ -383,7 +383,7 @@ class CLI:
             "--prompt",
             type=str,
             required=True,
-            choices=["uses_dl"],
+            choices=["uses_dl", "uses_ptms", "identify_ptms", "identify_reuse"],
             help="Prompt to use",
             dest="run_llm_uses_dl_analysis.prompt",
         )
