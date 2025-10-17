@@ -72,12 +72,14 @@ def compute_identify_ptms(data: dict, aa_df: DataFrame) -> Series:
             gt.replace("deeploc 1.0", "deeploc")
             .replace("-", "")
             .replace("inception resnet", "incresnet")
+            .replace("inceptionresnetv2", "incresnetv2")
             for gt in ground_truth
         }
         computed_values = {
             cv.replace("deeploc 1.0", "deeploc")
             .replace("-", "")
             .replace("inception resnet", "incresnet")
+            .replace("inceptionresnetv2", "incresnetv2")
             for cv in computed_values
         }
 

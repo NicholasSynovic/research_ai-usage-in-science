@@ -76,7 +76,7 @@ class CLI:
 
         #
         self.add_llm_prompt_engineering()
-        self.add_run_llm_uses_dl_analysis()
+        self.add_run_llm_analysis()
 
         # Add version argument
         self.parser.add_argument(
