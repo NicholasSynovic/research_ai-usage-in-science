@@ -6,6 +6,7 @@ from typing import List
 import click
 import pandas
 from pandas import DataFrame
+from pyarrow import ArrowInvalid
 from pydantic import BaseModel, RootModel, ValidationError
 
 
@@ -99,8 +100,7 @@ def resolve_json(json_str: str, model_str: str) -> dict:
 def main(input_fp: Path, model: str) -> None:
     df: DataFrame = pandas.read_parquet(path=input_fp, engine="pyarrow")
 
-    print(df.shape)
-    quit()
+    print("DataFrame shape:", df.shape)
 
     df["response_json"] = df["response_text"].apply(json.loads)
 
