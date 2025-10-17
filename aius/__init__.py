@@ -150,6 +150,7 @@ Pre-trained deep learning models have many different names. The following is a l
     "reinforcement_learning_models": ["Decision Transformer", "Trajectory Transformer"],
     "time_series_models": ["Autoformer", "Informer", "PatchTSMixer", "PatchTST", "Time Series Transformer", "TimesFM"],
     "graph_models": ["Graphormer"]
+    "edge_cases": ["SignalP", "DeepMedic", "SecretomeP", "DeepLoc", "DeepLocPro"]
 }
 ```
 
