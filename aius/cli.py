@@ -76,7 +76,8 @@ class CLI:
 
         #
         self.add_llm_prompt_engineering()
-        self.add_run_llm_analysis()
+        self.add_run_llm_uses_dl_analysis()
+        self.add_run_llm_uses_ptms_analysis()
 
         # Add version argument
         self.parser.add_argument(
@@ -351,10 +352,10 @@ class CLI:
             dest="run_llm_prompt_engineering.dataset_size",
         )
 
-    def add_run_llm_analysis(self) -> None:
+    def add_run_llm_uses_dl_analysis(self) -> None:
         llm_uses_dl_analysis: ArgumentParser = self.subparsers.add_parser(
             name="llm-analysis-uses-dl",
-            help="Run LLM uses DL  analysis",
+            help="Run LLM uses PTMS analysis",
             description="Step 11",
         )
 
@@ -403,6 +404,69 @@ class CLI:
             default=[1],
             help="Step value to iterate through the dataset",
             dest="run_llm_uses_dl_analysis.stride",
+        )
+
+    def add_run_llm_uses_ptms_analysis(self) -> None:
+        llm_uses_ptms_analysis: ArgumentParser = self.subparsers.add_parser(
+            name="llm-analysis-uses-ptms",
+            help="Run LLM uses PTMs analysis",
+            description="Step 12",
+        )
+
+        llm_uses_ptms_analysis.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="run_llm_uses_ptms_analysis.db",
+        )
+
+        llm_uses_ptms_analysis.add_argument(
+            "-m",
+            "--model",
+            type=str,
+            required=True,
+            choices=["phi3:14b", "gpt-oss:20b", "magistral:24b"],
+            help="LLM to run prompt engineering analysis on",
+            dest="run_llm_uses_ptms_analysis.model",
+        )
+
+        llm_uses_ptms_analysis.add_argument(
+            "--ollama",
+            nargs=1,
+            type=str,
+            required=True,
+            help="Ollama URI",
+            dest="run_llm_uses_ptms_analysis.ollama",
+        )
+
+        llm_uses_ptms_analysis.add_argument(
+            "--index",
+            nargs=1,
+            type=int,
+            default=[0],
+            help="Starting index of the dataset used for processing a subset of the dataset",
+            dest="run_llm_uses_ptms_analysis.index",
+        )
+
+        llm_uses_ptms_analysis.add_argument(
+            "--stride",
+            nargs=1,
+            type=int,
+            default=[1],
+            help="Step value to iterate through the dataset",
+            dest="run_llm_uses_ptms_analysis.stride",
+        )
+
+        llm_uses_ptms_analysis.add_argument(
+            "--input-fp",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to uses_dl results for the spcific model",
+            dest="run_llm_uses_ptms_analysis.input_fp",
         )
 
     @property

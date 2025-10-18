@@ -21,6 +21,7 @@ from aius.filter_documents import NaturalScienceFilter
 from aius.identify_documents import PLOSPaperIdentifier
 from aius.llm_prompt_engineering import LLMPromptEngineering
 from aius.llm_uses_dl_analysis import LLMUsesDL
+from aius.llm_uses_ptms_analysis import LLMUsesPTMs
 from aius.load_author_agreement import LoadAuthorAgreement
 from aius.load_pilot_study import LoadPilotStudy
 from aius.load_prompt_engineering_papers import LoadPromptEngineeringPapers
@@ -272,6 +273,25 @@ def main() -> None:  # noqa: PLR0914
             )
 
             lul.run()
+
+        case "run_llm_uses_ptms_analysis":
+            uses_dl_df: DataFrame = pd.read_json(
+                path_or_buf=args[f"{subparser}.input_fp"][0]
+            ).T
+            uses_dl_df["result"] = uses_dl_df["result"].astype(dtype=bool)
+            uses_dl_df = uses_dl_df[uses_dl_df["result"] == True]
+            uses_dl_df = uses_dl_df[uses_dl_df["prose"].str.len() != 0]
+
+            lup: LLMUsesPTMs = LLMUsesPTMs(
+                db=db,
+                uses_dl_df=uses_dl_df,
+                model=args[f"{subparser}.model"],
+                ollama_uri=args[f"{subparser}.ollama"][0],
+                index=args[f"{subparser}.index"][0],
+                stride=args[f"{subparser}.stride"][0],
+            )
+
+            lup.run()
 
         case _:
             sys.exit(1)
