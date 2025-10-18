@@ -15,7 +15,6 @@ class LLMUsesDL:
     def __init__(
         self,
         db: DB,
-        prompt_tag: str,
         model: str,
         ollama_uri: str = "localhost:11434",
         index: int = 0,
@@ -29,7 +28,7 @@ class LLMUsesDL:
 
         # Set output path to the file
         self.output_path: Path = Path(
-            f"{model.replace(':', '-')}_{prompt_tag}_index-{self.index}_stride-{self.stride}.parquet"
+            f"{model.replace(':', '-')}_uses_dl_index-{self.index}_stride-{self.stride}.parquet"
         ).resolve()
 
         # Get prompt from the database
@@ -37,7 +36,7 @@ class LLMUsesDL:
             table_name="llm_prompts",
             con=db.engine,
         )
-        self.prompt_tag: str = prompt_tag
+        self.prompt_tag: str = "uses_dl"
         self.prompt: str = prompts_df[prompts_df["tag"] == self.prompt_tag]["prompt"][0]
 
         # Get prompt engineering papers

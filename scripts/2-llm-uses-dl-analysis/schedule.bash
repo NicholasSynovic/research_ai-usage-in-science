@@ -15,15 +15,6 @@ MODELS=(
   "phi3:14b"
 )
 
-# Prompts
-PROMPTS=(
-  "uses_dl"
-  "uses_ptms"
-  "identify_ptms"
-  "identify_reuse"
-)
-
-
 # Index range (0–19 inclusive)
 INDICES=$(seq 0 19)
 
@@ -36,7 +27,7 @@ for MODEL in "${MODELS[@]}"; do
                 CURRENT_JOBS=$(qstat | grep "$USER_ID" | wc -l)
                 if (( CURRENT_JOBS < MAX_JOBS )); then
                     echo "[$(date)] Submitting: qsub -v AIUS_MODEL=\"$MODEL\",AIUS_INDEX=$INDEX,AIUS_PROMPT="$PROMPT" $PBS_SCRIPT"
-                    qsub -v AIUS_MODEL="$MODEL",AIUS_INDEX=$INDEX,AIUS_PROMPT="$PROMPT" "$PBS_SCRIPT"
+                    qsub -v AIUS_MODEL="$MODEL",AIUS_INDEX=$INDEX "$PBS_SCRIPT"
                     break
                 else
                     echo "[$(date)] $CURRENT_JOBS jobs active. Waiting for slots..."

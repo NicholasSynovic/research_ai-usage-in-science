@@ -266,7 +266,6 @@ def main() -> None:  # noqa: PLR0914
             lul: LLMUsesDL = LLMUsesDL(
                 db=db,
                 model=args[f"{subparser}.model"],
-                prompt_tag=args[f"{subparser}.prompt"],
                 ollama_uri=args[f"{subparser}.ollama"][0],
                 index=args[f"{subparser}.index"][0],
                 stride=args[f"{subparser}.stride"][0],

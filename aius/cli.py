@@ -353,7 +353,7 @@ class CLI:
 
     def add_run_llm_analysis(self) -> None:
         llm_uses_dl_analysis: ArgumentParser = self.subparsers.add_parser(
-            name="llm-analysis",
+            name="llm-analysis-uses-dl",
             help="Run LLM uses DL  analysis",
             description="Step 11",
         )
@@ -376,16 +376,6 @@ class CLI:
             choices=["phi3:14b", "gpt-oss:20b", "magistral:24b"],
             help="LLM to run prompt engineering analysis on",
             dest="run_llm_uses_dl_analysis.model",
-        )
-
-        llm_uses_dl_analysis.add_argument(
-            "-p",
-            "--prompt",
-            type=str,
-            required=True,
-            choices=["uses_dl", "uses_ptms", "identify_ptms", "identify_reuse"],
-            help="Prompt to use",
-            dest="run_llm_uses_dl_analysis.prompt",
         )
 
         llm_uses_dl_analysis.add_argument(
