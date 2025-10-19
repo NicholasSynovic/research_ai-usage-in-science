@@ -38,7 +38,9 @@ class LLMUsesPTMs:
             con=db.engine,
         )
         self.prompt_tag: str = "uses_ptms"
-        self.prompt: str = prompts_df[prompts_df["tag"] == self.prompt_tag]["prompt"]
+        self.prompt: str = prompts_df[prompts_df["tag"] == self.prompt_tag][
+            "prompt"
+        ].reset_index(drop=True)[0]
 
         # Get prompt engineering papers
         # TODO: Modify this SQL to grab all NS paper content
