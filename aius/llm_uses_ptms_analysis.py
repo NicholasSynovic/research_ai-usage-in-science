@@ -103,7 +103,7 @@ class LLMUsesPTMs:
             for idx, row in iterator:
                 data["model"].append(self.model)
                 data["system_prompt_tag"].append(self.prompt_tag)
-                data["plos_prompt_enineering_paper_id"].append(row["_id"])
+                data["plos_prompt_enineering_paper_id"].append(idx)
 
                 json_data["prompt"] = row["formatted_md"]
                 resp: Response = post(
