@@ -74,10 +74,12 @@ class CLI:
         # Load data from all_of_plos.zip and `pandoc`
         self.add_content_retriever()
 
-        #
+        # Add analysis
         self.add_llm_prompt_engineering()
         self.add_run_llm_uses_dl_analysis()
         self.add_run_llm_uses_ptms_analysis()
+        self.add_run_llm_identify_ptms_analysis()
+        self.add_run_llm_identify_reuse_analysis()
 
         # Add version argument
         self.parser.add_argument(
@@ -467,6 +469,150 @@ class CLI:
             type=lambda x: Path(x).resolve(),
             help="Path to uses_dl results for the spcific model",
             dest="run_llm_uses_ptms_analysis.input_fp",
+        )
+
+    def add_run_llm_identify_ptms_analysis(self) -> None:
+        llm_identify_ptms_analysis: ArgumentParser = self.subparsers.add_parser(
+            name="llm-analysis-identify-ptms",
+            help="Run LLM identify PTMs analysis",
+            description="Step 13",
+        )
+
+        llm_identify_ptms_analysis.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="run_llm_identify_ptms_analysis.db",
+        )
+
+        llm_identify_ptms_analysis.add_argument(
+            "-m",
+            "--model",
+            type=str,
+            required=True,
+            choices=["phi3:14b", "gpt-oss:20b", "magistral:24b"],
+            help="LLM to run prompt engineering analysis on",
+            dest="run_llm_identify_ptms_analysis.model",
+        )
+
+        llm_identify_ptms_analysis.add_argument(
+            "--ollama",
+            nargs=1,
+            type=str,
+            required=True,
+            help="Ollama URI",
+            dest="run_llm_identify_ptms_analysis.ollama",
+        )
+
+        llm_identify_ptms_analysis.add_argument(
+            "--index",
+            nargs=1,
+            type=int,
+            default=[0],
+            help="Starting index of the dataset used for processing a subset of the dataset",
+            dest="run_llm_identify_ptms_analysis.index",
+        )
+
+        llm_identify_ptms_analysis.add_argument(
+            "--stride",
+            nargs=1,
+            type=int,
+            default=[1],
+            help="Step value to iterate through the dataset",
+            dest="run_llm_identify_ptms_analysis.stride",
+        )
+
+        llm_identify_ptms_analysis.add_argument(
+            "--uses_dl",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to uses_dl results for the spcific model",
+            dest="run_llm_identify_ptms_analysis.uses_dl",
+        )
+
+        llm_identify_ptms_analysis.add_argument(
+            "--uses_ptms",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to uses_ptms results for the spcific model",
+            dest="run_llm_identify_ptms_analysis.uses_ptms",
+        )
+
+    def add_run_llm_identify_reuse_analysis(self) -> None:
+        llm_identify_reuse_analysis: ArgumentParser = self.subparsers.add_parser(
+            name="llm-analysis-identify-reuse",
+            help="Run LLM identify reuse analysis",
+            description="Step 14",
+        )
+
+        llm_identify_reuse_analysis.add_argument(
+            "-d",
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=self.db_help,
+            dest="run_llm_identify_reuse_analysis.db",
+        )
+
+        llm_identify_reuse_analysis.add_argument(
+            "-m",
+            "--model",
+            type=str,
+            required=True,
+            choices=["phi3:14b", "gpt-oss:20b", "magistral:24b"],
+            help="LLM to run prompt engineering analysis on",
+            dest="run_llm_identify_reuse_analysis.model",
+        )
+
+        llm_identify_reuse_analysis.add_argument(
+            "--ollama",
+            nargs=1,
+            type=str,
+            required=True,
+            help="Ollama URI",
+            dest="run_llm_identify_reuse_analysis.ollama",
+        )
+
+        llm_identify_reuse_analysis.add_argument(
+            "--index",
+            nargs=1,
+            type=int,
+            default=[0],
+            help="Starting index of the dataset used for processing a subset of the dataset",
+            dest="run_llm_identify_reuse_analysis.index",
+        )
+
+        llm_identify_reuse_analysis.add_argument(
+            "--stride",
+            nargs=1,
+            type=int,
+            default=[1],
+            help="Step value to iterate through the dataset",
+            dest="run_llm_identify_reuse_analysis.stride",
+        )
+
+        llm_identify_reuse_analysis.add_argument(
+            "--uses_dl",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to uses_dl results for the spcific model",
+            dest="run_llm_identify_reuse_analysis.uses_dl",
+        )
+
+        llm_identify_reuse_analysis.add_argument(
+            "--uses_ptms",
+            nargs=1,
+            required=True,
+            type=lambda x: Path(x).resolve(),
+            help="Path to uses_ptms results for the spcific model",
+            dest="run_llm_identify_reuse_analysis.uses_ptms",
         )
 
     @property
