@@ -526,16 +526,7 @@ class CLI:
         )
 
         llm_identify_ptms_analysis.add_argument(
-            "--uses_dl",
-            nargs=1,
-            required=True,
-            type=lambda x: Path(x).resolve(),
-            help="Path to uses_dl results for the spcific model",
-            dest="run_llm_identify_ptms_analysis.uses_dl",
-        )
-
-        llm_identify_ptms_analysis.add_argument(
-            "--uses_ptms",
+            "--uses-ptms",
             nargs=1,
             required=True,
             type=lambda x: Path(x).resolve(),
@@ -598,16 +589,7 @@ class CLI:
         )
 
         llm_identify_reuse_analysis.add_argument(
-            "--uses_dl",
-            nargs=1,
-            required=True,
-            type=lambda x: Path(x).resolve(),
-            help="Path to uses_dl results for the spcific model",
-            dest="run_llm_identify_reuse_analysis.uses_dl",
-        )
-
-        llm_identify_reuse_analysis.add_argument(
-            "--uses_ptms",
+            "--uses-ptms",
             nargs=1,
             required=True,
             type=lambda x: Path(x).resolve(),
