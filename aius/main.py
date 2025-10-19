@@ -31,6 +31,7 @@ from aius.pandoc import PandocAPI
 from aius.retrieve_content import RetrieveContent
 from aius.search import search
 from aius.search.plos import PLOS
+from aius.llm_identify_reuse_analysis import LLMIdentifyReuse
 
 
 def create_keyword_year_product() -> Iterable:
@@ -315,7 +316,24 @@ def main() -> None:  # noqa: PLR0914
             lip.run()
 
         case "run_llm_identify_reuse_analysis":
-            pass
+            uses_ptms_df: DataFrame = pd.read_json(
+                path_or_buf=args[f"{subparser}.uses_ptms"][0]
+            ).T
+
+            uses_ptms_df["result"] = uses_ptms_df["result"].astype(dtype=bool)
+            uses_ptms_df = uses_ptms_df[uses_ptms_df["result"] == True]
+            uses_ptms_df = uses_ptms_df[uses_ptms_df["prose"].str.len() != 0]
+
+            lir: LLMIdentifyReuse = LLMIdentifyReuse(
+                db=db,
+                uses_ptms_df=uses_ptms_df,
+                model=args[f"{subparser}.model"],
+                ollama_uri=args[f"{subparser}.ollama"][0],
+                index=args[f"{subparser}.index"][0],
+                stride=args[f"{subparser}.stride"][0],
+            )
+
+            lir.run()
 
         case _:
             sys.exit(1)
