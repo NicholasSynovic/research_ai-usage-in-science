@@ -1,0 +1,170 @@
+#!/bin/bash -l
+
+#PBS -l select=10
+#PBS -l walltime=1:00:00
+#PBS -q prod
+#PBS -A EVITA
+#PBS -l filesystems=home:eagle
+#PBS -j oe
+#PBS -r y
+#PBS -o logs
+#PBS -e logs
+
+# Set logging variables
+FQJI=job-$(echo $PBS_JOBID | cut -d'[' -f1)-$PBS_JOBNAME # Fully qualified job id
+LOGFILE=log-${AIUS_INDEX}.logging
+JOB_UNIQUE_DIR="${FQJI}/${AIUS_INDEX}"
+
+
+# Set Ollama variables
+PATH=$PATH:/eagle/EVITA/ollama/bin
+OLLAMA_PORT_START=11400
+OLLAMA_PORT_END=11500
+OLLAMA_LOGFILE=ollama-${AIUS_INDEX}.log
+export OLLAMA_MODELS=/eagle/EVITA/ollama-models
+
+# Set AIUS input variables
+AIUS_STRIDE=20
+# AIUS_MODEL="gpt-oss:20b"  # Set this via qsub -v AIUS_MODEL="",...
+# AIUS_INDEX=0  # # Set this via qsub -v AIUS_INDEX="",...
+
+# Load necessary module files
+module use /soft/modulefiles
+module load spack-pe-base
+module load conda
+
+# Instantiate python environment
+conda activate python
+
+# Setup output directories
+cd ${PBS_O_WORKDIR}
+mkdir -p ${JOB_UNIQUE_DIR}
+cd ${JOB_UNIQUE_DIR}
+
+echo "ollama at $(which ollama)" | tee $LOGFILE
+echo "result $(hostname) index $PBS_ARRAY_INDEX date $(date)" | tee $LOGFILE
+
+find_free_ollama_port() {
+    # This function searches through a specified range of ports, starting from
+    # OLLAMA_PORT_START and going up to OLLAMA_PORT_END, to find one that is not
+    # currently in use by any process. It uses the `lsof` command to check if
+    # each port has an active TCP listener associated with it. If no available
+    # port is found within the given range, the function returns -1.
+    #
+    # Usage:
+    #   find_free_ollama_port
+    #
+    # Returns:
+    #   If an available port is found, it prints the port number and exits with status code 0.
+    #   If no port within the specified range is free, it echoes "-1" and returns a non-zero exit status.
+
+    local port
+    for ((port=$OLLAMA_PORT_START; port<=$OLLAMA_PORT_END; port++)); do
+        if ! lsof -iTCP:"$port" -sTCP:LISTEN &>/dev/null; then
+            echo "$port"
+            return 0
+        fi
+    done
+    echo "-1"
+    return 1
+}
+
+start_ollama_server() {
+    # This function attempts to launch an Ollama serving instance at the
+    # provided TCP port. If successful, it returns the process ID (PID) of the
+    # spawned Ollama server in order to allow the caller to monitor or terminate
+    # the server if necessary. The function includes error handling for invalid
+    # ports and logs the initialization details to a log file specified by the
+    # LOGFILE environment variable.
+    #
+    # Usage:
+    #   start_ollama_server PORT [SLEEP_TIME]
+    #
+    # Arguments:
+    #   $1 (required) PORT: The TCP port number on which Ollama should listen.
+                                # Must be an integer within the range of 0 to
+                                # 65535 and not equal to zero or a negative value.
+    #   $2 (optional) SLEEP_TIME: Time in seconds to wait after starting the
+                                    # server before confirming it has started
+                                    # successfully. Defaults to 10 seconds if
+                                    # not provided.
+    #
+    # Returns:
+    #   If an Ollama server is successfully started, this function prints its
+    #   PID and returns a non-zero exit code. If there's an error (such as
+    #   providing an invalid port), it echoes the error message and exits with
+    #   status code 1.
+    local port="$1"
+    local sleep_time="$2"
+
+    if [[ -z "$port" || "$port" -lt 0 ]]; then
+        echo "❌ Invalid port: $port"
+        return 1
+    fi
+
+    local host="127.0.0.1"
+    local addr="${host}:${port}"
+
+    echo "🟢 Starting ollama on ${addr}..."
+    export OLLAMA_HOST="$addr"
+    nohup ollama serve > $OLLAMA_LOGFILE 2>&1 &
+    local pid=$!
+
+    sleep "$sleep_time"
+
+    echo "✅ Ollama started (PID $pid) on $addr"
+    echo "  logging to $OLLAMA_LOGFILE"
+    echo "To connect, run:"
+    echo "  export OLLAMA_HOST=$addr"
+    echo "  # or use inline: OLLAMA_HOST=$addr ollama run llama3"
+    return $pid
+}
+
+run_aius() {
+    local model="$1"
+    local port="$2"
+
+    local host="127.0.0.1"
+    local addr="${host}:${port}"
+
+    export OLLAMA_HOST="$addr"
+
+    aius llm-analysis-identify-reuse \
+    --db /home/nsynovic/aius.sqlite3 \
+    --model ${AIUS_MODEL} \
+    --ollama ${addr} \
+    --index ${AIUS_INDEX} \
+    --uses-ptms /home/nsynovic/gpt-oss-20b_uses_ptms.json \
+    --stride ${AIUS_STRIDE} 2>&1 | tee $LOGFILE
+}
+
+
+main() {
+    local port
+    port=$(find_free_ollama_port)
+
+    sleep_time=10
+
+    if [[ "$port" -lt 0 ]]; then
+        echo "❌ No available ports found between $PORT_START and $PORT_END."
+        exit 1
+    fi
+
+    pid=$(start_ollama_server "$port" "$sleep_time")
+    echo "Ollama Server running on port $port with PID $pid"
+
+    echo "Checking ps to see if it is really running"
+    ps auxww | grep ollama
+
+    run_aius "$MODEL" "$port"
+}
+
+unset http_proxy
+unset https_proxy
+
+echo "HOSTNAME: $(hostname)" | tee $LOGFILE
+echo "Starting inferencing" | tee $LOGFILE
+main "$@"
+
+echo "Is Ollama running?" | tee $LOGFILE
+ps auxww  | grep ^nsynovic | tee $LOGFILE
