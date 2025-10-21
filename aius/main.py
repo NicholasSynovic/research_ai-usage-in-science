@@ -20,6 +20,7 @@ from aius.db import DB
 from aius.filter_documents import NaturalScienceFilter
 from aius.identify_documents import PLOSPaperIdentifier
 from aius.llm_identify_ptms_analysis import LLMIdentifyPTMs
+from aius.llm_identify_reuse_analysis import LLMIdentifyReuse
 from aius.llm_prompt_engineering import LLMPromptEngineering
 from aius.llm_uses_dl_analysis import LLMUsesDL
 from aius.llm_uses_ptms_analysis import LLMUsesPTMs
@@ -31,7 +32,6 @@ from aius.pandoc import PandocAPI
 from aius.retrieve_content import RetrieveContent
 from aius.search import search
 from aius.search.plos import PLOS
-from aius.llm_identify_reuse_analysis import LLMIdentifyReuse
 
 
 def create_keyword_year_product() -> Iterable:
