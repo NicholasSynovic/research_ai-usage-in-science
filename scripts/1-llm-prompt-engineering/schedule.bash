@@ -3,7 +3,7 @@
 # Submits jobs for multiple models and prompts
 # Keeps at most 10 jobs in the queue/running at once
 
-MAX_JOBS=10
+MAX_JOBS=20
 USER_ID="nsynovic"
 POLL_INTERVAL=30  # seconds
 PBS_SCRIPT="llm_prompt_engineering.pbs"
@@ -12,7 +12,8 @@ PBS_SCRIPT="llm_prompt_engineering.pbs"
 MODELS=(
   "gpt-oss:20b"
   "magistral:24b"
-  "phi3:14b"
+  "qwen3:32b"
+  "deepseek-r1:70b"
 )
 
 # Prompts
@@ -21,6 +22,7 @@ PROMPTS=(
   "uses_ptms"
   "identify_ptms"
   "identify_reuse"
+  "identify_science"
 )
 
 # Dataset size
