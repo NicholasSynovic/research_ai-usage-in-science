@@ -318,9 +318,10 @@ class CLI:
             type=str,
             required=True,
             choices=[
-                "phi3:14b",
                 "gpt-oss:20b",
                 "magistral:24b",
+                "qwen3:32b",
+                "deepseek-r1:70b",
             ],
             help="LLM to run prompt engineering analysis on",
             dest="run_llm_prompt_engineering.model",
@@ -331,7 +332,13 @@ class CLI:
             "--prompt",
             type=str,
             required=True,
-            choices=["uses_dl", "uses_ptms", "identify_ptms", "identify_reuse"],
+            choices=[
+                "uses_dl",
+                "uses_ptms",
+                "identify_ptms",
+                "identify_reuse",
+                "identify_science",
+            ],
             help="Prompt to use",
             dest="run_llm_prompt_engineering.prompt",
         )
