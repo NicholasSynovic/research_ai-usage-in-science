@@ -144,7 +144,7 @@ Nothing else should ever be returned.
 ## (C) Context:
 
 You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine what pre-trained deep learning models the authors use in their methodology. Your response will be consumed by downstream systems that require structured JSON.
-Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can refence in your analysis:
+Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can reference in your analysis:
 
 ```json
 {
@@ -206,7 +206,7 @@ Nothing else should ever be returned.
 ## (C) Context:
 
 You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine the form and classification of pre-trained deep learning reuse models the authors use in their methodology. Your response will be consumed by downstream systems that require structured JSON.
-Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can refence in your analysis:
+Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can reference in your analysis:
 
 ```json
 {

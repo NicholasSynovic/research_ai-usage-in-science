@@ -32,9 +32,10 @@ def compute(df: DataFrame) -> None:
 
     row: Series
     for _, row in df.iterrows():
-        data[row["topic_0"]] += 1
-        data[row["topic_1"]] += 1
-        data[row["topic_2"]] += 1
+        unique_topics: set[str] = {row["topic_0"], row["topic_1"], row["topic_2"]}
+
+        for topic in unique_topics:
+            data[topic] += 1
 
     print(data)
 
