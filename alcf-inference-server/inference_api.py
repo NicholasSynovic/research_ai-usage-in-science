@@ -8,20 +8,17 @@ ALCF Sophia completions client CLI
 """
 
 import argparse
-import json
 import logging
 import os
-import sys
 from argparse import Namespace
 from datetime import datetime, timezone
 from json import dump, loads
 from logging import Logger
 from pathlib import Path
 from time import time
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import pandas
-from mdformat import text
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame

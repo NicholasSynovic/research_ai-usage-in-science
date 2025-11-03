@@ -185,3 +185,4 @@ data/*
 !data/.gitkeep
 !data/all_of_plos
 *.xml
+*.jsonl
