@@ -19,7 +19,8 @@ from time import time
 from typing import Optional
 
 import pandas
-from openai import OpenAI
+from mdformat import text
+from openai import InternalServerError, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame
 from progress.bar import Bar
@@ -74,7 +75,13 @@ def parse_cli(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--prompt-id",
         required=True,
-        choices=["uses_dl", "uses_ptms"],
+        choices=[
+            "uses_dl",
+            "uses_ptms",
+            "identify_ptms",
+            "identify_reuse",
+            "identify_science",
+        ],
         help="Which prompt template to use",
     )
     parser.add_argument(
@@ -162,8 +169,8 @@ def submit_request(
     # Submit content for analysis
     start_time: float = time()
     resp: ChatCompletion = alcf_connection.query(
-        system_prompt=system_prompt,
-        user_prompt=user_prompt,
+        system_prompt=text(system_prompt),
+        user_prompt=text(user_prompt),
         user_prompt_tokens=user_prompt_token_count,
     )
     end_time: float = time()
@@ -213,18 +220,28 @@ def main(argv: Optional[list[str]] = None) -> int:
     with Bar("Submitting queries...", max=user_prompts.shape[0]) as bar:
         _df: DataFrame
         for _, _df in user_prompts.iterrows():
-            plos_paper_id: int = _df["plos_paper_id"]
+            plos_paper_id: int = int(_df["plos_paper_id"])
             user_prompt: str = _df["formatted_md"]
             user_prompt_token_count: int = int(_df["formatted_md_token_count"])
 
-            message_json: dict = submit_request(
-                alcf_connection=oc,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                user_prompt_token_count=user_prompt_token_count,
-            )
-
             output_fp: Path = Path(f"{plos_paper_id}_{args.prompt_id}.json").resolve()
+
+            if output_fp.exists():
+                logging.info("Skipping paper ID %d", plos_paper_id)
+                bar.next()
+                continue
+
+            try:
+                message_json: dict = submit_request(
+                    alcf_connection=oc,
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    user_prompt_token_count=user_prompt_token_count,
+                )
+            except InternalServerError:
+                logging.fatal("Unable to inference document %d", plos_paper_id)
+                continue
+
             logging.info("Writing JSON to %s", output_fp)
 
             dump(
