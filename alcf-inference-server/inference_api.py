@@ -20,72 +20,13 @@ from pathlib import Path
 from time import time
 from typing import Any, Dict, Optional
 
+import pandas
 from mdformat import text
 from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
-from pydantic import BaseModel
-
-PROMPT_TEMPLATES: Dict[str, str] = {
-    "uses-dl": text(
-        md="""
-## (C) Context
-You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine readable format. Your sole responsibility is to evaluate the paper's content and determine whether the author's use deep learning models or methods in their methodology. Your response will be consumed by downstream systems that require structured JSON.
-
-## (O) Objective
-Your task is to output only a JSON object containing a key-value pairs, where:
-
-- the key "result" value is a boolean (true or false) based on whether the input text use deep learning models or methods in their methodology, and
-- the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of deep learning usage in the paper or empty if no deep learning method are used.
-
-No explanations or extra output are allowed.
-
-## (S) Style
-Responses must be strictly machine-readable JSON. No natural language, commentary, or formatting beyond the JSON object is permitted.
-
-## (T) Tone
-Neutral, objective, and machine-like.
-
-## (A) Audience
-The audience is a machine system that parses JSON. Human readability is irrelevant.
-
-## (R) Response
-Return only a JSON object of the form:
-
-```json
-{
-    "result": "boolean",
-    "prose": "string" | None,
-}
-```
-
-Nothing else should ever be returned.
-"""
-    ),
-    "uses-ptms": (
-        "System: You are an assistant that inspects scientific prose and answers whether the "
-        "manuscript describes use of pre-trained PTMs (protein/translational models) (yes/no) with "
-        "a brief justification. Respond as JSON with keys: result (bool), prose (string)."
-    ),
-    "identify-ptms": (
-        "System: Identify any pre-trained models mentioned in this document. Return a JSON array "
-        "where each item is an object with keys model (string) and prose (string). If none found, "
-        "return an empty array."
-    ),
-    "identify-ptm-reuse-patterns": (
-        "System: Analyze the provided scientific prose and identify reuse patterns of pre-trained "
-        "models (e.g., fine-tuning, feature extraction, transfer). Return JSON array of objects "
-        "with fields model (string), form (string), classification (string), prose (string)."
-    ),
-    "identify-scientific-process": (
-        "System: Extract and identify scientific processes described (e.g., training, cross-validation, "
-        "pruning). Return a JSON array of objects with keys: process (string), description (string)."
-    ),
-}
-
-
-class UsesDLResponse(BaseModel):
-    result: bool
-    prose: str | None
+from pandas import DataFrame
+from progress.bar import Bar
+from sqlalchemy import Engine, create_engine
 
 
 class ALCFConnection:
@@ -127,19 +68,13 @@ def parse_cli(argv: Optional[list[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--prompt-id",
         required=True,
-        choices=list(PROMPT_TEMPLATES.keys()),
+        choices=["uses_dl", "uses_ptms"],
         help="Which prompt template to use",
     )
     parser.add_argument(
-        "--input-md",
+        "--db",
         required=True,
-        help="Path to Markdown file with scientific prose",
-        type=lambda x: Path(x).resolve(),
-    )
-    parser.add_argument(
-        "--output-json",
-        required=True,
-        help="Path to write response JSON (and status)",
+        help="Path to SQLite3 database",
         type=lambda x: Path(x).resolve(),
     )
     parser.add_argument(
@@ -152,23 +87,9 @@ def parse_cli(argv: Optional[list[str]] = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def mask_key(key: str, show_last: int = 4) -> str:
-    if not key:
-        return "<empty>"
-    if len(key) <= show_last:
-        return "*" * len(key)
-    return "*" * (len(key) - show_last) + key[-show_last:]
-
-
-def write_output_file(path: str, status_code: int, payload: Any) -> None:
-    out = {"status_code": status_code, "response": payload}
-
-    with open(path, "w", encoding="utf-8") as fh:
-        json.dump(out, fh, indent=2, ensure_ascii=False)
-
-
 def configure_logging(
-    log_dir: Path = Path(".").resolve(), level: int = logging.INFO
+    log_dir: Path = Path(".").resolve(),
+    level: int = logging.INFO,
 ) -> Path:
     ts: str = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
@@ -186,13 +107,62 @@ def configure_logging(
         fh.setFormatter(fmt)
         logger.addHandler(fh)
 
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.INFO)
-        ch.setFormatter(logging.Formatter("%(levelname)s - %(message)s"))
-        logger.addHandler(ch)
-
     logging.info("Logging to %s", log_filename)
     return log_filename
+
+
+def mask_key(key: str, show_last: int = 4) -> str:
+    if not key:
+        return "<empty>"
+    if len(key) <= show_last:
+        return "*" * len(key)
+    return "*" * (len(key) - show_last) + key[-show_last:]
+
+
+def get_system_prompt(db_engine: Engine, prompt_tag: str) -> str:
+    sql_query: str = f"""
+    SELECT
+        llm_prompts.prompt
+    FROM
+        llm_prompts
+    WHERE
+        llm_prompts.tag = "{prompt_tag}";
+    """
+
+    return pandas.read_sql_query(sql=sql_query, con=db_engine).reset_index()["prompt"][
+        0
+    ]
+
+
+def get_user_prompts(db_engine: Engine) -> DataFrame:
+    sql_query: str = f"""
+    SELECT
+        plos_natural_science_paper_content.plos_paper_id,
+        plos_natural_science_paper_content.formatted_md
+    FROM
+    	plos_natural_science_paper_content;
+    """
+
+    return pandas.read_sql_query(sql=sql_query, con=db_engine)
+
+
+def submit_request(
+    alcf_connection: ALCFConnection,
+    system_prompt: str,
+    user_prompt: str,
+) -> dict:
+    # Submit content for analysis
+    logging.info("Sent request")
+    start_time: float = time()
+    resp: ChatCompletion = alcf_connection.query(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+    )
+    end_time: float = time()
+    logging.info(f"Response generated in {end_time - start_time} seconds")
+
+    # Handle completions
+    return loads(s=resp.choices[0].message.content)
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -207,44 +177,53 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     # Mask API key in logs
     logging.info(
-        "Using model=%s, prompt_id=%s, input=%s, output=%s",
+        "Using model=%s, prompt_id=%s, db=%s",
         args.model,
         args.prompt_id,
-        args.input_md,
-        args.output_json,
+        args.db,
     )
     logging.debug("API key (masked): %s", mask_key(args.api_key))
 
-    # Get system prompt
-    system_prompt: str = PROMPT_TEMPLATES[args.prompt_id]
-    logging.info("Loaded system prompt: %s", args.prompt_id)
+    # Create database engine
+    db_engine: Engine = create_engine(url=f"sqlite:///{args.db}")
 
-    # Validate input markdown file
-    if not args.input_md.is_file():
-        logging.error("Input markdown file not found: %s", args.input_md)
-        return 2
-    else:
-        markdown_text: str = args.input_md.read_text(encoding="utf-8")
-        logging.info("Loaded user prompt: %s", args.input_md)
+    # Get system prompt
+    system_prompt: str = get_system_prompt(
+        db_engine=db_engine,
+        prompt_tag=args.prompt_id,
+    )
+    logging.info("Loaded system prompt: %s", args.prompt_id)
 
     # Connect to the inference service
     oc: ALCFConnection = ALCFConnection(api_key=args.api_key)
     logging.info("Connected to the ALCF inference server")
 
-    # Submit content for analysis
-    logging.info("Sent request")
-    start_time: float = time()
-    resp: ChatCompletion = oc.query(
-        system_prompt=system_prompt,
-        user_prompt=markdown_text,
-    )
-    end_time: float = time()
-    logging.info(f"Response generated in {end_time - start_time} seconds")
+    # Get user prompts
+    user_prompts: DataFrame = get_user_prompts(db_engine=db_engine)
+    logging.info("Loaded user prompts: %d", user_prompts.shape[0])
 
-    # Handle completions
-    message_json: dict = loads(s=resp.choices[0].message.content)
-    logging.info("Writing JSON to %s", args.output_json)
-    dump(obj=message_json, fp=args.output_json.open(mode="w"), indent=4)
+    with Bar("Submitting queries...", max=user_prompts.shape[0]) as bar:
+        _df: DataFrame
+        for _, _df in user_prompts.iterrows():
+            plos_paper_id: int = _df["plos_paper_id"]
+            user_prompt: str = _df["formatted_md"]
+
+            message_json: dict = submit_request(
+                alcf_connection=oc,
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+            )
+
+            output_fp: Path = Path(f"{plos_paper_id}_{args.prompt_id}.json").resolve()
+            logging.info("Writing JSON to %s", output_fp)
+
+            dump(
+                obj=message_json,
+                fp=output_fp.open(mode="w"),
+                indent=4,
+            )
+
+            bar.next()
 
     logging.info("Finished with return code %d", rc)
     return rc
