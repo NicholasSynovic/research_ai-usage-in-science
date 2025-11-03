@@ -37,10 +37,19 @@ class ALCFConnection:
         )
         self.model: str = "openai/gpt-oss-120b"
 
-    def query(self, system_prompt: str, user_prompt: str) -> ChatCompletion:
+    def query(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        user_prompt_tokens: int,
+    ) -> ChatCompletion:
+        max_tokens: int = user_prompt_tokens + 10000
+
+        logging.info("Sent request of %d tokens", max_tokens)
         return self.openai_client.chat.completions.create(
             model="openai/gpt-oss-120b",
             reasoning_effort="high",
+            max_tokens=max_tokens,
             frequency_penalty=0,
             stream=False,
             seed=42,
@@ -138,7 +147,8 @@ def get_user_prompts(db_engine: Engine) -> DataFrame:
     sql_query: str = f"""
     SELECT
         plos_natural_science_paper_content.plos_paper_id,
-        plos_natural_science_paper_content.formatted_md
+        plos_natural_science_paper_content.formatted_md,
+        plos_natural_science_paper_content.formatted_md_token_count
     FROM
     	plos_natural_science_paper_content;
     """
@@ -150,13 +160,14 @@ def submit_request(
     alcf_connection: ALCFConnection,
     system_prompt: str,
     user_prompt: str,
+    user_prompt_token_count: int,
 ) -> dict:
     # Submit content for analysis
-    logging.info("Sent request")
     start_time: float = time()
     resp: ChatCompletion = alcf_connection.query(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
+        user_prompt_tokens=user_prompt_token_count,
     )
     end_time: float = time()
     logging.info(f"Response generated in {end_time - start_time} seconds")
@@ -207,11 +218,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         for _, _df in user_prompts.iterrows():
             plos_paper_id: int = _df["plos_paper_id"]
             user_prompt: str = _df["formatted_md"]
+            user_prompt_token_count: int = int(_df["formatted_md_token_count"])
 
             message_json: dict = submit_request(
                 alcf_connection=oc,
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
+                user_prompt_token_count=user_prompt_token_count,
             )
 
             output_fp: Path = Path(f"{plos_paper_id}_{args.prompt_id}.json").resolve()
