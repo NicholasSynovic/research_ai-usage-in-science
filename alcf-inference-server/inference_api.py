@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 ALCF Sophia completions client CLI
 - argparse CLI for api_key, prompt_id, input markdown, output json
@@ -8,29 +7,59 @@ ALCF Sophia completions client CLI
 - logging to timestamped file
 """
 
-from __future__ import annotations
-
 import argparse
 import json
 import logging
-import math
 import os
 import sys
-import time
-from datetime import datetime
+from argparse import Namespace
+from datetime import datetime, timezone
+from json import dump, loads
+from logging import Logger
+from pathlib import Path
+from time import time
 from typing import Any, Dict, Optional
 
-import requests
-
-# ---------------------------
-# Config / prompt templates
-# ---------------------------
+from mdformat import text
+from openai import OpenAI
+from openai.types.chat.chat_completion import ChatCompletion
+from pydantic import BaseModel
 
 PROMPT_TEMPLATES: Dict[str, str] = {
-    "uses-dl": (
-        "System: You are an assistant that inspects scientific prose and answers whether the "
-        "manuscript describes the use of pre-trained deep learning models (yes/no) and provide "
-        "a brief justification. Respond as JSON with keys: result (bool), prose (string)."
+    "uses-dl": text(
+        md="""
+## (C) Context
+You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine readable format. Your sole responsibility is to evaluate the paper's content and determine whether the author's use deep learning models or methods in their methodology. Your response will be consumed by downstream systems that require structured JSON.
+
+## (O) Objective
+Your task is to output only a JSON object containing a key-value pairs, where:
+
+- the key "result" value is a boolean (true or false) based on whether the input text use deep learning models or methods in their methodology, and
+- the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of deep learning usage in the paper or empty if no deep learning method are used.
+
+No explanations or extra output are allowed.
+
+## (S) Style
+Responses must be strictly machine-readable JSON. No natural language, commentary, or formatting beyond the JSON object is permitted.
+
+## (T) Tone
+Neutral, objective, and machine-like.
+
+## (A) Audience
+The audience is a machine system that parses JSON. Human readability is irrelevant.
+
+## (R) Response
+Return only a JSON object of the form:
+
+```json
+{
+    "result": "boolean",
+    "prose": "string" | None,
+}
+```
+
+Nothing else should ever be returned.
+"""
     ),
     "uses-ptms": (
         "System: You are an assistant that inspects scientific prose and answers whether the "
@@ -53,86 +82,74 @@ PROMPT_TEMPLATES: Dict[str, str] = {
     ),
 }
 
-# Default base url for Sophia (vLLM). The completions endpoint path below appended.
-DEFAULT_BASE_URL = "https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1"
-COMPLETIONS_PATH = "/completions"  # POST to {base_url}/completions
+
+class UsesDLResponse(BaseModel):
+    result: bool
+    prose: str | None
 
 
-# ---------------------------
-# Requests client with retries
-# ---------------------------
-
-
-class RequestsClient:
-    """
-    Simple requests wrapper that performs GET/POST with exponential backoff retries.
-    - retries: number of attempts (default 5)
-    - timeout: per-request timeout in seconds (default 60)
-    - backoff_factor: base backoff multiplier (sleep = backoff_factor * 2**(attempt-1))
-    """
-
-    def __init__(
-        self,
-        timeout: int = 60,
-        retries: int = 5,
-        backoff_factor: float = 1.0,
-        session: Optional[requests.Session] = None,
-    ) -> None:
-        self.timeout = timeout
-        self.retries = retries
-        self.backoff_factor = backoff_factor
-        self.session = session or requests.Session()
-
-    def _request_with_backoff(
-        self, method: str, url: str, **kwargs
-    ) -> requests.Response:
-        last_exc: Optional[Exception] = None
-        for attempt in range(1, self.retries + 1):
-            try:
-                logging.info(
-                    "Request attempt %d -> %s %s", attempt, method.upper(), url
-                )
-                resp = self.session.request(
-                    method=method, url=url, timeout=self.timeout, **kwargs
-                )
-                logging.info(
-                    "Response status: %s for %s %s",
-                    resp.status_code,
-                    method.upper(),
-                    url,
-                )
-                return resp
-            except (requests.Timeout, requests.ConnectionError) as exc:
-                last_exc = exc
-                # compute sleep with exponential backoff
-                sleep_seconds = self.backoff_factor * (2 ** (attempt - 1))
-                # cap at 60 seconds per sleep to be friendly
-                sleep_seconds = min(sleep_seconds, 60)
-                logging.warning(
-                    "Request attempt %d failed (%s). Sleeping %.1f seconds before retry...",
-                    attempt,
-                    str(exc),
-                    sleep_seconds,
-                )
-                time.sleep(sleep_seconds)
-        # If we exit loop, raise the last exception
-        logging.error(
-            "All %d attempts failed for %s %s", self.retries, method.upper(), url
+class ALCFConnection:
+    def __init__(self, api_key: str) -> None:
+        self.openai_client: OpenAI = OpenAI(
+            api_key=api_key,
+            base_url="https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1",
         )
-        if last_exc:
-            raise last_exc
-        raise RuntimeError("Unexpected error in request retry logic")
+        self.model: str = "openai/gpt-oss-120b"
 
-    def get(self, url: str, **kwargs) -> requests.Response:
-        return self._request_with_backoff("get", url, **kwargs)
+    def query(self, system_prompt: str, user_prompt: str) -> ChatCompletion:
+        return self.openai_client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            reasoning_effort="high",
+            frequency_penalty=0,
+            stream=False,
+            seed=42,
+            n=1,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
 
-    def post(self, url: str, **kwargs) -> requests.Response:
-        return self._request_with_backoff("post", url, **kwargs)
 
+def parse_cli(argv: Optional[list[str]] = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="ALCF Inference Tool",
+        description="Submit a scientific markdown document to ALCF Sophia completions API",
+        epilog="Nicholas M. Synovic",
+    )
+    parser.add_argument(
+        "--api-key",
+        required=True,
+        help="ALCF inference server API key (Bearer token)",
+        type=str,
+    )
+    parser.add_argument(
+        "--prompt-id",
+        required=True,
+        choices=list(PROMPT_TEMPLATES.keys()),
+        help="Which prompt template to use",
+    )
+    parser.add_argument(
+        "--input-md",
+        required=True,
+        help="Path to Markdown file with scientific prose",
+        type=lambda x: Path(x).resolve(),
+    )
+    parser.add_argument(
+        "--output-json",
+        required=True,
+        help="Path to write response JSON (and status)",
+        type=lambda x: Path(x).resolve(),
+    )
+    parser.add_argument(
+        "--model",
+        default="openai/gpt-oss-120b",
+        help="Model name to request",
+        type=str,
+    )
 
-# ---------------------------
-# Utilities
-# ---------------------------
+    return parser.parse_args(argv)
 
 
 def mask_key(key: str, show_last: int = 4) -> str:
@@ -145,93 +162,20 @@ def mask_key(key: str, show_last: int = 4) -> str:
 
 def write_output_file(path: str, status_code: int, payload: Any) -> None:
     out = {"status_code": status_code, "response": payload}
+
     with open(path, "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=2, ensure_ascii=False)
 
 
-# ---------------------------
-# Main submit logic
-# ---------------------------
+def configure_logging(
+    log_dir: Path = Path(".").resolve(), level: int = logging.INFO
+) -> Path:
+    ts: str = datetime.now(tz=timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
+    log_filename: Path = Path(os.path.join(log_dir, f"alcf_submit_{ts}.log")).resolve()
 
-def build_payload_for_prompt(
-    prompt_id: str, system_prompt: str, markdown_text: str, model: str
-) -> Dict[str, Any]:
-    """
-    Build a chat-completions-style payload. Sophia's vLLM endpoint supports OpenAI-like chat format.
-    We include the system prompt and the markdown document as the user message.
-    """
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": markdown_text},
-    ]
-
-    payload = {
-        "model": model,
-        "messages": messages,
-    }
-    return payload
-
-
-def submit_to_sophia(
-    client: RequestsClient,
-    base_url: str,
-    api_key: str,
-    model: str,
-    system_prompt: str,
-    markdown_text: str,
-    output_json: str,
-) -> int:
-    url = base_url.rstrip("/") + COMPLETIONS_PATH
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-
-    payload = build_payload_for_prompt(
-        prompt_id="",
-        system_prompt=system_prompt,
-        markdown_text=markdown_text,
-        model=model,
-    )
-    logging.debug("Payload built: keys=%s", list(payload.keys()))
-
-    try:
-        resp = client.post(url, headers=headers, json=payload)
-    except Exception as exc:
-        logging.exception("Request failed after retries: %s", exc)
-        # write failure to output file
-        write_output_file(output_json, status_code=0, payload={"error": str(exc)})
-        return 1
-
-    # Try to parse JSON, otherwise capture text
-    try:
-        resp_json = resp.json()
-    except ValueError:
-        resp_json = {"text": resp.text}
-
-    # Write to output file
-    write_output_file(output_json, status_code=resp.status_code, payload=resp_json)
-    logging.info("Wrote response to %s (status %d)", output_json, resp.status_code)
-
-    if not resp.ok:
-        logging.error("Non-OK response from server: %s", resp.status_code)
-        return 2
-
-    return 0
-
-
-# ---------------------------
-# CLI / main
-# ---------------------------
-
-
-def configure_logging(log_dir: str = ".", level: int = logging.INFO) -> str:
-    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    log_filename = os.path.join(log_dir, f"alcf_submit_{ts}.log")
     # basic file handler + console
-    logger = logging.getLogger()
+    logger: Logger = logging.getLogger()
     logger.setLevel(level)
 
     # Avoid adding multiple handlers in interactive re-runs
@@ -251,54 +195,15 @@ def configure_logging(log_dir: str = ".", level: int = logging.INFO) -> str:
     return log_filename
 
 
-def read_markdown_file(path: str) -> str:
-    with open(path, "r", encoding="utf-8") as fh:
-        return fh.read()
-
-
-def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Submit a scientific markdown document to ALCF Sophia completions API"
-    )
-    parser.add_argument(
-        "--api-key", required=True, help="ALCF inference server API key (Bearer token)"
-    )
-    parser.add_argument(
-        "--prompt-id",
-        required=True,
-        choices=list(PROMPT_TEMPLATES.keys()),
-        help="Which prompt template to use",
-    )
-    parser.add_argument(
-        "--input-md", required=True, help="Path to Markdown file with scientific prose"
-    )
-    parser.add_argument(
-        "--output-json", required=True, help="Path to write response JSON (and status)"
-    )
-    parser.add_argument(
-        "--model", default="Meta-Llama-3.1-8B-Instruct", help="Model name to request"
-    )
-    parser.add_argument(
-        "--base-url",
-        default=DEFAULT_BASE_URL,
-        help="Base URL for Sophia vLLM endpoints",
-    )
-    parser.add_argument(
-        "--log-dir", default=".", help="Directory to write timestamped logs"
-    )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=60,
-        help="Per-request timeout seconds (default 60)",
-    )
-
-    return parser.parse_args(argv)
-
-
 def main(argv: Optional[list[str]] = None) -> int:
-    args = parse_args(argv)
-    logpath = configure_logging(log_dir=args.log_dir)
+    # Set default return code
+    rc: int = 0
+
+    # Parse the command line
+    args: Namespace = parse_cli(argv)
+
+    # Configure logging
+    configure_logging()
 
     # Mask API key in logs
     logging.info(
@@ -310,31 +215,36 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     logging.debug("API key (masked): %s", mask_key(args.api_key))
 
+    # Get system prompt
+    system_prompt: str = PROMPT_TEMPLATES[args.prompt_id]
+    logging.info("Loaded system prompt: %s", args.prompt_id)
+
     # Validate input markdown file
-    if not os.path.isfile(args.input_md):
+    if not args.input_md.is_file():
         logging.error("Input markdown file not found: %s", args.input_md)
         return 2
+    else:
+        markdown_text: str = args.input_md.read_text(encoding="utf-8")
+        logging.info("Loaded user prompt: %s", args.input_md)
 
-    markdown_text = read_markdown_file(args.input_md)
+    # Connect to the inference service
+    oc: ALCFConnection = ALCFConnection(api_key=args.api_key)
+    logging.info("Connected to the ALCF inference server")
 
-    system_prompt = PROMPT_TEMPLATES.get(args.prompt_id)
-    if system_prompt is None:
-        logging.error("Unknown prompt id: %s", args.prompt_id)
-        return 2
-
-    # create requests client
-    client = RequestsClient(timeout=args.timeout, retries=5, backoff_factor=1.0)
-
-    logging.info("Submitting to Sophia at %s", args.base_url)
-    rc = submit_to_sophia(
-        client=client,
-        base_url=args.base_url,
-        api_key=args.api_key,
-        model=args.model,
+    # Submit content for analysis
+    logging.info("Sent request")
+    start_time: float = time()
+    resp: ChatCompletion = oc.query(
         system_prompt=system_prompt,
-        markdown_text=markdown_text,
-        output_json=args.output_json,
+        user_prompt=markdown_text,
     )
+    end_time: float = time()
+    logging.info(f"Response generated in {end_time - start_time} seconds")
+
+    # Handle completions
+    message_json: dict = loads(s=resp.choices[0].message.content)
+    logging.info("Writing JSON to %s", args.output_json)
+    dump(obj=message_json, fp=args.output_json.open(mode="w"), indent=4)
 
     logging.info("Finished with return code %d", rc)
     return rc
