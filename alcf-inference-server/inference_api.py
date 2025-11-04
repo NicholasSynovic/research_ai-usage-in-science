@@ -177,7 +177,12 @@ def submit_request(
     logging.info(f"Response generated in {end_time - start_time} seconds")
 
     # Handle completions
-    return loads(s=resp.choices[0].message.content)
+    data: dict = {}
+    try:
+        data = loads(s=resp.choices[0].message.content)
+    except TypeError:
+        pass
+    return data
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -240,6 +245,12 @@ def main(argv: Optional[list[str]] = None) -> int:
                 )
             except InternalServerError:
                 logging.fatal("Unable to inference document %d", plos_paper_id)
+                continue
+
+            if message_json == {}:
+                logging.fatal(
+                    "Unable to inference document %d (NoneType response)", plos_paper_id
+                )
                 continue
 
             logging.info("Writing JSON to %s", output_fp)
