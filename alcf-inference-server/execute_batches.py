@@ -13,22 +13,23 @@ headers = {
     "Authorization": f"Bearer {access_token}",
     "Content-Type": "application/json",
 }
-# url = "https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1/batches"
 
-# # Submit batch request
-# data = {
-#     "model": "openai/gpt-oss-120b",
-#     "input_file": "/home/nsynovic/jsonl/output_0001.jsonl",
-#     "output_folder_path": "/home/nsynovic/jsonl/output",
-# }
+# Submit batch request
+url = "https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1/batches"
 
-# response = requests.post(url, headers=headers, json=data)
-# print(response.json())
+data = {
+    "model": "openai/gpt-oss-120b",
+    "input_file": "/home/nsynovic/jsonl/output_0001.jsonl",
+    "output_folder_path": "/home/nsynovic/jsonl/output",
+}
 
-url = "https://inference-api.alcf.anl.gov/resource_server/v1/batches"
+response = requests.post(url, headers=headers, json=data)
+print(response.json())
 
-# List all batches
-while True:
-    response = requests.get(url, headers=headers)
-    print(response.json()[-1])
-    sleep(10)
+# url = "https://inference-api.alcf.anl.gov/resource_server/v1/batches"
+
+# # List all batches
+# while True:
+#     response = requests.get(url, headers=headers)
+#     print(response.json()[-1])
+#     sleep(10)
