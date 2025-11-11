@@ -7,7 +7,7 @@ def init(logger: Logger, **kwargs) -> None:
     logger.debug(msg=f"init kwargs: {kwargs}")
     runner: InitRunner = InitRunner(
         db_path=kwargs["init.db"],
-        min_year=kwargs["init.min_year"],
-        max_year=kwargs["init.max_year"],
+        min_year=kwargs["init.min"],
+        max_year=kwargs["init.max"],
     )
     runner.execute(logger=logger)
