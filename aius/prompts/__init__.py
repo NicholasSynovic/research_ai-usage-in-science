@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class COSTAR_SystemPrompt(BaseModel):
+    tag: str
     context: str
     objective: str
     response: str
@@ -59,6 +60,7 @@ __reuse_key_words: str = """
 ```"""
 
 USES_DL_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
+    tag="uses_dl",
     context="You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine readable format. Your sole responsibility is to evaluate the paper's content and determine whether the author's use deep learning models or methods in their methodology. Your response will be consumed by downstream systems that require structured JSON.",
     objective="""Your task is to output only a JSON object containing a key-value pairs, where:
 
@@ -79,6 +81,7 @@ Nothing else should ever be returned.""",
 )
 
 USES_PTMS_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
+    tag="uses_ptms",
     context="You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine whether the authors use pre-trained deep learning models (PTMs) in their methodology. Your response will be consumed by downstream systems that require structured JSON.",
     objective="""Your task is to output only a JSON object containing key-value pairs, where:
 
@@ -99,6 +102,7 @@ Nothing else should ever be returned.""",
 )
 
 IDENTIFY_PTMS_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
+    tag="identify_ptms",
     context=f"""You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine what pre-trained deep learning models the authors use in their methodology. Your response will be consumed by downstream systems that require structured JSON.
 Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can reference in your analysis:
 
@@ -130,6 +134,7 @@ Nothing else should ever be returned.""",
 )
 
 IDENTIFY_PTM_REUSE_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
+    tag="identify_ptm_reuse",
     context=f"""You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine the form and classification of pre-trained deep learning reuse models the authors use in their methodology. Your response will be consumed by downstream systems that require structured JSON.
 Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can reference in your analysis:
 
@@ -172,6 +177,7 @@ Nothing else should ever be returned.""",
 )
 
 IDENTIFY_PTM_USAGE_IN_SCIENTIFIC_PROCESS: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
+    tag="identify_ptm_science",
     context=f"""You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine where in the scientific method a pre-trained deep learning model was leveraged. Your response will be consumed by downstream systems that require structured JSON.
 Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can refence in your analysis:
 

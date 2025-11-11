@@ -18,27 +18,6 @@ POST_TIMEOUT: int = 36000
 YEAR_LIST: list[int] = list(range(2014, 2025))
 YEARS: DataFrame = DataFrame(data={"year": YEAR_LIST})
 
-FIELD_FILTER: set[str] = {
-    "Agricultural and Biological Sciences",
-    "Environmental Science",
-    "Biochemistry, Genetics and Molecular Biology",
-    "Immunology and Microbiology",
-    "Neuroscience",
-    "Earth and Planetary Sciences",
-    "Physics and Astronomy",
-    "Chemistry",
-}
-
-KEYWORD_LIST: list[str] = [
-    r'"Deep Learning"',
-    r'"Deep Neural Network"',
-    r'"Hugging Face"',
-    r'"HuggingFace"',
-    r'"Model Checkpoint"',
-    r'"Model Weights"',
-    r'"Pre-Trained Model"',
-]
-
 
 SEARCH_KEYWORDS: DataFrame = DataFrame(
     data={
