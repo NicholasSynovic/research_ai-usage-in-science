@@ -34,5 +34,9 @@ def search(logger: Logger, **kwargs) -> None:
     db: DB = connect_to_db(logger=logger, db_path=kwargs["search.db"])
 
     # Execute runner
-    runner: SearchRunner = SearchRunner(db=db, journal=kwargs["search.journal"])
-    runner.execute(logger=logger)
+    runner: SearchRunner = SearchRunner(
+        logger=logger,
+        db=db,
+        journal=kwargs["search.journal"],
+    )
+    runner.execute()

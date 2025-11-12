@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from itertools import product
+from logging import Logger
 from string import Template
 
 from pydantic import BaseModel
@@ -8,13 +9,13 @@ from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 
 
-class ResponseModel(BaseModel):
-    response: dict
+class SearchModel(BaseModel):
     status_code: int
     year: int
     search_keyword: str
     megajournal: str
     url: str
+    json_data: dict
 
 
 class ArticleModel(BaseModel):
@@ -43,8 +44,32 @@ class MegaJournal(ABC):
             ),
         )
 
-    @abstractmethod
-    def search(self) -> list[ResponseModel]: ...
+    def search_single_page(
+        self,
+        logger: Logger,
+        keyword_year_pair: tuple[str, int],
+        page: int,
+    ) -> SearchModel:
+        search_url: str = self.search_url_template.substitute(
+            search_keyword=keyword_year_pair[0],
+            year=keyword_year_pair[1],
+            page=page,
+        )
+        logger.info(msg=f"Searching URL: {search_url}")
+
+        resp: Response = self.session.get(url=search_url)
+        logger.debug(msg=f"Response status code: {resp.status_code}")
+        return SearchModel(
+            status_code=resp.status_code,
+            year=keyword_year_pair[1],
+            search_keyword=keyword_year_pair[0],
+            megajournal=self.megajournal,
+            url=search_url,
+            json_data=resp.json(),
+        )
 
     @abstractmethod
-    def parse_response(self, responses: list[ResponseModel]) -> list[ArticleModel]: ...
+    def search(self) -> list[SearchModel]: ...
+
+    @abstractmethod
+    def parse_response(self, responses: list[SearchModel]) -> list[ArticleModel]: ...

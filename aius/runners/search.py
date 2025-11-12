@@ -8,17 +8,26 @@ from aius.search.plos import PLOS
 
 class SearchRunner(Runner):
     def __init__(self, logger: Logger, db: DB, journal: str) -> None:
+        self.logger: Logger = logger
+
         self.journal: MegaJournal | None
         match journal:
             case "plos":
-                self.journal = PLOS(logger=logger, db=db)
+                self.journal = PLOS(logger=self.logger, db=db)
             case _:
                 self.journal = None
 
-    def execute(self, logger: Logger) -> int:
         if self.journal is None:
+            self.logger.error(msg=f"Journal is set to None (journal={journal})")
+        else:
+            self.logger.info(msg=f"Identified journal as {self.journal.megajournal}")
+
+    def execute(self) -> int:
+        if self.journal is None:
+            self.logger.info(msg="Journal is None. Returning 1")
             return 1
 
-        [print(f) for f in self.journal.keyword_year_products]
+        self.logger.info(msg=f"Executing {self.journal.megajournal} search")
+        self.journal.search()
 
         return 0
