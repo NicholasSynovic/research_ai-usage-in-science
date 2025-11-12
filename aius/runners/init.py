@@ -1,5 +1,4 @@
 from logging import Logger
-from pathlib import Path
 
 from pandas import DataFrame
 
@@ -9,11 +8,21 @@ from aius.runners.runner import Runner
 
 
 class InitRunner(Runner):
-    def __init__(self, db_path: Path, min_year: int, max_year: int) -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        db: DB,
+        min_year: int,
+        max_year: int,
+    ) -> None:
+        self.logger: Logger = logger
+
         # Set constants
-        self.db_path: Path = db_path
+        self.db: DB = db
         self.min_year: int = min_year
         self.max_year: int = max_year
+        self.logger.info(msg=f"Minimum year: {self.min_year}")
+        self.logger.info(msg=f"Maximum year: {self.max_year}")
 
         # Natural science OpenAlex field constants
         self.ns_fields: list[tuple[str, int]] = [
@@ -48,68 +57,54 @@ class InitRunner(Runner):
 
         # Create range of years
         self.year_range: range = range(self.min_year, self.max_year + 1)
+        self.logger.info(msg=f"Years to store: {list(self.year_range)}")
 
-    def execute(self, logger: Logger) -> int:
-        # Lambda function to simplify writing to the database
-        write_data = lambda table, data: DataFrame(data=data).to_sql(
+    def _write_data_to_table(self, table: str, data: dict[str, list]) -> None:
+        self.logger.info(msg=f"Writing data to the `{table}` table")
+        self.logger.debug(msg=f"Data: {data}")
+        DataFrame(data=data).to_sql(
             name=table,
-            con=db.engine,
+            con=self.db.engine,
             if_exists="append",
             index=True,
             index_label="_id",
         )
+        self.logger.info(msg=f"Wrote data to the `{table}` table")
 
-        # Connect to the database
-        logger.info(msg=f"Connected to SQLite3 database: {self.db_path}")
-        db: DB = DB(logger=logger, db_path=self.db_path)
-
+    def execute(self) -> int:
         # Write LLM prompts
-        table: str = "_llm_prompts"
-        logger.info(msg=f"Writing LLM prompts to the `{table}` table")
-        write_data(
-            table=table,
+        self._write_data_to_table(
+            table="_llm_prompts",
             data={
                 "tag": [p.tag for p in self.llm_prompts],
                 "prompt": [p.create_prompt() for p in self.llm_prompts],
                 "json_string": [p.model_dump_json(indent=4) for p in self.llm_prompts],
             },
         )
-        logger.info(msg=f"Wrote LLM prompt to the `{table}` table")
 
         # Write OpenAlex natural science field filter
-        table = "_openalex_natural_science_fields"
-        logger.info(
-            msg=f"Writing OpenAlex natural science fields to the `{table}` table"
-        )
-        write_data(
-            table=table,
+        self._write_data_to_table(
+            table="_openalex_natural_science_fields",
             data={
                 "field": [field[0] for field in self.ns_fields],
                 "openalex_id": [field[1] for field in self.ns_fields],
             },
         )
-        logger.info(msg=f"Wrote OpenAlex natural science fields to the `{table}` table")
 
         # Write search keywords
-        table = "_search_keywords"
-        logger.info(msg=f"Writing search keywords to the `{table}` table")
-        write_data(
-            table=table,
+        self._write_data_to_table(
+            table="_search_keywords",
             data={
                 "keyword": self.search_keywords,
             },
         )
-        logger.info(msg=f"Wrote search keywords to the `{table}` table")
 
         # Write years
-        table = "_years"
-        logger.info(msg=f"Writing years to the `{table}` table")
-        write_data(
-            table=table,
+        self._write_data_to_table(
+            table="_years",
             data={
                 "year": list(self.year_range),
             },
         )
-        logger.info(msg=f"Wrote years to the `{table}` table")
 
         return 0

@@ -13,3 +13,7 @@ DB_DEFAULT_PATH: Path = Path(f"{DB_DEFAULT_NAME}").resolve()
 # Step 0 variables
 MIN_YEAR_HELP: str = "Minimum year to search for documents"
 MAX_YEAR_HELP: str = "Maximum year to search for documents"
+
+# Step 1 variables
+JOURNAL_HELP: str = "Mega-journal to search from"
+JOURNAL_CHOICES: list[str] = ["plos"]

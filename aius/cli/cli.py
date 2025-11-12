@@ -28,6 +28,9 @@ class CLI:
         # Step 0: Load constants into the database
         self.add_load_constants()
 
+        # Step 1: Search
+        self.add_search()
+
         # # Queries PLOS
         # self.add_search_plos()
 
@@ -71,7 +74,6 @@ class CLI:
         )
 
         parser.add_argument(
-            "-d",
             "--db",
             nargs=1,
             default=self.database_path,
@@ -96,6 +98,32 @@ class CLI:
             type=lambda x: min([self.current_year, x]),
             help=MAX_YEAR_HELP,
             dest="init.max",
+        )
+
+    def add_search(self) -> None:
+        parser: ArgumentParser = self.subparsers.add_parser(
+            name="search",
+            help="Search Journals",
+            description="Step 1",
+        )
+
+        parser.add_argument(
+            "--db",
+            nargs=1,
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=DB_HELP_MESSAGE,
+            dest="search.db",
+        )
+
+        parser.add_argument(
+            "--journal",
+            nargs=1,
+            default=JOURNAL_CHOICES[0],
+            type=str,
+            choices=JOURNAL_CHOICES,
+            help=JOURNAL_HELP,
+            dest="search.journal",
         )
 
     # def add_search_plos(self) -> None:

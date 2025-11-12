@@ -5,10 +5,13 @@ Copyright (C) 2025 Nicholas M. Synovic
 """
 
 import contextlib
+import warnings
 from logging import Logger
 from pathlib import Path
 from string import Template
 
+import pandas
+from pandas import DataFrame
 from sqlalchemy import (
     Boolean,
     Column,
@@ -43,6 +46,9 @@ class DB:
             created if it doesn't exist.
 
         """
+        # Supress warnings
+        warnings.filterwarnings(action="ignore")
+
         # Establish class variables
         self.metadata: MetaData = MetaData()
 
@@ -191,6 +197,24 @@ class DB:
         )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
+
+    def get_search_keywords(self) -> list[str]:
+        df: DataFrame = pandas.read_sql_table(
+            table_name="_search_keywords",
+            con=self.engine,
+            index_col="_id",
+        )
+
+        return df["keyword"].tolist()
+
+    def get_years(self) -> list[int]:
+        df: DataFrame = pandas.read_sql_table(
+            table_name="_years",
+            con=self.engine,
+            index_col="_id",
+        )
+
+        return df["year"].tolist()
 
     def get_last_row_id(self, table_name: str) -> int:
         """

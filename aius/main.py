@@ -16,7 +16,7 @@ def setup_logging() -> None:
     log_file: Path = Path(f"{MODULE_NAME}_{timestamp}.log").resolve()
 
     # Setup the logger
-    logger = logging.getLogger()
+    logging.getLogger()
     logging.basicConfig(
         filename=log_file,
         filemode="w",
@@ -30,6 +30,8 @@ def get_subparser_runner(subparser: str):
     match subparser:
         case "init":
             return runners.init
+        case "search":
+            return runners.search
         case _:
             return -1
 
