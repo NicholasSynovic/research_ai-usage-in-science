@@ -98,103 +98,105 @@ class DB:
 
         # Search table
         _: Table = Table(
-            "plos_searches",
+            "searches",
             self.metadata,
             Column("_id", Integer, primary_key=True),
-            Column("json", String),
-            Column("keyword", String),
-            Column("page", Integer),
-            Column("url", String),
+            Column("timestamp", DateTime),
+            Column("megajournal", String),
+            Column("search_keyword", String),
             Column("year", Integer),
-            Column("timestamp", DateTime),
-        )
-
-        # Papers table
-        _: Table = Table(
-            "plos_paper_dois",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("doi", String),
-        )
-
-        # Searches to Papers table
-        _: Table = Table(
-            "plos_searches_to_paper_dois",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_search_id", Integer, ForeignKey("plos_searches._id")),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-        )
-
-        # OpenAlex table
-        _: Table = Table(
-            "plos_paper_openalex_metadata",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-            Column("json", String),
-            Column("cited_by_count", Integer),
-            Column("open_access", Boolean),
-            Column("topic_0", String),
-            Column("topic_1", String),
-            Column("topic_2", String),
             Column("url", String),
-            Column("timestamp", DateTime),
+            Column("page", Integer),
+            Column("status_code", String),
+            Column("json_data", String),
         )
 
-        # PLOS Natural Science Papers
-        _: Table = Table(
-            "plos_natural_science_papers",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-        )
+        # # Papers table
+        # _: Table = Table(
+        #     "plos_paper_dois",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("doi", String),
+        # )
 
-        # PLOS Natural Science Paper Content
-        _: Table = Table(
-            "plos_natural_science_paper_content",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-            Column("raw_jats_xml", String),
-            Column("formatted_jats_xml", String),
-            Column("raw_md", String),
-            Column("formatted_md", String),
-            Column("raw_jats_xml_token_count", Integer),
-            Column("formatted_jats_xml_token_count", Integer),
-            Column("raw_md_token_count", Integer),
-            Column("formatted_md_token_count", Integer),
-        )
+        # # Searches to Papers table
+        # _: Table = Table(
+        #     "plos_searches_to_paper_dois",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("plos_search_id", Integer, ForeignKey("plos_searches._id")),
+        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        # )
 
-        # Pilot Study PLOS Paper
-        _: Table = Table(
-            "plos_pilot_study_papers",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-            Column("url", String),
-            Column("json", String),
-            Column("timestamp", DateTime),
-        )
+        # # OpenAlex table
+        # _: Table = Table(
+        #     "plos_paper_openalex_metadata",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        #     Column("json", String),
+        #     Column("cited_by_count", Integer),
+        #     Column("open_access", Boolean),
+        #     Column("topic_0", String),
+        #     Column("topic_1", String),
+        #     Column("topic_2", String),
+        #     Column("url", String),
+        #     Column("timestamp", DateTime),
+        # )
 
-        # Author Agreement PLOS Papers
-        _: Table = Table(
-            "plos_author_agreement_papers",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-            Column("uses_dl", Boolean),
-            Column("uses_ptms", Boolean),
-            Column("ptm_name_reuse_type", String),
-        )
+        # # PLOS Natural Science Papers
+        # _: Table = Table(
+        #     "plos_natural_science_papers",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        # )
 
-        # PLOS LLM Prompt Engineering papers
-        _: Table = Table(
-            "plos_llm_prompt_engineering_papers",
-            self.metadata,
-            Column("_id", Integer, primary_key=True),
-            Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-        )
+        # # PLOS Natural Science Paper Content
+        # _: Table = Table(
+        #     "plos_natural_science_paper_content",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        #     Column("raw_jats_xml", String),
+        #     Column("formatted_jats_xml", String),
+        #     Column("raw_md", String),
+        #     Column("formatted_md", String),
+        #     Column("raw_jats_xml_token_count", Integer),
+        #     Column("formatted_jats_xml_token_count", Integer),
+        #     Column("raw_md_token_count", Integer),
+        #     Column("formatted_md_token_count", Integer),
+        # )
+
+        # # Pilot Study PLOS Paper
+        # _: Table = Table(
+        #     "plos_pilot_study_papers",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        #     Column("url", String),
+        #     Column("json", String),
+        #     Column("timestamp", DateTime),
+        # )
+
+        # # Author Agreement PLOS Papers
+        # _: Table = Table(
+        #     "plos_author_agreement_papers",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        #     Column("uses_dl", Boolean),
+        #     Column("uses_ptms", Boolean),
+        #     Column("ptm_name_reuse_type", String),
+        # )
+
+        # # PLOS LLM Prompt Engineering papers
+        # _: Table = Table(
+        #     "plos_llm_prompt_engineering_papers",
+        #     self.metadata,
+        #     Column("_id", Integer, primary_key=True),
+        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
+        # )
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 

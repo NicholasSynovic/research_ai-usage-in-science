@@ -1,10 +1,10 @@
 from itertools import product
+from json import dumps
 from logging import Logger
 from math import ceil
 from string import Template
 
 from progress.bar import Bar
-from requests import Response
 
 from aius.db import DB
 from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
@@ -18,14 +18,15 @@ class PLOS(MegaJournal):
         super().__init__()
 
         # Set constants
+        self.db = db
         self.megajournal: str = "PLOS"
         self.search_url_template: Template = Template(
             template="https://journals.plos.org/plosone/dynamicSearch?filterArticleTypes=Research Article&sortOrder=DATE_NEWEST_FIRST&resultsPerPage=100&q=${search_keyword}&filterStartDate=${year}-01-01&filterEndDate=${year}-12-31&page=${page}"
         )
 
         self.keyword_year_products: product = product(
-            db.get_search_keywords(),
-            db.get_years(),
+            self.db.get_search_keywords(),
+            self.db.get_years(),
         )
 
         self.logger.info(msg=f"Mega Journal: {self.megajournal}")
@@ -55,7 +56,7 @@ class PLOS(MegaJournal):
                 resp: SearchModel = self.search_single_page(
                     logger=self.logger,
                     keyword_year_pair=pair,
-                    page=page,
+                    page=1,
                 )
                 data.append(resp)
                 bar.next()
