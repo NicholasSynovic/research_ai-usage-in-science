@@ -32,6 +32,8 @@ def get_subparser_runner(subparser: str):
             return runners.init
         case "search":
             return runners.search
+        case "openalex":
+            return runners.openalex
         case _:
             return -1
 

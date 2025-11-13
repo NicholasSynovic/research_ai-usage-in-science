@@ -31,19 +31,8 @@ class CLI:
         # Step 1: Search
         self.add_search()
 
-        # # Queries PLOS
-        # self.add_search_plos()
-
-        # # Organizes data; all commands related to papers come after this one
-        # self.add_identify_papers()
-
-        # # These load CSV files that reference papers by DOI
-        # self.add_load_pilot_study()
-        # self.add_load_author_agreement()
-        # self.add_load_llm_prompt_engineering_papers()
-
-        # # Query OpenAlex
-        # self.add_openalex()
+        # Step 2: Search OpenAlex
+        self.add_openalex()
 
         # # Identify Natural Science documents
         # self.add_document_filter()
@@ -75,7 +64,6 @@ class CLI:
 
         parser.add_argument(
             "--db",
-            nargs=1,
             default=self.database_path,
             type=lambda x: Path(x).resolve(),
             help=DB_HELP_MESSAGE,
@@ -84,7 +72,6 @@ class CLI:
 
         parser.add_argument(
             "--min-year",
-            nargs=1,
             default=2015,
             type=lambda x: max([2000, x]),
             help=MIN_YEAR_HELP,
@@ -93,7 +80,6 @@ class CLI:
 
         parser.add_argument(
             "--max-year",
-            nargs=1,
             default=2024,
             type=lambda x: min([self.current_year, x]),
             help=MAX_YEAR_HELP,
@@ -109,7 +95,6 @@ class CLI:
 
         parser.add_argument(
             "--db",
-            nargs=1,
             default=self.database_path,
             type=lambda x: Path(x).resolve(),
             help=DB_HELP_MESSAGE,
@@ -125,140 +110,28 @@ class CLI:
             dest="search.journal",
         )
 
-    # def add_search_plos(self) -> None:
-    #     """Add a sub-parser for searching PLOS for papers with keywords."""
-    #     search_parser: ArgumentParser = self.subparsers.add_parser(
-    #         name="search-plos",
-    #         help="Search PLOS for papers",
-    #         description="Step 1",
-    #     )
+    def add_openalex(self) -> None:
+        """Configure a sub-parser for retrieving metadata from OpenAlex."""
+        openalex_parser: ArgumentParser = self.subparsers.add_parser(
+            name="openalex",
+            help="Get document metadata from OpenAlex",
+            description="Step 6",
+        )
 
-    #     search_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="search_plos.db",
-    #     )
-
-    # def add_identify_papers(self) -> None:
-    #     """Add a sub-parser for identifying documents from journal searches."""
-    #     extract_documents_parser: ArgumentParser = self.subparsers.add_parser(
-    #         name="identify-documents",
-    #         help="Identify documents from journal searches",
-    #         description="Step 2",
-    #     )
-
-    #     extract_documents_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="identify_documents.db",
-    #     )
-
-    # def add_load_pilot_study(self) -> None:
-    #     """Add a sub-parser to retrieve PLOS Natural Science paper content."""
-    #     load_pilot_study_parser: ArgumentParser = self.subparsers.add_parser(
-    #         name="load-pilot-study",
-    #         help="Load pilot study dataset",
-    #         description="Step 3",
-    #     )
-
-    #     load_pilot_study_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="load_pilot_study.db",
-    #     )
-    #     load_pilot_study_parser.add_argument(
-    #         "-i",
-    #         "--input-fp",
-    #         nargs=1,
-    #         required=True,
-    #         type=lambda x: Path(x).resolve(),
-    #         help="Path to pilot study CSV file",
-    #         dest="load_pilot_study.fp",
-    #     )
-
-    # def add_load_author_agreement(self) -> None:
-    #     author_agreement_parser: ArgumentParser = self.subparsers.add_parser(
-    #         name="load-author-agreement",
-    #         help="Load author agreement dataset",
-    #         description="Step 4",
-    #     )
-
-    #     author_agreement_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="load_author_agreement.db",
-    #     )
-    #     author_agreement_parser.add_argument(
-    #         "-i",
-    #         "--input-fp",
-    #         nargs=1,
-    #         required=True,
-    #         type=lambda x: Path(x).resolve(),
-    #         help="Path to author agreement CSV file",
-    #         dest="load_author_agreement.fp",
-    #     )
-
-    # def add_load_llm_prompt_engineering_papers(self) -> None:
-    #     llm_prompt_engineering_papers_parser: ArgumentParser = (
-    #         self.subparsers.add_parser(
-    #             name="load-llm-prompt-engineering-papers",
-    #             help="Load LLM prompt engineering papers into the database",
-    #             description="Step 5",
-    #         )
-    #     )
-
-    #     llm_prompt_engineering_papers_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="load_llm_prompt_prompt_engineering_papers.db",
-    #     )
-
-    # def add_openalex(self) -> None:
-    #     """Configure a sub-parser for retrieving metadata from OpenAlex."""
-    #     openalex_parser: ArgumentParser = self.subparsers.add_parser(
-    #         name="openalex",
-    #         help="Get document metadata from OpenAlex",
-    #         description="Step 6",
-    #     )
-
-    #     openalex_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="openalex.db",
-    #     )
-    #     openalex_parser.add_argument(
-    #         "-e",
-    #         "--email",
-    #         nargs=1,
-    #         type=str,
-    #         help="Email address to access OpenAlex polite pool",
-    #         required=True,
-    #         dest="openalex.email",
-    #     )
+        openalex_parser.add_argument(
+            "--db",
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=DB_HELP_MESSAGE,
+            dest="openalex.db",
+        )
+        openalex_parser.add_argument(
+            "--email",
+            type=str,
+            help="Email address to access OpenAlex polite pool",
+            required=True,
+            dest="openalex.email",
+        )
 
     # def add_document_filter(self) -> None:
     #     """Add a sub-parser to filter documents by Natural Science category."""
