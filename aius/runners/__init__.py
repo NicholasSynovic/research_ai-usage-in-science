@@ -4,7 +4,7 @@ from pathlib import Path
 from aius.db import DB
 from aius.runners.init import InitRunner
 from aius.runners.search import SearchRunner
-
+from aius.runners.openalex import OpenAlexRunner
 
 def connect_to_db(logger: Logger, db_path: Path) -> DB:
     logger.info(msg=f"Connected to SQLite3 database: {db_path}")
@@ -38,5 +38,19 @@ def search(logger: Logger, **kwargs) -> None:
         logger=logger,
         db=db,
         journal=kwargs["search.journal"],
+    )
+    runner.execute()
+
+def openalex(logger: Logger, **kwargs)  ->  None:
+    logger.debug(msg=f"openalex kwargs: {kwargs}")
+
+    # Connect to the database
+    db: DB = connect_to_db(logger=logger, db_path=kwargs["openalex.db"])
+
+    # Execute runner
+    runner: OpenAlexRunner = OpenAlexRunner(
+        logger=logger,
+        db=db,
+        email=kwargs["openalex.email"],
     )
     runner.execute()

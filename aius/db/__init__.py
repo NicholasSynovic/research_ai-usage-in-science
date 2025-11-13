@@ -122,46 +122,20 @@ class DB:
             Column("journal", String),
         )
 
-        # # Papers table
-        # _: Table = Table(
-        #     "plos_paper_dois",
-        #     self.metadata,
-        #     Column("_id", Integer, primary_key=True),
-        #     Column("doi", String),
-        # )
-
-        # # Searches to Papers table
-        # _: Table = Table(
-        #     "plos_searches_to_paper_dois",
-        #     self.metadata,
-        #     Column("_id", Integer, primary_key=True),
-        #     Column("plos_search_id", Integer, ForeignKey("plos_searches._id")),
-        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-        # )
-
-        # # OpenAlex table
-        # _: Table = Table(
-        #     "plos_paper_openalex_metadata",
-        #     self.metadata,
-        #     Column("_id", Integer, primary_key=True),
-        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-        #     Column("json", String),
-        #     Column("cited_by_count", Integer),
-        #     Column("open_access", Boolean),
-        #     Column("topic_0", String),
-        #     Column("topic_1", String),
-        #     Column("topic_2", String),
-        #     Column("url", String),
-        #     Column("timestamp", DateTime),
-        # )
-
-        # # PLOS Natural Science Papers
-        # _: Table = Table(
-        #     "plos_natural_science_papers",
-        #     self.metadata,
-        #     Column("_id", Integer, primary_key=True),
-        #     Column("plos_paper_id", Integer, ForeignKey("plos_paper_dois._id")),
-        # )
+        # OpenAlex table
+        _: Table = Table(
+            "openalex",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("timestamp", DateTime),
+            Column("doi", String),
+            Column("cited_by_count", Integer),
+            Column("open_access", Boolean),
+            Column("topic_0", String),
+            Column("topic_1", String),
+            Column("topic_2", String),
+            Column("json_data", String),
+        )
 
         # # PLOS Natural Science Paper Content
         # _: Table = Table(
