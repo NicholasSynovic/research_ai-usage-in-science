@@ -185,6 +185,43 @@ class DB:
 
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
+        view_sql = """
+CREATE VIEW IF NOT EXISTS natural_science_article_dois AS
+WITH field_values AS (
+    SELECT
+        field
+    FROM
+        _openalex_natural_science_fields
+)
+SELECT
+    DISTINCT oa.doi
+FROM
+    openalex oa
+WHERE
+    oa.cited_by_count > 0
+    AND (
+        (
+            oa.topic_0 IN field_values
+            AND oa.topic_1 IN field_values
+        )
+        OR (
+            oa.topic_0 IN field_values
+            AND oa.topic_2 IN field_values
+        )
+        OR (
+            oa.topic_1 IN field_values
+            AND oa.topic_2 IN field_values
+        )
+    )
+;
+"""
+
+        # Execute the SQL to create the view
+        with self.engine.connect() as conn:
+            conn.execute(text("DROP VIEW IF EXISTS topic_field_matches;"))
+            conn.execute(text(view_sql))
+            conn.commit()
+
     def get_search_keywords(self) -> list[str]:
         df: DataFrame = pandas.read_sql_table(
             table_name="_search_keywords",
