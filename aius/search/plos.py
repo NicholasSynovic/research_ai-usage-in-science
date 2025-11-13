@@ -64,7 +64,7 @@ class PLOS(MegaJournal):
                 page_count = self._compute_total_number_of_pages(resp=resp)
 
                 # Iterate to the next page if page_count == 1
-                if page_count == 1:
+                if page_count <= 1:
                     continue
                 else:
                     bar.max = page_count
@@ -83,4 +83,30 @@ class PLOS(MegaJournal):
         return data
 
     def parse_response(self, responses: list[SearchModel]) -> list[ArticleModel]:
-        return []
+        data: list[ArticleModel] = []
+
+        response_index: int = 0
+
+        with Bar(
+            "Extracting articles from search results...", max=len(responses)
+        ) as bar:
+            response: SearchModel
+            for response in responses:
+                docs: list[dict] = response.json_data["searchResults"]["docs"]
+
+                doc: dict
+                for doc in docs:
+                    data.append(
+                        ArticleModel(
+                            doi=doc["id"],
+                            title=doc["title"],
+                            megajournal=self.megajournal,
+                            journal=doc["journal_name"],
+                            search_id=response_index,
+                        )
+                    )
+
+                response_index += 1
+                bar.next()
+
+        return data

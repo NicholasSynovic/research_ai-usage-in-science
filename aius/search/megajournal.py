@@ -44,9 +44,19 @@ class ArticleModel(BaseModel):
     title: str
     megajournal: str
     journal: str
-    search_keyword: str
-    published_date: datetime
-    journal_article_id: str
+    search_id: int
+
+
+def article_model_to_df(am: ArticleModel) -> DataFrame:
+    datum: dict[str, list] = {
+        "doi": [am.doi],
+        "title": [am.title],
+        "megajournal": [am.megajournal],
+        "journal": [am.journal],
+        "search_id": [am.search_id],
+    }
+
+    return DataFrame(data=datum)
 
 
 class MegaJournal(ABC):

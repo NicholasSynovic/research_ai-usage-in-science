@@ -3,6 +3,7 @@ from itertools import product
 from json import dumps
 from logging import Logger
 
+from progress.bar import Bar
 from requests import Response
 
 from aius.db import DB
@@ -91,7 +92,9 @@ class FrontiersIn(MegaJournal):
     def search(self) -> list[SearchModel]:
         data: list[SearchModel] = []
 
-        keywords: set[str] = {pair[0] for pair in self.keyword_year_products}
+        keywords: list[str] = sorted(
+            list({pair[0] for pair in self.keyword_year_products})
+        )
 
         keyword: str
         for keyword in keywords:
@@ -117,4 +120,30 @@ class FrontiersIn(MegaJournal):
         return data
 
     def parse_response(self, responses: list[SearchModel]) -> list[ArticleModel]:
-        return []
+        data: list[ArticleModel] = []
+
+        response_index: int = 0
+
+        with Bar(
+            "Extracting articles from search results...", max=len(responses)
+        ) as bar:
+            response: SearchModel
+            for response in responses:
+                docs: list[dict] = response.json_data["Articles"]
+
+                doc: dict
+                for doc in docs:
+                    data.append(
+                        ArticleModel(
+                            doi=doc["Doi"],
+                            title=doc["Title"],
+                            megajournal=self.megajournal,
+                            journal=doc["Journal"]["Title"],
+                            search_id=response_index,
+                        )
+                    )
+
+                response_index += 1
+                bar.next()
+
+        return data

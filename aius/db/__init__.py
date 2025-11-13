@@ -111,6 +111,17 @@ class DB:
             Column("json_data", String),
         )
 
+        # Articles table
+        _: Table = Table(
+            "articles",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("doi", String),
+            Column("title", String),
+            Column("megajournal", String),
+            Column("journal", String),
+        )
+
         # # Papers table
         # _: Table = Table(
         #     "plos_paper_dois",
