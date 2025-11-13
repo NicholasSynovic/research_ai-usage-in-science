@@ -22,6 +22,8 @@ class SearchRunner(Runner):
         match journal:
             case "plos":
                 self.journal = PLOS(logger=self.logger, db=db)
+            case "frontiersin":
+                self.journal = FrontiersIn(logger=self.logger, db=db)
             case _:
                 self.journal = None
 

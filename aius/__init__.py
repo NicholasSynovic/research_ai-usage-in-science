@@ -5,33 +5,14 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
-from mdformat import text
 from pandas import DataFrame
 
 MODULE_NAME: str = "aius"
 PROGRAM_NAME: str = "AIUS"
 PROGRAM_DESCRIPTION: str = "Identify AI usage in Natural Science research papers"
 PROGRAM_EPILOG: str = "Copyright 2025 (C) Nicholas M. Synovic"
-JOURNALS: DataFrame = DataFrame(data={"journal": ["Nature", "PLOS", "Science"]})
 GET_TIMEOUT: int = 60
 POST_TIMEOUT: int = 36000
-YEAR_LIST: list[int] = list(range(2014, 2025))
-YEARS: DataFrame = DataFrame(data={"year": YEAR_LIST})
-
-
-SEARCH_KEYWORDS: DataFrame = DataFrame(
-    data={
-        "keyword": [
-            r'"Deep Learning"',
-            r'"Deep Neural Network"',
-            r'"Hugging Face"',
-            r'"HuggingFace"',
-            r'"Model Checkpoint"',
-            r'"Model Weights"',
-            r'"Pre-Trained Model"',
-        ]
-    }
-)
 
 LLM_PROMPT_ENGINEERING_PAPERS: DataFrame = DataFrame(
     data={
