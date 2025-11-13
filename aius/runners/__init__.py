@@ -3,8 +3,9 @@ from pathlib import Path
 
 from aius.db import DB
 from aius.runners.init import InitRunner
-from aius.runners.search import SearchRunner
 from aius.runners.openalex import OpenAlexRunner
+from aius.runners.search import SearchRunner
+
 
 def connect_to_db(logger: Logger, db_path: Path) -> DB:
     logger.info(msg=f"Connected to SQLite3 database: {db_path}")
@@ -41,7 +42,8 @@ def search(logger: Logger, **kwargs) -> None:
     )
     runner.execute()
 
-def openalex(logger: Logger, **kwargs)  ->  None:
+
+def openalex(logger: Logger, **kwargs) -> None:
     logger.debug(msg=f"openalex kwargs: {kwargs}")
 
     # Connect to the database
