@@ -118,7 +118,6 @@ class CLI:
 
         parser.add_argument(
             "--journal",
-            nargs=1,
             default=JOURNAL_CHOICES[0],
             type=str,
             choices=JOURNAL_CHOICES,

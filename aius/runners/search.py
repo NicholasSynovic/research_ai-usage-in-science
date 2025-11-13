@@ -6,6 +6,7 @@ from pandas import DataFrame
 
 from aius.db import DB
 from aius.runners.runner import Runner
+from aius.search.frontiersin import FrontiersIn
 from aius.search.megajournal import (
     MegaJournal,
     SearchModel,
@@ -45,9 +46,17 @@ class SearchRunner(Runner):
         self.logger.info(msg=f"Wrote data to the `{table}` table")
 
     def execute(self) -> int:
+        # Check that the journal is not None
         if self.journal is None:
             self.logger.info(msg="Journal is None. Returning 1")
             return 1
+
+        # Get the current row count of the `searches` table to ensure that the
+        # SQL Unique constraint is not violated by updating DataFrame index
+        # later
+        search_table_row_count: int = self.journal.db.get_last_row_id(
+            table_name="searches"
+        )
 
         # Conduct searches
         self.logger.info(msg=f"Executing {self.journal.megajournal} search")
@@ -56,11 +65,16 @@ class SearchRunner(Runner):
             msg=f"Searched {len(searches)} queries in {self.journal.megajournal}"
         )
 
-        # Write searches to the database
+        # Create DataFrame of searches
         searches_df: DataFrame = pandas.concat(
             objs=[search_model_to_df(sm=sm) for sm in searches],
             ignore_index=True,
         )
+
+        if search_table_row_count != 0:
+            searches_df.index = searches_df.index + search_table_row_count + 1
+
+        # Write DataFrame to the database
         self._write_data_to_table(table="searches", data=searches_df)
 
         return 0

@@ -2,10 +2,11 @@ from datetime import datetime, timezone
 from itertools import product
 from json import dumps
 from logging import Logger
+
 from requests import Response
 
 from aius.db import DB
-from aius.search.megajournal import MegaJournal, SearchModel
+from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
 
 
 class FrontiersIn(MegaJournal):
@@ -35,6 +36,9 @@ class FrontiersIn(MegaJournal):
             "Top": 1,  # Change this to get more search results
             "UserId": 0,
         }
+        # self.search_headers: dict[str, str] = {
+        #     "Content-Type": "application/json"
+        # }
 
         self.keyword_year_products: product = product(
             self.db.get_search_keywords(),
@@ -45,7 +49,7 @@ class FrontiersIn(MegaJournal):
         self.logger.info(msg=f"Keyword-Year products: {self.keyword_year_products}")
 
     def _compute_total_number_of_papers(self, resp: SearchModel) -> int:
-        documents_found: int = int(resp.json_data["Summary"]["Aricle"]["Count"])
+        documents_found: int = int(resp.json_data["Summary"]["Article"]["Count"])
         self.logger.info(msg=f"Total number of documents found: {documents_found}")
 
         return documents_found
@@ -61,14 +65,18 @@ class FrontiersIn(MegaJournal):
         search_request_body: dict = self.search_api_body.copy()
         search_request_body["Search"] = keyword_year_pair[0]
         search_request_body["Top"] = page
-        logger.info(msg=f"Search API JSON data: {search_request_body}")
+        logger.info(msg=f"Search API JSON data: {dumps(obj=search_request_body)}")
 
         timestamp: float = datetime.now(tz=timezone.utc).timestamp()
         resp: Response = self.session.post(
             url=self.search_api_endpoint,
-            data=search_request_body,
+            json=search_request_body,
         )
         logger.debug(msg=f"Response status code: {resp.status_code}")
+
+        if resp.status_code != 200:
+            logger.error(msg=f"Non 200 response code: {resp.content}")
+
         return SearchModel(
             timestamp=timestamp,
             megajournal=self.megajournal,
@@ -83,14 +91,16 @@ class FrontiersIn(MegaJournal):
     def search(self) -> list[SearchModel]:
         data: list[SearchModel] = []
 
-        pair: tuple[str, int]
-        for pair in self.keyword_year_products:
-            self.logger.debug(msg=f"Keyword year pair being searched for: {pair}")
+        keywords: set[str] = {pair[0] for pair in self.keyword_year_products}
 
-            print(f"Searching {self.megajournal} for {pair[0]} in {pair[1]}...")
+        keyword: str
+        for keyword in keywords:
+            self.logger.debug(msg=f"Keyword being searched for: {keyword}")
+
+            print(f"Searching {self.megajournal} for {keyword} in all years...")
             resp: SearchModel = self.search_single_page(
                 logger=self.logger,
-                keyword_year_pair=pair,
+                keyword_year_pair=(keyword, 0),
                 page=1,
             )
 
@@ -99,9 +109,12 @@ class FrontiersIn(MegaJournal):
             data.append(
                 self.search_single_page(
                     logger=self.logger,
-                    keyword_year_pair=pair,
+                    keyword_year_pair=(keyword, 0),
                     page=paper_count,
                 )
             )
 
         return data
+
+    def parse_response(self, responses: list[SearchModel]) -> list[ArticleModel]:
+        return []
