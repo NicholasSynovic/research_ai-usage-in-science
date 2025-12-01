@@ -37,9 +37,6 @@ class FrontiersIn(MegaJournal):
             "Top": 1,  # Change this to get more search results
             "UserId": 0,
         }
-        # self.search_headers: dict[str, str] = {
-        #     "Content-Type": "application/json"
-        # }
 
         self.keyword_year_products: product = product(
             self.db.get_search_keywords(),
