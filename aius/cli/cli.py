@@ -34,8 +34,8 @@ class CLI:
         # Step 2: Search OpenAlex
         self.add_openalex()
 
-        # # Identify Natural Science documents
-        # self.add_document_filter()
+        # Step 3: Get JATS XML content from Natural Science DOIs
+        self.add_jats()
 
         # # Load data from all_of_plos.zip and `pandoc`
         # self.add_content_retriever()
@@ -115,7 +115,7 @@ class CLI:
         openalex_parser: ArgumentParser = self.subparsers.add_parser(
             name="openalex",
             help="Get document metadata from OpenAlex",
-            description="Step 6",
+            description="Step 2",
         )
 
         openalex_parser.add_argument(
@@ -131,6 +131,29 @@ class CLI:
             help="Email address to access OpenAlex polite pool",
             required=True,
             dest="openalex.email",
+        )
+
+    def add_jats(self) -> None:
+        """Configure a sub-parser for getting JATS XML from DOIs."""
+        jats_parser: ArgumentParser = self.subparsers.add_parser(
+            name="jats",
+            help="Get JATS XML from DOIs",
+            description="Step 3",
+        )
+
+        jats_parser.add_argument(
+            "--db",
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=DB_HELP_MESSAGE,
+            dest="jats.db",
+        )
+        jats_parser.add_argument(
+            "--plos-zip",
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help="Path to PLOS ZIP file containing all PLOS documents",
+            dest="jats.plos_zip",
         )
 
     # def add_document_filter(self) -> None:

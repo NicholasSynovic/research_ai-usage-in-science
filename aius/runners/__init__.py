@@ -56,3 +56,18 @@ def openalex(logger: Logger, **kwargs) -> None:
         email=kwargs["openalex.email"],
     )
     runner.execute()
+
+
+def jats(logger: Logger, **kwargs) -> None:
+    logger.debug(msg=f"jats kwargs: {kwargs}")
+
+    # Connect to the database
+    db: DB = connect_to_db(logger=logger, db_path=kwargs["jats.db"])
+
+    # # Execute runner
+    # runner: OpenAlexRunner = OpenAlexRunner(
+    #     logger=logger,
+    #     db=db,
+    #     email=kwargs["openalex.email"],
+    # )
+    # runner.execute()
