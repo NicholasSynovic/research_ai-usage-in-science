@@ -164,7 +164,7 @@ class F1000(MegaJournal):
                 for doc in docs:
                     data.append(
                         ArticleModel(
-                            doi=f"https://doi.org/{doc.text}",
+                            doi=doc.text,
                             title="",
                             megajournal=self.megajournal,
                             journal="",

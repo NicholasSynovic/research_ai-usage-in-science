@@ -186,7 +186,7 @@ class BMJ(MegaJournal):
 
                     data.append(
                         ArticleModel(
-                            doi=f"https://doi.org/{doi_tag.text}",
+                            doi=doi_tag.text.split(" ")[1],
                             title=title_tag.text,
                             megajournal=self.megajournal,
                             journal=journal_tag.text,
