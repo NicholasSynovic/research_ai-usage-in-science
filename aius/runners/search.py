@@ -16,6 +16,7 @@ from aius.search.megajournal import (
     article_model_to_df,
     search_model_to_df,
 )
+from aius.search.peerj import PeerJ
 from aius.search.plos import PLOS
 
 
@@ -25,14 +26,16 @@ class SearchRunner(Runner):
 
         self.journal: MegaJournal | None
         match journal:
-            case "plos":
-                self.journal = PLOS(logger=self.logger, db=db)
-            case "frontiersin":
-                self.journal = FrontiersIn(logger=self.logger, db=db)
             case "bmj":
                 self.journal = BMJ(logger=self.logger, db=db)
+            case "frontiersin":
+                self.journal = FrontiersIn(logger=self.logger, db=db)
             case "f1000":
                 self.journal = F1000(logger=self.logger, db=db)
+            case "peerj":
+                self.journal = PeerJ(logger=self.logger, db=db)
+            case "plos":
+                self.journal = PLOS(logger=self.logger, db=db)
             case _:
                 self.journal = None
 
