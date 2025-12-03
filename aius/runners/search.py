@@ -7,6 +7,7 @@ from pandas import DataFrame
 from aius.db import DB
 from aius.runners.runner import Runner
 from aius.search.bmj import BMJ
+from aius.search.f1000 import F1000
 from aius.search.frontiersin import FrontiersIn
 from aius.search.megajournal import (
     ArticleModel,
@@ -30,6 +31,8 @@ class SearchRunner(Runner):
                 self.journal = FrontiersIn(logger=self.logger, db=db)
             case "bmj":
                 self.journal = BMJ(logger=self.logger, db=db)
+            case "f1000":
+                self.journal = F1000(logger=self.logger, db=db)
             case _:
                 self.journal = None
 
