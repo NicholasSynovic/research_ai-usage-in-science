@@ -1,6 +1,7 @@
 from logging import Logger
 
 import pandas
+from bs4 import BeautifulSoup, ResultSet, Tag
 from mdformat import text
 from pandas import DataFrame, Series
 from progress.bar import Bar
@@ -29,6 +30,25 @@ class PandocRunner(Runner):
             index_col="_id",
         )
 
+    def format_xml(self, xml: str) -> str:
+        soup: BeautifulSoup = BeautifulSoup(markup=xml, features="lxml")
+
+        front_tag: Tag | None = soup.find(name="front")
+        back_tag: Tag | None = soup.find(name="back")
+        xref_tags: ResultSet[Tag] = soup.find_all(name="xref")
+
+        if isinstance(front_tag, Tag):
+            front_tag.clear(decompose=False)
+
+        if isinstance(back_tag, Tag):
+            back_tag.clear(decompose=False)
+
+        xref_tag: Tag
+        for xref_tag in xref_tags:
+            xref_tag.decompose()
+
+        return soup.prettify()
+
     def _write_data_to_table(self, table: str, data: DataFrame) -> None:
         self.logger.info(msg=f"Writing data to the `{table}` table")
         self.logger.debug(msg=f"Data: {data}")
@@ -51,7 +71,8 @@ class PandocRunner(Runner):
             for _, row in df.iterrows():
                 data["doi"].append(row["doi"])
 
-                self.json_body["text"] = row["jats"]
+                xml: str = self.format_xml(xml=row["jats_xml"])
+                self.json_body["text"] = xml
 
                 resp: Response = post(
                     url=self.pandoc_uri,
