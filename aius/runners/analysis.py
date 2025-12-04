@@ -2,7 +2,7 @@ from json import dumps, loads
 from logging import Logger
 
 import pandas
-from openai import OpenAI
+from openai import OpenAI, InternalServerError
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame, Series
 from progress.bar import Bar
@@ -104,10 +104,14 @@ class AnalysisRunner(Runner):
                 data["doi"].append(row["doi"])
                 user_prompt: str = row["markdown"]
 
-                resp: ChatCompletion = self.inference(
-                    system_prompt=system_prompt,
-                    user_prompt=user_prompt,
-                )
+                try:
+                    resp: ChatCompletion = self.inference(
+                        system_prompt=system_prompt,
+                        user_prompt=user_prompt,
+                    )
+                except InternalServerError:
+                    bar.next()
+                    continue
 
                 data["response"].append(
                     dumps(
