@@ -17,3 +17,12 @@ MAX_YEAR_HELP: str = "Maximum year to search for documents"
 # Step 1 variables
 JOURNAL_HELP: str = "Mega-journal to search from"
 JOURNAL_CHOICES: list[str] = ["bmj", "f1000", "frontiersin", "plos"]
+
+# Step 5 variables
+ANALYSIS_CHOICES: list[str] = [
+    "uses_dl",
+    "uses_ptms",
+    "identify_ptms",
+    "identify_ptm_reuse",
+    "identify_ptm_science",
+]

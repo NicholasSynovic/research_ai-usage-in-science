@@ -2,6 +2,7 @@ from logging import Logger
 from pathlib import Path
 
 from aius.db import DB
+from aius.runners.analysis import AnalysisRunner
 from aius.runners.init import InitRunner
 from aius.runners.jats import JATSRunner
 from aius.runners.openalex import OpenAlexRunner
@@ -86,5 +87,21 @@ def pandoc(logger: Logger, **kwargs) -> None:
         logger=logger,
         db=db,
         pandoc_uri=kwargs["pandoc.uri"],
+    )
+    runner.execute()
+
+
+def analysis(logger: Logger, **kwargs) -> None:
+    logger.debug(msg=f"analysis kwargs: {kwargs}")
+
+    # Connect to the database
+    db: DB = connect_to_db(logger=logger, db_path=kwargs["analysis.db"])
+
+    # Execute runner
+    runner: AnalysisRunner = AnalysisRunner(
+        logger=logger,
+        db=db,
+        prompt_id=kwargs["analysis.prompt"],
+        alcf_auth_token=kwargs["analysis.auth"],
     )
     runner.execute()

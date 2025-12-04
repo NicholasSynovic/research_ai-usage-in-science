@@ -51,7 +51,7 @@ class InitRunner(Runner):
             USES_DL_PROMPT,
             USES_PTMS_PROMPT,
             IDENTIFY_PTMS_PROMPT,
-            IDENTIFY_PTMS_PROMPT,
+            IDENTIFY_PTM_REUSE_PROMPT,
             IDENTIFY_PTM_USAGE_IN_SCIENTIFIC_PROCESS,
         ]
 

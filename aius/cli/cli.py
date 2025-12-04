@@ -40,6 +40,9 @@ class CLI:
         # Step 4: Convert JATS XML to Markdown and compute rough token counts
         self.add_pandoc()
 
+        # Step 5: Analyze Markdown with ALCF inference server
+        self.add_analysis()
+
         # # Add analysis
         # self.add_llm_prompt_engineering()
         # self.add_run_llm_uses_dl_analysis()
@@ -178,6 +181,38 @@ class CLI:
             type=str,
             help="URI to pandoc server instance",
             dest="pandoc.uri",
+        )
+
+    def add_analysis(self) -> None:
+        parser: ArgumentParser = self.subparsers.add_parser(
+            name="analysis",
+            help="Search Journals",
+            description="Step 1",
+        )
+
+        parser.add_argument(
+            "--db",
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=DB_HELP_MESSAGE,
+            dest="analysis.db",
+        )
+
+        parser.add_argument(
+            "--prompt",
+            default=ANALYSIS_CHOICES[0],
+            type=str,
+            choices=ANALYSIS_CHOICES,
+            help="LLM analysis prompt to leverage",
+            dest="analysis.prompt",
+        )
+
+        parser.add_argument(
+            "--token",
+            type=str,
+            required=True,
+            help="ALCF Inference server token",
+            dest="analysis.auth",
         )
 
     # def add_llm_prompt_engineering(self) -> None:

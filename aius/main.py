@@ -38,6 +38,8 @@ def get_subparser_runner(subparser: str):
             return runners.jats
         case "pandoc":
             return runners.pandoc
+        case "analysis":
+            return runners.analysis
         case _:
             return -1
 

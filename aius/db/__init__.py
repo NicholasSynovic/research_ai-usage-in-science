@@ -154,6 +154,16 @@ class DB:
             Column("markdown", String),
         )
 
+        # uses_dl analyis table
+        _: Table = Table(
+            "uses_dl_analysis",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("doi", String),
+            Column("response", String),
+            Column("reasoning", String),
+        )
+
         # # PLOS Natural Science Paper Content
         # _: Table = Table(
         #     "plos_natural_science_paper_content",

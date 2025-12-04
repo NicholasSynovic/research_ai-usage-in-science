@@ -33,15 +33,7 @@ class PandocRunner(Runner):
     def format_xml(self, xml: str) -> str:
         soup: BeautifulSoup = BeautifulSoup(markup=xml, features="lxml")
 
-        front_tag: Tag | None = soup.find(name="front")
-        back_tag: Tag | None = soup.find(name="back")
         xref_tags: ResultSet[Tag] = soup.find_all(name="xref")
-
-        if isinstance(front_tag, Tag):
-            front_tag.clear(decompose=False)
-
-        if isinstance(back_tag, Tag):
-            back_tag.clear(decompose=False)
 
         xref_tag: Tag
         for xref_tag in xref_tags:
