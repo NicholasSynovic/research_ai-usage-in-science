@@ -1,17 +1,24 @@
+"""
+System prompts for analyzing documents.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 import mdformat
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
-class COSTAR_SystemPrompt(BaseModel):
+class COSTAR_SystemPrompt(BaseModel):  # noqa: D101, N801
     tag: str
     context: str
     objective: str
     response: str
-    style: str = "Responses must be strictly machine-readable JSON. No natural language, commentary, or formatting beyond the JSON object is permitted."
+    style: str = "Responses must be strictly machine-readable JSON. No natural language, commentary, or formatting beyond the JSON object is permitted."  # noqa: E501
     tone: str = "Neutral, objective, and machine-like."
-    audience: str = "The audience is a machine system that parses JSON. Human readability is irrelevant."
+    audience: str = "The audience is a machine system that parses JSON. Human readability is irrelevant."  # noqa: E501
 
-    def create_prompt(self) -> str:
+    def create_prompt(self) -> str:  # noqa: D102
         return mdformat.text(
             options={"wrap": 80},
             md=f"""
@@ -48,7 +55,7 @@ __model_json_object: str = """```json
     "graph_models": ["Graphormer"],
     "edge_cases": ["SignalP", "DeepMedic", "SecretomeP", "DeepLoc", "DeepLocPro"]
 }
-```"""
+```"""  # noqa: E501
 
 __reuse_key_words: str = """
 ```json
@@ -57,17 +64,17 @@ __reuse_key_words: str = """
     "adaptation_reuse": ["fine-tuning", "knowledge distillation", "parameter efficient fine tuning (PEFT)", "low-rank adaptation (LoRA)"],
     "deployment_reuse": ["vLLM", "inference server", "quantize", "ONNX", "MLIR", "LiteRT", "ExecuTorch", "TorchScript"],
 }
-```"""
+```"""  # noqa: E501
 
 USES_DL_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
     tag="uses_dl",
-    context="You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine readable format. Your sole responsibility is to evaluate the paper's content and determine whether the author's use deep learning models or methods in their methodology. Your response will be consumed by downstream systems that require structured JSON.",
+    context="You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine readable format. Your sole responsibility is to evaluate the paper's content and determine whether the author's use deep learning models or methods in their methodology. Your response will be consumed by downstream systems that require structured JSON.",  # noqa: E501
     objective="""Your task is to output only a JSON object containing a key-value pairs, where:
 
 - the key "result" value is a boolean (true or false) based on whether the input text use deep learning models or methods in their methodology, and
 - the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of deep learning usage in the paper or empty if no deep learning method are used.
 
-No explanations or extra output are allowed.""",
+No explanations or extra output are allowed.""",  # noqa: E501
     response="""Return only a JSON object of the form:
 
 ```json
@@ -82,13 +89,13 @@ Nothing else should ever be returned.""",
 
 USES_PTMS_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
     tag="uses_ptms",
-    context="You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine whether the authors use pre-trained deep learning models (PTMs) in their methodology. Your response will be consumed by downstream systems that require structured JSON.",
+    context="You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine whether the authors use pre-trained deep learning models (PTMs) in their methodology. Your response will be consumed by downstream systems that require structured JSON.",  # noqa: E501
     objective="""Your task is to output only a JSON object containing key-value pairs, where:
 
 - the key "result" value is a boolean (true or false) based on whether the input text indicates the use of pre-trained deep learning models (PTMs) in the methodology, and
 - the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of pre-trained model usage, or an empty string if no PTMs are used.
 
-No explanations or extra output are allowed.""",
+No explanations or extra output are allowed.""",  # noqa: E501
     response="""Return only a JSON object of the form:
 
 ```json
@@ -109,13 +116,13 @@ Pre-trained deep learning models have many different names. The following is a l
 {__model_json_object}
 
 However, not all papers use these models. In the event that the paper does not use one of these PTMs, identify the PTM.
-""",
+""",  # noqa: E501
     objective="""Your task is to output only an array of JSON objects containing key-value pairs, where:
 
 - the key "model" value is a string of the pre-trained deep learning models name as stated in the prose, and
 - the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of the pre-trained model's usage.
 
-No explanations or extra output are allowed.""",
+No explanations or extra output are allowed.""",  # noqa: E501
     response="""Return only an array of JSON objects of the form:
 
 ```json
@@ -150,7 +157,7 @@ Pre-trained deep learning reuse methods can be classified as one of the followin
 
 Reusing pre-trained deep learning models can take many forms, but the following are some key words commonly associated with each reuse classification that you can reference in your analysis:
 
-{__reuse_key_words}""",
+{__reuse_key_words}""",  # noqa: E501
     objective="""Your task is to output only an array of JSON objects containing key-value pairs, where:
 
 - the key "model" value is a string of the pre-trained deep learning models name as stated in the prose,
@@ -158,7 +165,7 @@ Reusing pre-trained deep learning models can take many forms, but the following 
 - the key "classification" value is a string of either "conceptual_reuse", "adaptation_reuse", or "deployment_reuse" that best classifies the pre-training deep learning model reuse form, and
 - the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of the pre-trained model's reuse form.
 
-No explanations or extra output are allowed.""",
+No explanations or extra output are allowed.""",  # noqa: E501
     response="""```json
 [
     {
@@ -192,14 +199,14 @@ The scientific method is made up of several steps. These include:
 - "Hypothesis": The third involves creating a testable explanation,
 - "Test": The fourth step is to experiment and challenge the hypothesis,
 - "Analysis": The fifth step reviews the data generated from the test and iterates upon challenging the hypothesis, and
-- "Conclusion": The sixth step is reporting the results of the experiment and if the results support or reject your hypothesis.""",
+- "Conclusion": The sixth step is reporting the results of the experiment and if the results support or reject your hypothesis.""",  # noqa: E501
     objective="""Your task is to output only an array of JSON objects containing key-value pairs, where:
 
 - the key "method" value is a string of the pre-trained deep learning models name as stated in the prose,
 - the key "step" value is the most probable step in the scientific process that the pre-trained deep learning model is written at, and
 - the key "prose" value is the most salient excerpt from the paper that shows concrete evidence of the pre-trained model's usage.
 
-No explanations or extra output are allowed.""",
+No explanations or extra output are allowed.""",  # noqa: E501
     response="""Return only an array of JSON objects of the form:
 
 ```json
