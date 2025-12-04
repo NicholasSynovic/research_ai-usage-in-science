@@ -5,6 +5,7 @@ from aius.db import DB
 from aius.runners.init import InitRunner
 from aius.runners.jats import JATSRunner
 from aius.runners.openalex import OpenAlexRunner
+from aius.runners.pandoc import PandocRunner
 from aius.runners.search import SearchRunner
 
 
@@ -70,5 +71,20 @@ def jats(logger: Logger, **kwargs) -> None:
         logger=logger,
         db=db,
         plos_zip_fp=kwargs["jats.plos_zip"],
+    )
+    runner.execute()
+
+
+def pandoc(logger: Logger, **kwargs) -> None:
+    logger.debug(msg=f"pandoc kwargs: {kwargs}")
+
+    # Connect to the database
+    db: DB = connect_to_db(logger=logger, db_path=kwargs["pandoc.db"])
+
+    # Execute runner
+    runner: PandocRunner = PandocRunner(
+        logger=logger,
+        db=db,
+        pandoc_uri=kwargs["pandoc.uri"],
     )
     runner.execute()

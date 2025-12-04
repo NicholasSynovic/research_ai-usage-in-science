@@ -36,6 +36,8 @@ def get_subparser_runner(subparser: str):
             return runners.openalex
         case "jats":
             return runners.jats
+        case "pandoc":
+            return runners.pandoc
         case _:
             return -1
 

@@ -37,8 +37,8 @@ class CLI:
         # Step 3: Get JATS XML content from Natural Science DOIs
         self.add_jats()
 
-        # # Load data from all_of_plos.zip and `pandoc`
-        # self.add_content_retriever()
+        # Step 4: Convert JATS XML to Markdown and compute rough token counts
+        self.add_pandoc()
 
         # # Add analysis
         # self.add_llm_prompt_engineering()
@@ -156,59 +156,29 @@ class CLI:
             dest="jats.plos_zip",
         )
 
-    # def add_document_filter(self) -> None:
-    #     """Add a sub-parser to filter documents by Natural Science category."""
-    #     document_filter_parser: ArgumentParser = self.subparsers.add_parser(
-    #         name="filter-documents",
-    #         help="Filter for Natural Science documents",
-    #         description="Step 7",
-    #     )
+    def add_pandoc(self) -> None:
+        """Configure a sub-parser for converting JATS XML to Markdown."""
+        pandoc_parser: ArgumentParser = self.subparsers.add_parser(
+            name="pandoc",
+            help="Convert JATS XML to Markdown with Pandoc",
+            description="Step 4",
+        )
 
-    #     document_filter_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="doucment_filter.db",
-    #     )
+        pandoc_parser.add_argument(
+            "--db",
+            default=self.database_path,
+            type=lambda x: Path(x).resolve(),
+            help=DB_HELP_MESSAGE,
+            dest="pandoc.db",
+        )
 
-    # def add_content_retriever(self) -> None:
-    #     """Add a sub-parser to retrieve PLOS Natural Science paper content."""
-    #     content_retriever_parser: ArgumentParser = self.subparsers.add_parser(
-    #         name="retrieve-content",
-    #         help="Retrieve content from PLOS Natural Science documents",
-    #         description="Step 8",
-    #     )
-
-    #     content_retriever_parser.add_argument(
-    #         "-d",
-    #         "--db",
-    #         nargs=1,
-    #         default=self.database_path,
-    #         type=lambda x: Path(x).resolve(),
-    #         help=self.db_help,
-    #         dest="content_retriever.db",
-    #     )
-    #     content_retriever_parser.add_argument(
-    #         "-i",
-    #         "--input-fp",
-    #         nargs=1,
-    #         required=True,
-    #         type=lambda x: Path(x).resolve(),
-    #         help="Path to All of PLOS zip file",
-    #         dest="content_retriever.fp",
-    #     )
-    #     content_retriever_parser.add_argument(
-    #         "-p",
-    #         "--pandoc-url",
-    #         nargs=1,
-    #         type=str,
-    #         default=["http://localhost:3030"],
-    #         help="Pandoc server URL",
-    #         dest="content_retriever.pandoc_url",
-    #     )
+        pandoc_parser.add_argument(
+            "--uri",
+            default="http://localhost:3030",
+            type=str,
+            help="URI to pandoc server instance",
+            dest="pandoc.uri",
+        )
 
     # def add_llm_prompt_engineering(self) -> None:
     #     llm_prompt_engineering_parser: ArgumentParser = self.subparsers.add_parser(

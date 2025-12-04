@@ -145,6 +145,15 @@ class DB:
             Column("jats_xml", String),
         )
 
+        # Markdown table
+        _: Table = Table(
+            "markdown",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("doi", String),
+            Column("markdown", String),
+        )
+
         # # PLOS Natural Science Paper Content
         # _: Table = Table(
         #     "plos_natural_science_paper_content",
