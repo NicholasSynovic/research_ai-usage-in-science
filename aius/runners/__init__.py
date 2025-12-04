@@ -3,6 +3,7 @@ from pathlib import Path
 
 from aius.db import DB
 from aius.runners.init import InitRunner
+from aius.runners.jats import JATSRunner
 from aius.runners.openalex import OpenAlexRunner
 from aius.runners.search import SearchRunner
 
@@ -64,10 +65,10 @@ def jats(logger: Logger, **kwargs) -> None:
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs["jats.db"])
 
-    # # Execute runner
-    # runner: OpenAlexRunner = OpenAlexRunner(
-    #     logger=logger,
-    #     db=db,
-    #     email=kwargs["openalex.email"],
-    # )
-    # runner.execute()
+    # Execute runner
+    runner: JATSRunner = JATSRunner(
+        logger=logger,
+        db=db,
+        plos_zip_fp=kwargs["jats.plos_zip"],
+    )
+    runner.execute()

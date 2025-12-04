@@ -17,7 +17,6 @@ from sqlalchemy import (
     Column,
     DateTime,
     Engine,
-    ForeignKey,
     Integer,
     MetaData,
     Row,
@@ -135,6 +134,15 @@ class DB:
             Column("topic_1", String),
             Column("topic_2", String),
             Column("json_data", String),
+        )
+
+        # JATS table
+        _: Table = Table(
+            "jats",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("doi", String),
+            Column("jats_xml", String),
         )
 
         # # PLOS Natural Science Paper Content
