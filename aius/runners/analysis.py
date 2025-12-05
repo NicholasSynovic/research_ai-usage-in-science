@@ -6,9 +6,16 @@ from openai import InternalServerError, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame, Series
 from progress.bar import Bar
+from pydantic import BaseModel
 
 from aius.db import DB
 from aius.runners.runner import Runner
+
+
+class UsesDL_Model(BaseModel):
+    doi: str
+    uses_dl: bool = False
+    reasoning: str = ""
 
 
 class AnalysisRunner(Runner):
@@ -19,7 +26,6 @@ class AnalysisRunner(Runner):
         prompt_id: str,
         alcf_auth_token: str,
     ) -> None:
-        # Set class constants
         self.logger: Logger = logger
         self.db: DB = db
         self.prompt_id: str = prompt_id
@@ -46,6 +52,12 @@ class AnalysisRunner(Runner):
             case "uses_dl":
                 return pandas.read_sql_table(
                     table_name="markdown",
+                    con=self.db.engine,
+                    index_col="_id",
+                )
+            case "uses_ptms":
+                df: DataFrame = pandas.read_sql_table(
+                    table_name="uses_dl_analysis",
                     con=self.db.engine,
                     index_col="_id",
                 )
