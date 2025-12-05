@@ -2,7 +2,7 @@ from json import dumps, loads
 from logging import Logger
 
 import pandas
-from openai import OpenAI, InternalServerError
+from openai import InternalServerError, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame, Series
 from progress.bar import Bar
@@ -28,7 +28,7 @@ class AnalysisRunner(Runner):
             api_key=alcf_auth_token,
             base_url="https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1",
         )
-        self.model: str = "openai/gpt-oss-120b"
+        self.model: str = "openai/gpt-oss-20b"
 
     def get_prompt(self) -> str:
         df: DataFrame = pandas.read_sql_table(
@@ -100,8 +100,7 @@ class AnalysisRunner(Runner):
             max=df.shape[0],
         ) as bar:
             row: Series
-            for _, row in df.iterrows():
-                data["doi"].append(row["doi"])
+            for _, row in df[0:100].iterrows():
                 user_prompt: str = row["markdown"]
 
                 try:
@@ -113,14 +112,14 @@ class AnalysisRunner(Runner):
                     bar.next()
                     continue
 
+                data["doi"].append(row["doi"])
+                data["reasoning"].append(resp.choices[0].message.reasoning_content)
                 data["response"].append(
                     dumps(
                         obj=loads(s=resp.choices[0].message.content),
                         indent=4,
                     )
                 )
-
-                data["reasoning"].append(resp.choices[0].message.reasoning_content)
 
                 bar.next()
 

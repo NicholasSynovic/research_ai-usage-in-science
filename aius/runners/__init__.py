@@ -1,3 +1,10 @@
+"""
+Runner entrypoints.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 from logging import Logger
 from pathlib import Path
 
@@ -92,7 +99,7 @@ def pandoc(logger: Logger, **kwargs) -> None:
 
 
 def analysis(logger: Logger, **kwargs) -> None:
-    logger.debug(msg=f"analysis kwargs: {kwargs}")
+    logger.debug("analysis kwargs: %s", kwargs)
 
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs["analysis.db"])
