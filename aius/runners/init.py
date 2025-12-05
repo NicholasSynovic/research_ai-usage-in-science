@@ -3,7 +3,7 @@ from logging import Logger
 from pandas import DataFrame
 
 from aius.db import DB
-from aius.prompts import *
+from aius.inference.prompts import *
 from aius.runners.runner import Runner
 
 

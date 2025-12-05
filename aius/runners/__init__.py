@@ -1,5 +1,5 @@
 """
-Runner entrypoints.
+Runner entrypoints; each runner corresponds to a CLI sub-command
 
 Copyright 2025 (C) Nicholas M. Synovic
 
