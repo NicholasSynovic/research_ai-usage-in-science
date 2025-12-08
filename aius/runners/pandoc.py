@@ -1,6 +1,13 @@
+"""
+Document conversion with `pandoc` runner.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 from logging import Logger
 
-import pandas
+import pandas as pd
 from bs4 import BeautifulSoup, ResultSet, Tag
 from mdformat import text
 from pandas import DataFrame, Series
@@ -8,11 +15,11 @@ from progress.bar import Bar
 from requests import Response, post
 
 from aius.db import DB
-from aius.runners.runner import Runner
+from aius.runners import Runner
 
 
-class PandocRunner(Runner):
-    def __init__(self, logger: Logger, db: DB, pandoc_uri: str) -> None:
+class PandocRunner(Runner):  # noqa: D101
+    def __init__(self, logger: Logger, db: DB, pandoc_uri: str) -> None:  # noqa: D107
         # Set class constants
         self.logger: Logger = logger
         self.db: DB = db
@@ -23,14 +30,15 @@ class PandocRunner(Runner):
             "text": "",
         }
 
-    def get_data(self) -> DataFrame:
-        return pandas.read_sql_table(
+    def get_data(self) -> DataFrame:  # noqa: D102
+        return pd.read_sql_table(
             table_name="jats",
             con=self.db.engine,
             index_col="_id",
         )
 
-    def format_xml(self, xml: str) -> str:
+    @staticmethod
+    def format_xml(xml: str) -> str:  # noqa: D102
         soup: BeautifulSoup = BeautifulSoup(markup=xml, features="lxml")
 
         front_tag: Tag | None = soup.find(name="front")
@@ -49,9 +57,13 @@ class PandocRunner(Runner):
 
         return soup.prettify()
 
-    def _write_data_to_table(self, table: str, data: DataFrame) -> None:
-        self.logger.info(msg=f"Writing data to the `{table}` table")
-        self.logger.debug(msg=f"Data: {data}")
+    def _write_data_to_table(
+        self,
+        table: str,
+        data: DataFrame,
+    ) -> None:
+        self.logger.info("Writing data to the `%s` table", table)
+        self.logger.debug("Data: %s", data)
         data.to_sql(
             name=table,
             con=self.db.engine,
@@ -59,9 +71,9 @@ class PandocRunner(Runner):
             index=True,
             index_label="_id",
         )
-        self.logger.info(msg=f"Wrote data to the `{table}` table")
+        self.logger.info("Wrote data to the `%s` table", table)
 
-    def execute(self) -> int:
+    def execute(self) -> int:  # noqa: D102
         data: dict[str, list[str]] = {"doi": [], "markdown": []}
 
         df: DataFrame = self.get_data()
@@ -86,6 +98,6 @@ class PandocRunner(Runner):
 
         df: DataFrame = DataFrame(data=data)
 
-        self._write_data_to_table(table="markdown", data=df)
+        self.db.write_dataframe_to_table(table_name="markdown", df=df)
 
         return 0
