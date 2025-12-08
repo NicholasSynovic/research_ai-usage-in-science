@@ -1,6 +1,13 @@
+"""
+Conduct journal searches.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 from logging import Logger
 
-import pandas
+import pandas as pd
 from pandas import DataFrame
 
 from aius.db import DB
@@ -18,8 +25,13 @@ from aius.search.megajournal import (
 from aius.search.plos import PLOS
 
 
-class SearchRunner(Runner):
-    def __init__(self, db: DB, logger: Logger, megajournal_name: str) -> None:
+class SearchRunner(Runner):  # noqa: D101
+    def __init__(  # noqa: D107
+        self,
+        db: DB,
+        logger: Logger,
+        megajournal_name: str,
+    ) -> None:
         # Set constants
         super().__init__(name="search", db=db, logger=logger)
         self.megajournal_name: str = megajournal_name.lower()
@@ -39,7 +51,7 @@ class SearchRunner(Runner):
 
         self.logger.info("Identified journal as %s", self.megajournal.name)
 
-    def execute(self) -> int:
+    def execute(self) -> int:  # noqa: D102
         # Get the current row count of the `searches` table to ensure that the
         # SQL Unique constraint is not violated by updating DataFrame index
         # later
@@ -72,7 +84,7 @@ class SearchRunner(Runner):
 
         # Create DataFrame of searches
         self.logger.info(msg="Preparing searches for database write")
-        searches_df: DataFrame = pandas.concat(
+        searches_df: DataFrame = pd.concat(
             objs=[search_model_to_df(sm=sm) for sm in searches],
             ignore_index=True,
         )
@@ -80,7 +92,7 @@ class SearchRunner(Runner):
 
         # Create DataFrame of articles
         self.logger.info(msg="Preparing articles for database write")
-        articles_df: DataFrame = pandas.concat(
+        articles_df: DataFrame = pd.concat(
             objs=[article_model_to_df(am=am) for am in articles],
             ignore_index=True,
         )
@@ -99,13 +111,13 @@ class SearchRunner(Runner):
         if search_table_row_count != 0:
             update_val: int = search_table_row_count + 1
             self.logger.info("Updating search IDs by %s", update_val)
-            searches_df.index = searches_df.index + update_val
+            searches_df.index += update_val
 
         # Update unique article IDs
         if article_table_row_count != 0:
             update_val: int = article_table_row_count + 1
-            self.logger.info(msg=f"Updating search IDs by {update_val}")
-            articles_df.index = articles_df.index + update_val
+            self.logger.info("Updating search IDs by %s", update_val)
+            articles_df.index += update_val
 
         # Write DataFrames to the database
         self.db.write_dataframe_to_table(table_name="searches", df=searches_df)
