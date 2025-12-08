@@ -1,14 +1,20 @@
+"""
+Main executable file.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 import logging
 import sys
 from datetime import datetime, timezone
-from logging import Logger
 from pathlib import Path
 
 from aius import MODULE_NAME, runners
 from aius.cli.argparse import Argparse
 
 
-def setup_logging() -> None:
+def setup_logging() -> None:  # noqa: D103
     # Get the current timestamp
     timestamp: int = int(datetime.now(tz=timezone.utc).timestamp())
 
@@ -26,25 +32,7 @@ def setup_logging() -> None:
     )
 
 
-def get_subparser_runner(subparser: str):
-    match subparser:
-        case "init":
-            return runners.init
-        case "search":
-            return runners.search
-        case "openalex":
-            return runners.openalex
-        case "jats":
-            return runners.jats
-        case "pandoc":
-            return runners.pandoc
-        case "analysis":
-            return runners.analysis
-        case _:
-            return -1
-
-
-def main() -> int:
+def main() -> int:  # noqa: D103
     setup_logging()
     logger = logging.getLogger()
     logger.info(msg="Hello world!")
@@ -52,22 +40,23 @@ def main() -> int:
     # Run the command line interface
     cli: Argparse = Argparse()
     args: dict = cli.parse_cli()
-    logger.debug(msg=f"Command line input: {args}")
+    logger.debug("Command line input: %s", args)
 
     # Get the appropriate runner method
     subparser: str = cli.identify_subcommand()
-    logger.debug(msg=f"Subparser: {subparser}")
-    runner = get_subparser_runner(subparser=subparser)
+    logger.debug("Subparser: %s", subparser)
 
-    # Handle invalid runners
-    if runner == -1:
-        logger.error(
-            msg=f"Unable to get the proper subparser runner: {subparser}",
-        )
+    # This function identifies which runner to execute, and then moves the code
+    # over to aius/runners/__init__.py for further execution
+    runner_status = runners.handle_runner(
+        logger=logger,
+        runner_name=subparser,
+        **args,
+    )
+
+    if runner_status == 1:
+        logger.error("Unable to get the proper subparser runner: %s", subparser)
         sys.exit(1)
-
-    # Run code
-    runner(logger=logger, **args)
 
     return 0
 
