@@ -1,5 +1,5 @@
 """
-Runner entrypoints; each runner corresponds to a CLI sub-command
+Runner entrypoints; each runner corresponds to a CLI sub-command.
 
 Copyright 2025 (C) Nicholas M. Synovic
 
@@ -17,13 +17,13 @@ from aius.runners.pandoc import PandocRunner
 from aius.runners.search import SearchRunner
 
 
-def connect_to_db(logger: Logger, db_path: Path) -> DB:
-    logger.info(msg=f"Connected to SQLite3 database: {db_path}")
+def connect_to_db(logger: Logger, db_path: Path) -> DB:  # noqa: D103
+    logger.info("Connected to SQLite3 database: %s", db_path)
     return DB(logger=logger, db_path=db_path)
 
 
-def init(logger: Logger, **kwargs) -> None:
-    logger.debug(msg=f"init kwargs: {kwargs}")
+def init(logger: Logger, **kwargs) -> None:  # noqa: ANN003, D103
+    logger.debug("init kwargs: %s", kwargs)
 
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs["init.db"])
@@ -38,8 +38,8 @@ def init(logger: Logger, **kwargs) -> None:
     runner.execute()
 
 
-def search(logger: Logger, **kwargs) -> None:
-    logger.debug(msg=f"search kwargs: {kwargs}")
+def search(logger: Logger, **kwargs) -> None:  # noqa: ANN003, D103
+    logger.debug("search kwargs: %s", kwargs)
 
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs["search.db"])
@@ -53,8 +53,8 @@ def search(logger: Logger, **kwargs) -> None:
     runner.execute()
 
 
-def openalex(logger: Logger, **kwargs) -> None:
-    logger.debug(msg=f"openalex kwargs: {kwargs}")
+def openalex(logger: Logger, **kwargs) -> None:  # noqa: ANN003, D103
+    logger.debug("openalex kwargs: %s", kwargs)
 
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs["openalex.db"])
@@ -68,8 +68,8 @@ def openalex(logger: Logger, **kwargs) -> None:
     runner.execute()
 
 
-def jats(logger: Logger, **kwargs) -> None:
-    logger.debug(msg=f"jats kwargs: {kwargs}")
+def jats(logger: Logger, **kwargs) -> None:  # noqa: ANN003, D103
+    logger.debug("jats kwargs: %s", kwargs)
 
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs["jats.db"])
@@ -83,8 +83,8 @@ def jats(logger: Logger, **kwargs) -> None:
     runner.execute()
 
 
-def pandoc(logger: Logger, **kwargs) -> None:
-    logger.debug(msg=f"pandoc kwargs: {kwargs}")
+def pandoc(logger: Logger, **kwargs) -> None:  # noqa: ANN003, D103
+    logger.debug("pandoc kwargs: %s", kwargs)
 
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs["pandoc.db"])
@@ -98,7 +98,7 @@ def pandoc(logger: Logger, **kwargs) -> None:
     runner.execute()
 
 
-def analysis(logger: Logger, **kwargs) -> None:
+def analysis(logger: Logger, **kwargs) -> None:  # noqa: ANN003, D103
     logger.debug("analysis kwargs: %s", kwargs)
 
     # Connect to the database
