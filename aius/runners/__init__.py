@@ -51,7 +51,7 @@ def handle_runner(logger: Logger, runner_name: str, **kwargs) -> int:  # noqa: A
             runner = SearchRunner(
                 logger=logger,
                 db=db,
-                journal=kwargs["search.journal"],
+                megajournal_name=kwargs["search.journal"],
             )
         case "openalex":
             runner = OpenAlexRunner(
