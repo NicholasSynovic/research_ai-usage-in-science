@@ -11,7 +11,7 @@ from pandas import DataFrame
 
 from aius.db import DB
 from aius.inference import SYSTEM_PROMPT_TAG_MAPPING, COSTAR_SystemPrompt
-from aius.runners.runner import Runner
+from aius.runners import Runner
 
 
 class InitRunner(Runner):  # noqa: D101
@@ -22,10 +22,8 @@ class InitRunner(Runner):  # noqa: D101
         min_year: int,
         max_year: int,
     ) -> None:
-        self.logger: Logger = logger
-
         # Set constants
-        self.db: DB = db
+        super().__init__(name="init", db=db, logger=logger)
         self.min_year: int = min_year
         self.max_year: int = max_year
         self.logger.info("Minimum year: %s", self.min_year)

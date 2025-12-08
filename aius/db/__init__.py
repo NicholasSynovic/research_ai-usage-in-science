@@ -236,3 +236,15 @@ WHERE
                 self.logger.debug("Last row returned `None`")
 
         return last_row_id
+
+    def write_dataframe_to_table(self, table_name: str, df: DataFrame) -> None:
+        self.logger.info("Writing data to the `%s` table", table_name)
+        self.logger.debug("Data: %s", table_name)
+        df.to_sql(
+            name=table_name,
+            con=self.engine,
+            if_exists="append",
+            index=True,
+            index_label="_id",
+        )
+        self.logger.info("Wrote data to the `%s` table", table_name)

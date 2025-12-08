@@ -1,11 +1,10 @@
-from json import dumps
 from logging import Logger
 
 import pandas
 from pandas import DataFrame
 
 from aius.db import DB
-from aius.runners.runner import Runner
+from aius.runners import Runner
 from aius.search.bmj import BMJ
 from aius.search.f1000 import F1000
 from aius.search.frontiersin import FrontiersIn
@@ -16,74 +15,59 @@ from aius.search.megajournal import (
     article_model_to_df,
     search_model_to_df,
 )
-from aius.search.peerj import PeerJ
 from aius.search.plos import PLOS
 
 
 class SearchRunner(Runner):
-    def __init__(self, logger: Logger, db: DB, journal: str) -> None:
-        self.logger: Logger = logger
+    def __init__(self, db: DB, logger: Logger, megajournal_name: str) -> None:
+        # Set constants
+        super().__init__(name="search", db=db, logger=logger)
+        self.megajournal_name: str = megajournal_name.lower()
+        self.logger.info("Journal name: %s", self.megajournal_name)
 
-        self.journal: MegaJournal | None
-        match journal:
+        # Identify which megajournal to use
+        self.megajournal: MegaJournal
+        match self.megajournal_name:
             case "bmj":
-                self.journal = BMJ(logger=self.logger, db=db)
+                self.megajournal = BMJ(logger=self.logger, db=self.db)
             case "frontiersin":
-                self.journal = FrontiersIn(logger=self.logger, db=db)
+                self.megajournal = FrontiersIn(logger=self.logger, db=self.db)
             case "f1000":
-                self.journal = F1000(logger=self.logger, db=db)
-            case "peerj":
-                self.journal = PeerJ(logger=self.logger, db=db)
+                self.megajournal = F1000(logger=self.logger, db=self.db)
             case "plos":
-                self.journal = PLOS(logger=self.logger, db=db)
-            case _:
-                self.journal = None
+                self.megajournal = PLOS(logger=self.logger, db=self.db)
 
-        if self.journal is None:
-            self.logger.error(msg=f"Journal is set to None (journal={journal})")
-        else:
-            self.logger.info(msg=f"Identified journal as {self.journal.megajournal}")
-
-    def _write_data_to_table(self, table: str, data: DataFrame) -> None:
-        self.logger.info(msg=f"Writing data to the `{table}` table")
-        self.logger.debug(msg=f"Data: {data}")
-        data.to_sql(
-            name=table,
-            con=self.journal.db.engine,
-            if_exists="append",
-            index=True,
-            index_label="_id",
-        )
-        self.logger.info(msg=f"Wrote data to the `{table}` table")
+        self.logger.info("Identified journal as %s", self.megajournal.name)
 
     def execute(self) -> int:
-        # Check that the journal is not None
-        if self.journal is None:
-            self.logger.info(msg="Journal is None. Returning 1")
-            return 1
-
         # Get the current row count of the `searches` table to ensure that the
         # SQL Unique constraint is not violated by updating DataFrame index
         # later
-        search_table_row_count: int = self.journal.db.get_last_row_id(
+        search_table_row_count: int = self.megajournal.db.get_last_row_id(
             table_name="searches"
         )
-        article_table_row_count: int = self.journal.db.get_last_row_id(
+        article_table_row_count: int = self.megajournal.db.get_last_row_id(
             table_name="articles"
         )
 
         # Conduct searches
-        self.logger.info(msg=f"Executing {self.journal.megajournal} search")
-        searches: list[SearchModel] = self.journal.search()
+        self.logger.info("Executing %s search", self.megajournal.name)
+        searches: list[SearchModel] = self.megajournal.search()
         self.logger.info(
-            msg=f"Searched {len(searches)} queries in {self.journal.megajournal}"
+            "Searched %s queries in %s",
+            len(searches),
+            self.megajournal.name,
         )
 
         # Parse searches for articles
-        self.logger.info(msg=f"Executing {self.journal.megajournal} article extraction")
-        articles: list[ArticleModel] = self.journal.parse_response(responses=searches)
+        self.logger.info("Executing %s article extraction", self.megajournal.name)
+        articles: list[ArticleModel] = self.megajournal.parse_response(
+            responses=searches
+        )
         self.logger.info(
-            msg=f"Extracted {len(articles)} from {self.journal.megajournal}"
+            "Extracted %s from %s",
+            len(articles),
+            self.megajournal.name,
         )
 
         # Create DataFrame of searches
@@ -92,6 +76,7 @@ class SearchRunner(Runner):
             objs=[search_model_to_df(sm=sm) for sm in searches],
             ignore_index=True,
         )
+        self.logger.debug("Data: %s", searches_df)
 
         # Create DataFrame of articles
         self.logger.info(msg="Preparing articles for database write")
@@ -99,6 +84,7 @@ class SearchRunner(Runner):
             objs=[article_model_to_df(am=am) for am in articles],
             ignore_index=True,
         )
+        self.logger.debug("Data: %s", articles_df)
 
         # Only keep unique articles by DOI
         self.logger.info(msg="Dropping duplicate DOI entries")
@@ -112,7 +98,7 @@ class SearchRunner(Runner):
         # Update unique search IDs
         if search_table_row_count != 0:
             update_val: int = search_table_row_count + 1
-            self.logger.info(msg=f"Updating search IDs by {update_val}")
+            self.logger.info("Updating search IDs by %s", update_val)
             searches_df.index = searches_df.index + update_val
 
         # Update unique article IDs
@@ -122,7 +108,7 @@ class SearchRunner(Runner):
             articles_df.index = articles_df.index + update_val
 
         # Write DataFrames to the database
-        self._write_data_to_table(table="searches", data=searches_df)
-        self._write_data_to_table(table="articles", data=articles_df)
+        self.db.write_dataframe_to_table(table_name="searches", df=searches_df)
+        self.db.write_dataframe_to_table(table_name="articles", df=articles_df)
 
         return 0

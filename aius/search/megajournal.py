@@ -60,12 +60,14 @@ def article_model_to_df(am: ArticleModel) -> DataFrame:
 
 
 class MegaJournal(ABC):
-    def __init__(self) -> None:
+    def __init__(self, logger: Logger, db: DB) -> None:
+        self.logger: Logger = logger
+        self.db: DB = db
+
         # Empty variables that are set by instancing classes
-        self.megajournal: str = ""
+        self.name: str = ""
         self.search_url_template: Template = Template(template="")
         self.keyword_year_products: product = product()
-        self.db: DB | None = None
 
         # Custom HTTPS session with exponential backoff enabled
         self.session: Session = Session()

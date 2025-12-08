@@ -19,7 +19,8 @@ from aius.runners.search import SearchRunner
 
 
 class Runner(ABC):  # noqa: D101
-    def __init__(self, name: str, db: DB) -> None:  # noqa: D107
+    def __init__(self, name: str, db: DB, logger: Logger) -> None:  # noqa: D107
+        self.logger: Logger = logger
         self.name: str = name
         self.db: DB = db
 
