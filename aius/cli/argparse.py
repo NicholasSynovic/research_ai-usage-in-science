@@ -1,5 +1,11 @@
+"""
+Argparse CLI implementation.
+
+Copyright (C) 2025 Nicholas M. Synovic
+"""
+
 from argparse import ArgumentParser, _SubParsersAction
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from aius.analyze import SYSTEM_PROMPT_TAG_MAPPING
@@ -10,8 +16,8 @@ from aius.pandoc import DEFAULT_PANDOC_URI
 from aius.search import JOURNAL_SEARCH_MAPPING
 
 
-class Argparse(CLI):
-    def __init__(self) -> None:
+class Argparse(CLI):  # noqa: D101
+    def __init__(self) -> None:  # noqa: D107
         super().__init__()
 
         self.parser: ArgumentParser = ArgumentParser(
@@ -20,9 +26,11 @@ class Argparse(CLI):
             epilog=self.progam_epilog,
         )
 
-        self.subparsers: _SubParsersAction[ArgumentParser] = self.parser.add_subparsers(prog=self.program_name,)
+        self.subparsers: _SubParsersAction[ArgumentParser] = self.parser.add_subparsers(
+            prog=self.program_name
+        )
 
-    def add_version(self) -> None:
+    def add_version(self) -> None:  # noqa: D102
         self.parser.add_argument(
             "-v",
             "--version",
@@ -30,8 +38,8 @@ class Argparse(CLI):
             version=self.get_version,
         )
 
-    def add_init_subparser(self) -> None:
-        current_year: int = datetime.now().year
+    def add_init_subparser(self) -> None:  # noqa: D102
+        current_year: int = datetime.now(tz=timezone.utc).year
 
         parser: ArgumentParser = self.subparsers.add_parser(
             name="init",
@@ -63,7 +71,7 @@ class Argparse(CLI):
             dest="init.max",
         )
 
-    def add_search_subparser(self) -> None:
+    def add_search_subparser(self) -> None:  # noqa: D102
         parser: ArgumentParser = self.subparsers.add_parser(
             name="search",
             help="Search Journals",
@@ -80,14 +88,14 @@ class Argparse(CLI):
 
         parser.add_argument(
             "--journal",
-            default=list(JOURNAL_SEARCH_MAPPING.keys())[0],
+            default=next(iter(JOURNAL_SEARCH_MAPPING.keys())),
             type=str,
             choices=list(JOURNAL_SEARCH_MAPPING.keys()),
             help="Journal to search for natural science documents reusing PTMs",
             dest="search.journal",
         )
 
-    def add_openalex_subparser(self) -> None:
+    def add_openalex_subparser(self) -> None:  # noqa: D102
         parser: ArgumentParser = self.subparsers.add_parser(
             name="openalex",
             help="Get document metadata from OpenAlex academic indexer",
@@ -110,7 +118,7 @@ class Argparse(CLI):
             dest="openalex.email",
         )
 
-    def add_documents_subparser(self) -> None:
+    def add_documents_subparser(self) -> None:  # noqa: D102
         parser: ArgumentParser = self.subparsers.add_parser(
             name="jats",
             help="Get JATS XML from DOIs",
@@ -126,13 +134,13 @@ class Argparse(CLI):
         )
         parser.add_argument(
             "--plos-zip",
-            default=ALL_OF_PLOS_DEFAULT_PATH
+            default=ALL_OF_PLOS_DEFAULT_PATH,
             type=lambda x: Path(x).resolve(),
             help="Path to PLOS ZIP file containing all PLOS documents",
             dest="jats.plos_zip",
         )
 
-    def add_pandoc_subparser(self) -> None:
+    def add_pandoc_subparser(self) -> None:  # noqa: D102
         pandoc_parser: ArgumentParser = self.subparsers.add_parser(
             name="pandoc",
             help="Convert documents to Markdown with Pandoc",
@@ -155,7 +163,7 @@ class Argparse(CLI):
             dest="pandoc.uri",
         )
 
-    def add_analyze_subparser(self) -> None:
+    def add_analyze_subparser(self) -> None:  # noqa: D102
         parser: ArgumentParser = self.subparsers.add_parser(
             name="analyze",
             help="Analyze documents with LLMs for PTM reuse patterns",
@@ -172,7 +180,7 @@ class Argparse(CLI):
 
         parser.add_argument(
             "--system-prompt",
-            default=list(SYSTEM_PROMPT_TAG_MAPPING.keys())[0],
+            default=next(iter(SYSTEM_PROMPT_TAG_MAPPING.keys())),
             type=str,
             choices=list(SYSTEM_PROMPT_TAG_MAPPING.keys()),
             help="LLM system prompt to use for analysis",
@@ -187,10 +195,10 @@ class Argparse(CLI):
             dest="analysis.auth",
         )
 
-    def parse_cli(self) -> dict:
+    def parse_cli(self) -> dict:  # noqa: D102
         return self.parser.parse_args().__dict__
 
-    def identify_subcommand(self) -> str:
+    def identify_subcommand(self) -> str:  # noqa: D102
         args: dict = self.parse_cli()
         arg_keys: list[str] = list(args.keys())
         return arg_keys[0].split(sep=".")[0]
