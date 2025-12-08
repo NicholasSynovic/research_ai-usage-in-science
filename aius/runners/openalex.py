@@ -1,9 +1,16 @@
+"""
+OpenAlex metadata search runner.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 from datetime import datetime, timezone
 from json import dumps
 from logging import Logger
 from string import Template
 
-import pandas
+import pandas as pd
 from pandas import DataFrame
 from progress.bar import Bar
 from pydantic import BaseModel
@@ -14,7 +21,7 @@ from aius.db import DB
 from aius.runners import Runner
 
 
-class MetadataModel(BaseModel):
+class MetadataModel(BaseModel):  # noqa: D101
     timestamp: float
     doi: str
     cited_by_count: int
@@ -25,23 +32,13 @@ class MetadataModel(BaseModel):
     json_data: dict
 
 
-def metadata_model_to_df(mm: MetadataModel) -> DataFrame:
-    data: dict[str, list] = {
-        "timestamp": [mm.timestamp],
-        "doi": [mm.doi],
-        "cited_by_count": [mm.cited_by_count],
-        "open_access": [mm.open_access],
-        "topic_0": [mm.topic_0],
-        "topic_1": [mm.topic_1],
-        "topic_2": [mm.topic_2],
-        "json_data": [dumps(obj=mm.json_data)],
-    }
-
-    return DataFrame(data=data)
-
-
-class OpenAlexRunner(Runner):
-    def __init__(self, logger: Logger, email: str, db: DB) -> None:
+class OpenAlexRunner(Runner):  # noqa: D101
+    def __init__(  # noqa: D107
+        self,
+        logger: Logger,
+        email: str,
+        db: DB,
+    ) -> None:
         # Set class constants
         self.logger: Logger = logger
         self.email: str = email
@@ -62,7 +59,7 @@ class OpenAlexRunner(Runner):
         # Get all DOIs from the database
         dois: list[str] = [
             "https://doi.org/" + doi
-            for doi in pandas.read_sql_query(
+            for doi in pd.read_sql_query(
                 sql="SELECT DISTINCT doi FROM articles;", con=self.db.engine
             )["doi"].tolist()
         ]
@@ -70,20 +67,8 @@ class OpenAlexRunner(Runner):
             dois[i : i + 50] for i in range(0, len(dois), 50)
         ]
 
-    def _write_data_to_table(self, data: DataFrame) -> None:
-        self.logger.info(msg=f"Writing data to the `openalex` table")
-        self.logger.debug(msg=f"Data: {data}")
-        data.to_sql(
-            name="openalex",
-            con=self.db.engine,
-            if_exists="append",
-            index=True,
-            index_label="_id",
-        )
-        self.logger.info(msg=f"Wrote data to the `openalex` table")
-
     @staticmethod
-    def extract_topics(topics: list[dict[str, dict]]) -> tuple:
+    def extract_topics(topics: list[dict[str, dict]]) -> tuple:  # noqa: D102
         topic_0: str | None = None
         topic_1: str | None = None
         topic_2: str | None = None
@@ -98,7 +83,22 @@ class OpenAlexRunner(Runner):
 
         return (topic_0, topic_1, topic_2)
 
-    def search(self) -> list[MetadataModel]:
+    @staticmethod
+    def metadata_model_to_df(mm: MetadataModel) -> DataFrame:  # noqa: D102
+        data: dict[str, list] = {
+            "timestamp": [mm.timestamp],
+            "doi": [mm.doi],
+            "cited_by_count": [mm.cited_by_count],
+            "open_access": [mm.open_access],
+            "topic_0": [mm.topic_0],
+            "topic_1": [mm.topic_1],
+            "topic_2": [mm.topic_2],
+            "json_data": [dumps(obj=mm.json_data)],
+        }
+
+        return DataFrame(data=data)
+
+    def search(self) -> list[MetadataModel]:  # noqa: D102
         data: list[MetadataModel] = []
 
         with Bar(
@@ -110,11 +110,11 @@ class OpenAlexRunner(Runner):
                     email=self.email,
                     dois="|".join(chunk),
                 )
-                self.logger.info(msg=f"Querying {url}")
+                self.logger.info("Querying %s", url)
 
                 timestamp: float = datetime.now(tz=timezone.utc).timestamp()
                 resp: Response = self.session.get(url=url)
-                self.logger.debug(msg=f"Response status code: {resp.status_code}")
+                self.logger.debug("Response status code: %s", resp.status_code)
 
                 result: dict
                 for result in resp.json()["results"]:
@@ -139,31 +139,31 @@ class OpenAlexRunner(Runner):
 
         return data
 
-    def execute(self) -> int:
+    def execute(self) -> int:  # noqa: D102
         # Get the current row count of the `openalex` table to ensure that the
         # SQL Unique constraint is not violated by updating DataFrame index
         # later
         search_table_row_count: int = self.db.get_last_row_id(table_name="openalex")
 
         # Conduct searches
-        self.logger.info(msg=f"Executing OpenAlex search")
+        self.logger.info("Executing OpenAlex search")
         searches: list[MetadataModel] = self.search()
-        self.logger.info(msg=f"Searched {len(searches)} documents")
+        self.logger.info("Searched %s documents", len(searches))
 
         # Create DataFrame of searches
         self.logger.info(msg="Preparing searches for database write")
-        searches_df: DataFrame = pandas.concat(
-            objs=[metadata_model_to_df(mm=mm) for mm in searches],
+        searches_df: DataFrame = pd.concat(
+            objs=[self.metadata_model_to_df(mm=mm) for mm in searches],
             ignore_index=True,
         )
 
         # Update unique search IDs
         if search_table_row_count != 0:
             update_val: int = search_table_row_count + 1
-            self.logger.info(msg=f"Updating search IDs by {update_val}")
-            searches_df.index = searches_df.index + update_val
+            self.logger.info("Updating search IDs by %s", update_val)
+            searches_df.index += update_val
 
-        # Write DataFrames to the database
-        self._write_data_to_table(data=searches_df)
+        # Write DataFrame to the database
+        self.db.write_dataframe_to_table(table_name="openalex", df=searches_df)
 
         return 0
