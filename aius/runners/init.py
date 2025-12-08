@@ -1,5 +1,5 @@
 """
-Initialize runners.
+Initialize application runner.
 
 Copyright 2025 (C) Nicholas M. Synovic
 
