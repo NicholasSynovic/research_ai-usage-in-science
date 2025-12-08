@@ -27,6 +27,8 @@ from sqlalchemy import (
     text,
 )
 
+DEFAULT_DATABASE_PATH: Path = Path("aius.sqlite3").resolve()
+
 
 class DB:  # noqa: D101
     def __init__(self, logger: Logger, db_path: Path) -> None:  # noqa: D107

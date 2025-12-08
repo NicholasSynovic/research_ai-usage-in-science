@@ -1,28 +1,56 @@
-from pathlib import Path
+from abc import ABC, abstractmethod
+from importlib.metadata import version
 
-# Used for the top level parser
-PROGRAM_NAME: str = "AIUS"
-PROGRAM_DESCRIPTION: str = "Pre-trained deep learning model reusage in natural science"
-PROGRAM_EPILOG: str = "Copyright 2025 (C) Nicholas M. Synovic"
+DATABASE_HELP_MESSAGE: str = "Path to database"
 
-# Common variables for database handling
-DB_DEFAULT_NAME: str = "aius.sqlite3"
-DB_HELP_MESSAGE: str = "Path to SQLite3 database"
-DB_DEFAULT_PATH: Path = Path(f"{DB_DEFAULT_NAME}").resolve()
 
-# Step 0 variables
-MIN_YEAR_HELP: str = "Minimum year to search for documents"
-MAX_YEAR_HELP: str = "Maximum year to search for documents"
+class CLI(ABC):
+    def __init__(self) -> None:
+        self.program_name: str = "AIUS"
+        self.progam_epilog: str = "Copyright 2025 (C) Nicholas M. Synovic"
+        self.program_description: str = """
+Empirically measure pre-trained deep learning model (PTM) reusage and its impact
+in natural science publications
+"""
 
-# Step 1 variables
-JOURNAL_HELP: str = "Mega-journal to search from"
-JOURNAL_CHOICES: list[str] = ["bmj", "f1000", "frontiersin", "plos"]
+        self.construct_cli()
 
-# Step 5 variables
-ANALYSIS_CHOICES: list[str] = [
-    "uses_dl",
-    "uses_ptms",
-    "identify_ptms",
-    "identify_ptm_reuse",
-    "identify_ptm_science",
-]
+    @abstractmethod
+    def add_version(self) -> None: ...
+
+    @abstractmethod
+    def add_init_subparser(self) -> None: ...
+
+    @abstractmethod
+    def add_search_subparser(self) -> None: ...
+
+    @abstractmethod
+    def add_openalex_subparser(self) -> None: ...
+
+    @abstractmethod
+    def add_documents_subparser(self) -> None: ...
+
+    @abstractmethod
+    def add_pandoc_subparser(self) -> None: ...
+
+    @abstractmethod
+    def add_analyze_subparser(self) -> None: ...
+
+    @abstractmethod
+    def parse_cli(self) -> dict: ...
+
+    @abstractmethod
+    def identify_subcommand(self) -> str: ...
+
+    @property
+    def get_version(self) -> str:
+        return version(distribution_name="aius")
+
+    def construct_cli(self) -> None:
+        self.add_version()
+        self.add_init_subparser()
+        self.add_search_subparser()
+        self.add_openalex_subparser()
+        self.add_documents_subparser()
+        self.add_pandoc_subparser()
+        self.add_analyze_subparser()

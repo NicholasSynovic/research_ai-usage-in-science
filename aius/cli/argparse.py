@@ -1,0 +1,196 @@
+from argparse import ArgumentParser, _SubParsersAction
+from datetime import datetime
+from pathlib import Path
+
+from aius.analyze import SYSTEM_PROMPT_TAG_MAPPING
+from aius.cli import CLI, DATABASE_HELP_MESSAGE
+from aius.db import DEFAULT_DATABASE_PATH
+from aius.documents import ALL_OF_PLOS_DEFAULT_PATH
+from aius.pandoc import DEFAULT_PANDOC_URI
+from aius.search import JOURNAL_SEARCH_MAPPING
+
+
+class Argparse(CLI):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.parser: ArgumentParser = ArgumentParser(
+            prog=self.program_name,
+            description=self.program_description,
+            epilog=self.progam_epilog,
+        )
+
+        self.subparsers: _SubParsersAction[ArgumentParser] = self.parser.add_subparsers(prog=self.program_name,)
+
+    def add_version(self) -> None:
+        self.parser.add_argument(
+            "-v",
+            "--version",
+            action="version",
+            version=self.get_version,
+        )
+
+    def add_init_subparser(self) -> None:
+        current_year: int = datetime.now().year
+
+        parser: ArgumentParser = self.subparsers.add_parser(
+            name="init",
+            help="Initialize the database",
+            description="Step 0",
+        )
+
+        parser.add_argument(
+            "--db",
+            default=parser,
+            type=lambda x: Path(x).resolve(),
+            help=DATABASE_HELP_MESSAGE,
+            dest="init.db",
+        )
+
+        parser.add_argument(
+            "--min-year",
+            default=2015,
+            type=lambda x: max([2000, x]),
+            help="Minimum year to search journals through",
+            dest="init.min",
+        )
+
+        parser.add_argument(
+            "--max-year",
+            default=2024,
+            type=lambda x: min([current_year, x]),
+            help="Maximum year to search journals through",
+            dest="init.max",
+        )
+
+    def add_search_subparser(self) -> None:
+        parser: ArgumentParser = self.subparsers.add_parser(
+            name="search",
+            help="Search Journals",
+            description="Step 1",
+        )
+
+        parser.add_argument(
+            "--db",
+            default=DEFAULT_DATABASE_PATH,
+            type=lambda x: Path(x).resolve(),
+            help=DATABASE_HELP_MESSAGE,
+            dest="search.db",
+        )
+
+        parser.add_argument(
+            "--journal",
+            default=list(JOURNAL_SEARCH_MAPPING.keys())[0],
+            type=str,
+            choices=list(JOURNAL_SEARCH_MAPPING.keys()),
+            help="Journal to search for natural science documents reusing PTMs",
+            dest="search.journal",
+        )
+
+    def add_openalex_subparser(self) -> None:
+        parser: ArgumentParser = self.subparsers.add_parser(
+            name="openalex",
+            help="Get document metadata from OpenAlex academic indexer",
+            description="Step 2",
+        )
+
+        parser.add_argument(
+            "--db",
+            default=DEFAULT_DATABASE_PATH,
+            type=lambda x: Path(x).resolve(),
+            help=DATABASE_HELP_MESSAGE,
+            dest="openalex.db",
+        )
+
+        parser.add_argument(
+            "--email",
+            type=str,
+            help="Email address to access OpenAlex polite pool",
+            required=True,
+            dest="openalex.email",
+        )
+
+    def add_documents_subparser(self) -> None:
+        parser: ArgumentParser = self.subparsers.add_parser(
+            name="jats",
+            help="Get JATS XML from DOIs",
+            description="Step 3",
+        )
+
+        parser.add_argument(
+            "--db",
+            default=DEFAULT_DATABASE_PATH,
+            type=lambda x: Path(x).resolve(),
+            help=DATABASE_HELP_MESSAGE,
+            dest="jats.db",
+        )
+        parser.add_argument(
+            "--plos-zip",
+            default=ALL_OF_PLOS_DEFAULT_PATH
+            type=lambda x: Path(x).resolve(),
+            help="Path to PLOS ZIP file containing all PLOS documents",
+            dest="jats.plos_zip",
+        )
+
+    def add_pandoc_subparser(self) -> None:
+        pandoc_parser: ArgumentParser = self.subparsers.add_parser(
+            name="pandoc",
+            help="Convert documents to Markdown with Pandoc",
+            description="Step 4",
+        )
+
+        pandoc_parser.add_argument(
+            "--db",
+            default=DEFAULT_DATABASE_PATH,
+            type=lambda x: Path(x).resolve(),
+            help=DATABASE_HELP_MESSAGE,
+            dest="pandoc.db",
+        )
+
+        pandoc_parser.add_argument(
+            "--uri",
+            default=DEFAULT_PANDOC_URI,
+            type=str,
+            help="URI to pandoc server instance",
+            dest="pandoc.uri",
+        )
+
+    def add_analyze_subparser(self) -> None:
+        parser: ArgumentParser = self.subparsers.add_parser(
+            name="analyze",
+            help="Analyze documents with LLMs for PTM reuse patterns",
+            description="Step 5",
+        )
+
+        parser.add_argument(
+            "--db",
+            default=DEFAULT_DATABASE_PATH,
+            type=lambda x: Path(x).resolve(),
+            help=DATABASE_HELP_MESSAGE,
+            dest="analyze.db",
+        )
+
+        parser.add_argument(
+            "--system-prompt",
+            default=list(SYSTEM_PROMPT_TAG_MAPPING.keys())[0],
+            type=str,
+            choices=list(SYSTEM_PROMPT_TAG_MAPPING.keys()),
+            help="LLM system prompt to use for analysis",
+            dest="analysis.system_prompt",
+        )
+
+        parser.add_argument(
+            "--alcf-token",
+            type=str,
+            required=True,
+            help="ALCF Inference server token",
+            dest="analysis.auth",
+        )
+
+    def parse_cli(self) -> dict:
+        return self.parser.parse_args().__dict__
+
+    def identify_subcommand(self) -> str:
+        args: dict = self.parse_cli()
+        arg_keys: list[str] = list(args.keys())
+        return arg_keys[0].split(sep=".")[0]

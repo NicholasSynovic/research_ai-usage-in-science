@@ -147,8 +147,8 @@ No explanations or extra output are allowed.""",  # noqa: E501
 Nothing else should ever be returned.""",
 )
 
-IDENTIFY_PTM_USAGE_IN_SCIENTIFIC_PROCESS: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
-    tag="identify_ptm_science",
+IDENTIFY_PTM_IMPACT_IN_SCIENTIFIC_PROCESS: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
+    tag="identify_ptm_impact",
     context=f"""You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine where in the scientific method a pre-trained deep learning model was leveraged. Your response will be consumed by downstream systems that require structured JSON.
 Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can refence in your analysis:
 

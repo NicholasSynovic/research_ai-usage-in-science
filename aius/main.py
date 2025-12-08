@@ -5,7 +5,7 @@ from logging import Logger
 from pathlib import Path
 
 from aius import MODULE_NAME, runners
-from aius.cli.cli import CLI
+from aius.cli.argparse import Argparse
 
 
 def setup_logging() -> None:
@@ -44,16 +44,18 @@ def get_subparser_runner(subparser: str):
             return -1
 
 
-def main(logger: Logger) -> int:
+def main() -> int:
+    setup_logging()
+    logger = logging.getLogger()
     logger.info(msg="Hello world!")
 
     # Run the command line interface
-    cli: CLI = CLI()
-    args: dict = cli.parse
+    cli: Argparse = Argparse()
+    args: dict = cli.parse_cli()
     logger.debug(msg=f"Command line input: {args}")
 
     # Get the appropriate runner method
-    subparser: str = cli.identify_subparser
+    subparser: str = cli.identify_subcommand()
     logger.debug(msg=f"Subparser: {subparser}")
     runner = get_subparser_runner(subparser=subparser)
 
@@ -71,5 +73,4 @@ def main(logger: Logger) -> int:
 
 
 if __name__ == "__main__":
-    setup_logging()
-    main(logger=logging.getLogger())
+    main()
