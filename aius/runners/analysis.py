@@ -9,7 +9,7 @@ from progress.bar import Bar
 from pydantic import BaseModel
 
 from aius.db import DB
-from aius.runners.runner import Runner
+from aius.runners import Runner
 
 
 class UsesDL_Model(BaseModel):

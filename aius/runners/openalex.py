@@ -11,7 +11,7 @@ from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 
 from aius.db import DB
-from aius.runners.runner import Runner
+from aius.runners import Runner
 
 
 class MetadataModel(BaseModel):

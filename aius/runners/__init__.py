@@ -33,7 +33,8 @@ def connect_to_db(logger: Logger, db_path: Path) -> DB:  # noqa: D103
     return DB(logger=logger, db_path=db_path)
 
 
-def handle_runner(logger: Logger, runner_name: str, **kwargs) -> int:  # noqa: ANN003, D103
+# Factory method design pattern implementation
+def runner_factory(logger: Logger, runner_name: str, **kwargs) -> int:  # noqa: ANN003, D103
     logger.info("%s kwargs: %s", runner_name, kwargs)
 
     # Connect to the database

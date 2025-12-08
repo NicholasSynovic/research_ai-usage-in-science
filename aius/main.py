@@ -48,7 +48,7 @@ def main() -> int:  # noqa: D103
 
     # This function identifies which runner to execute, and then moves the code
     # over to aius/runners/__init__.py for further execution
-    runner_status = runners.handle_runner(
+    runner_status = runners.runner_factory(
         logger=logger,
         runner_name=subparser,
         **args,

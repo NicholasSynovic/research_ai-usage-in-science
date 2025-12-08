@@ -25,6 +25,7 @@ from aius.search.megajournal import (
 from aius.search.plos import PLOS
 
 
+# Template method design pattern
 class SearchRunner(Runner):  # noqa: D101
     def __init__(  # noqa: D107
         self,
@@ -38,6 +39,7 @@ class SearchRunner(Runner):  # noqa: D101
         self.logger.info("Journal name: %s", self.megajournal_name)
 
         # Identify which megajournal to use
+        # Factory method design pattern
         self.megajournal: MegaJournal
         match self.megajournal_name:
             case "bmj":
