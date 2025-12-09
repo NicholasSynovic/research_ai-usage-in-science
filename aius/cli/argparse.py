@@ -30,6 +30,8 @@ class Argparse(CLI):  # noqa: D101
             prog=self.program_name
         )
 
+        self.construct_cli()
+
     def add_version(self) -> None:  # noqa: D102
         self.parser.add_argument(
             "-v",
@@ -184,7 +186,7 @@ class Argparse(CLI):  # noqa: D101
             type=str,
             choices=list(SYSTEM_PROMPT_TAG_MAPPING.keys()),
             help="LLM system prompt to use for analysis",
-            dest="analysis.system_prompt",
+            dest="analyze.system_prompt",
         )
 
         parser.add_argument(
@@ -192,7 +194,7 @@ class Argparse(CLI):  # noqa: D101
             type=str,
             required=True,
             help="ALCF Inference server token",
-            dest="analysis.auth",
+            dest="analyze.auth",
         )
 
     def parse_cli(self) -> dict:  # noqa: D102

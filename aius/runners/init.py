@@ -11,7 +11,7 @@ from pandas import DataFrame
 
 from aius.db import DB
 from aius.inference import SYSTEM_PROMPT_TAG_MAPPING, COSTAR_SystemPrompt
-from aius.runners import Runner
+from aius.runners.runner import Runner
 
 
 class InitRunner(Runner):  # noqa: D101

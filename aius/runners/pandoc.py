@@ -15,7 +15,7 @@ from progress.bar import Bar
 from requests import Response, post
 
 from aius.db import DB
-from aius.runners import Runner
+from aius.runners.runner import Runner
 
 
 class PandocRunner(Runner):  # noqa: D101

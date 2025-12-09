@@ -1,25 +1,32 @@
+"""
+LLM inference runner.
+
+Copyright 2025 (C) Nicholas M. Synovic
+
+"""
+
 from json import dumps, loads
 from logging import Logger
 
-import pandas
-from openai import InternalServerError, OpenAI
+import pandas as pd
+from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame, Series
 from progress.bar import Bar
 from pydantic import BaseModel
 
 from aius.db import DB
-from aius.runners import Runner
+from aius.runners.runner import Runner
 
 
-class UsesDL_Model(BaseModel):
+class UsesDL_Model(BaseModel):  # noqa: D101, N801
     doi: str
     uses_dl: bool = False
     reasoning: str = ""
 
 
-class AnalysisRunner(Runner):
-    def __init__(
+class AnalysisRunner(Runner):  # noqa: D101
+    def __init__(  # noqa: D107
         self,
         logger: Logger,
         db: DB,
@@ -36,8 +43,8 @@ class AnalysisRunner(Runner):
         )
         self.model: str = "openai/gpt-oss-20b"
 
-    def get_prompt(self) -> str:
-        df: DataFrame = pandas.read_sql_table(
+    def get_prompt(self) -> str:  # noqa: D102
+        df: DataFrame = pd.read_sql_table(
             table_name="_llm_prompts",
             con=self.db.engine,
             index_col="_id",
@@ -47,16 +54,16 @@ class AnalysisRunner(Runner):
 
         return prompt_df["prompt"][0]
 
-    def get_data(self) -> DataFrame:
+    def get_data(self) -> DataFrame:  # noqa: D102
         match self.prompt_id:
             case "uses_dl":
-                return pandas.read_sql_table(
+                return pd.read_sql_table(
                     table_name="markdown",
                     con=self.db.engine,
                     index_col="_id",
                 )
             case "uses_ptms":
-                df: DataFrame = pandas.read_sql_table(
+                return pd.read_sql_table(
                     table_name="uses_dl_analysis",
                     con=self.db.engine,
                     index_col="_id",
@@ -64,7 +71,7 @@ class AnalysisRunner(Runner):
 
         return DataFrame()
 
-    def inference(
+    def inference(  # noqa: D102
         self,
         system_prompt: str,
         user_prompt: str,
@@ -85,19 +92,7 @@ class AnalysisRunner(Runner):
             ],
         )
 
-    def _write_data_to_table(self, table: str, data: DataFrame) -> None:
-        self.logger.info(msg=f"Writing data to the `{table}` table")
-        self.logger.debug(msg=f"Data: {data}")
-        data.to_sql(
-            name=table,
-            con=self.db.engine,
-            if_exists="append",
-            index=True,
-            index_label="_id",
-        )
-        self.logger.info(msg=f"Wrote data to the `{table}` table")
-
-    def execute(self) -> int:
+    def execute(self) -> int:  # noqa: D102
         data: dict[str, list[str]] = {
             "doi": [],
             "response": [],
@@ -112,7 +107,7 @@ class AnalysisRunner(Runner):
             max=df.shape[0],
         ) as bar:
             row: Series
-            for _, row in df[0:100].iterrows():
+            for _, row in df.iterrows():
                 user_prompt: str = row["markdown"]
 
                 try:
@@ -120,7 +115,7 @@ class AnalysisRunner(Runner):
                         system_prompt=system_prompt,
                         user_prompt=user_prompt,
                     )
-                except InternalServerError:
+                except Exception:  # noqa: BLE001
                     bar.next()
                     continue
 
@@ -135,7 +130,7 @@ class AnalysisRunner(Runner):
 
                 bar.next()
 
-        self._write_data_to_table(
-            data=DataFrame(data=data), table=f"{self.prompt_id}_analysis"
+        self.db.write_dataframe_to_table(
+            df=DataFrame(data=data), table_name=f"{self.prompt_id}_analysis"
         )
         return 0

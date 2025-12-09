@@ -19,8 +19,6 @@ Empirically measure pre-trained deep learning model (PTM) reusage and its impact
 in natural science publications
 """
 
-        self.construct_cli()
-
     @abstractmethod
     def add_version(self) -> None: ...  # noqa: D102
 

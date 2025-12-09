@@ -5,7 +5,6 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
-from abc import ABC, abstractmethod
 from logging import Logger
 from pathlib import Path
 
@@ -16,16 +15,6 @@ from aius.runners.jats import JATSRunner
 from aius.runners.openalex import OpenAlexRunner
 from aius.runners.pandoc import PandocRunner
 from aius.runners.search import SearchRunner
-
-
-class Runner(ABC):  # noqa: D101
-    def __init__(self, name: str, db: DB, logger: Logger) -> None:  # noqa: D107
-        self.logger: Logger = logger
-        self.name: str = name
-        self.db: DB = db
-
-    @abstractmethod
-    def execute(self) -> int: ...  # noqa: D102
 
 
 def connect_to_db(logger: Logger, db_path: Path) -> DB:  # noqa: D103
@@ -72,12 +61,12 @@ def runner_factory(logger: Logger, runner_name: str, **kwargs) -> int:  # noqa: 
                 db=db,
                 pandoc_uri=kwargs["pandoc.uri"],
             )
-        case "analysis":
+        case "analyze":
             runner = AnalysisRunner(
                 logger=logger,
                 db=db,
-                prompt_id=kwargs["analysis.prompt"],
-                alcf_auth_token=kwargs["analysis.auth"],
+                prompt_id=kwargs["analyze.system_prompt"],
+                alcf_auth_token=kwargs["analyze.auth"],
             )
         case _:
             return 1

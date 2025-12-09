@@ -19,7 +19,7 @@ from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import HTTPError
 
 from aius.db import DB
-from aius.runners import Runner
+from aius.runners.runner import Runner
 
 
 class JATSRunner(Runner):  # noqa: D101
