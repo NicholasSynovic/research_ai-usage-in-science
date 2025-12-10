@@ -65,8 +65,12 @@ def runner_factory(logger: Logger, runner_name: str, **kwargs) -> int:  # noqa: 
             runner = AnalysisRunner(
                 logger=logger,
                 db=db,
-                prompt_id=kwargs["analyze.system_prompt"],
-                alcf_auth_token=kwargs["analyze.auth"],
+                system_prompt_id=kwargs["analyze.system_prompt"],
+                index=kwargs["analyze.index"],
+                stride=kwargs["analyze.stride"],
+                auth_key=kwargs["analyze.auth"],
+                backend=kwargs["analyze.backend"],
+                ollama_endpoint=kwargs["analyze.ollama"],
             )
         case _:
             return 1

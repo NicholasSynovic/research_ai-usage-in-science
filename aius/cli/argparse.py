@@ -190,11 +190,47 @@ class Argparse(CLI):  # noqa: D101
         )
 
         parser.add_argument(
-            "--alcf-token",
+            "--auth-key",
             type=str,
             required=True,
             help="ALCF Inference server token",
             dest="analyze.auth",
+        )
+
+        parser.add_argument(
+            "--index",
+            type=int,
+            required=False,
+            default=0,
+            help="Starting index of documents",
+            dest="analyze.index",
+        )
+
+        parser.add_argument(
+            "--stride",
+            type=int,
+            required=False,
+            default=20,
+            help="Stride of documents",
+            dest="analyze.stride",
+        )
+
+        parser.add_argument(
+            "--backend",
+            type=str,
+            required=True,
+            choices=["alcf", "ollama"],
+            help="AI inferencing backend",
+            dest="analyze.backend",
+        )
+
+        parser.add_argument(
+            "--ollama",
+            type=str,
+            required=False,
+            default="http://localhost:11434/v1",
+            help="OpenAI inferencing URL",
+            dest="analyze.ollama",
         )
 
     def parse_cli(self) -> dict:  # noqa: D102

@@ -6,14 +6,11 @@ Copyright 2025 (C) Nicholas M. Synovic
 """
 
 from itertools import islice
-from json import dumps, loads
 from logging import Logger
 from math import ceil
 from typing import Literal
 
-from openai.types.chat.chat_completion import ChatCompletion
-from pandas import DataFrame, Series
-from progress.bar import Bar
+from pandas import DataFrame
 from pydantic import BaseModel
 
 from aius.db import DB
@@ -28,7 +25,7 @@ class UsesDL_Model(BaseModel):  # noqa: D101, N801
 
 
 class AnalysisRunner(Runner):  # noqa: D101
-    def __init__(  # noqa: D107
+    def __init__(  # noqa: D107, PLR0917, PLR0913
         self,
         logger: Logger,
         db: DB,
@@ -91,8 +88,15 @@ class AnalysisRunner(Runner):  # noqa: D101
         document_count: int
         document_iterator, document_count = self._get_documents()
 
-        responses: DataFrame = self.inference_backend.inference_doucments(system_prompt=self.system_prompt,document_iterator=document_iterator, document_count=document_count,)
+        responses: DataFrame = self.inference_backend.inference_doucments(
+            system_prompt=self.system_prompt,
+            document_iterator=document_iterator,
+            document_count=document_count,
+        )
 
-        self.db.write_dataframe_to_table(df=responses, table_name=f"{self.system_prompt_id}_analysis",)
+        self.db.write_dataframe_to_table(
+            df=responses,
+            table_name=f"{self.system_prompt_id}_analysis",
+        )
 
         return 0
