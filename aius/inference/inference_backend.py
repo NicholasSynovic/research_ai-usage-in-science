@@ -65,7 +65,7 @@ class InferenceBackend:
             doi=document.doi,
             system_prompt=system_prompt,
             user_prompt=document.content,
-            model_response=loads(s=resp.choices[0].message.content),
+            model_response=resp.choices[0].message.content,
             model_reasoning=resp.choices[0].message.reasoning_content,
             compute_time_seconds=end_time - start_time,
         )

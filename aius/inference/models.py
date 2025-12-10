@@ -46,10 +46,19 @@ class ModelResponse(BaseModel):
     doi: str
     system_prompt: str
     user_prompt: str
-    model_response: dict
+    model_response: str
     model_reasoning: str
     compute_time_seconds: float
 
     @property
     def df(self) -> DataFrame:
-        return DataFrame(data=self.model_dump())
+        return DataFrame(
+            data={
+                "doi": [self.doi],
+                "system_prompt": [self.system_prompt],
+                "user_prompt": [self.user_prompt],
+                "model_response": [self.model_response],
+                "model_reasoning": [self.model_reasoning],
+                "compute_time_seconds": [self.compute_time_seconds],
+            }
+        )
