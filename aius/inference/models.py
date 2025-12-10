@@ -1,4 +1,5 @@
 import mdformat
+from pandas import DataFrame
 from pydantic import BaseModel
 
 
@@ -45,15 +46,10 @@ class ModelResponse(BaseModel):
     doi: str
     system_prompt: str
     user_prompt: str
-    model_response: str
+    model_response: dict
     model_reasoning: str
-    compute_time_seconds: str
+    compute_time_seconds: float
 
-
-class UsesDL(BaseModel):
-    doi: str
-    model_response: str
-    model_reasoning: str
-    uses_dl: str
-    uses_dl_evidence: str
-    compute_time_seconds: str
+    @property
+    def df(self) -> DataFrame:
+        return DataFrame(data=self.model_dump())

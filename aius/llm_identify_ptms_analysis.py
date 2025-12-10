@@ -9,6 +9,7 @@ from requests import Response, post
 
 import aius
 from aius.db import DB
+from aius.inference.models import Document, ModelResponse, UsesDL
 
 
 class LLMIdentifyPTMs:

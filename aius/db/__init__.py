@@ -218,6 +218,15 @@ WHERE
 
         return df["year"].tolist()
 
+    def get_llm_prompt(self, llm_prompt_id: str) -> str:
+        df: DataFrame = pd.read_sql_table(
+            table_name="_llm_prompts",
+            con=self.engine,
+            index_col="_id",
+        )
+
+        return df[df["tag"] == llm_prompt_id]["prompt"].to_list()[0]
+
     def get_last_row_id(self, table_name: str) -> int:  # noqa: D102
         last_row_id: int = -1
 
@@ -248,3 +257,12 @@ WHERE
             index_label="_id",
         )
         self.logger.info("Wrote data to the `%s` table", table_name)
+
+    def read_table_to_dataframe(self, table_name: str) -> DataFrame:
+        self.logger.info("Reading data to the `%s` table", table_name)
+        self.logger.debug("Data: %s", table_name)
+        return pd.read_sql_table(
+            table_name=table_name,
+            con=self.engine,
+            index_col="_id",
+        )

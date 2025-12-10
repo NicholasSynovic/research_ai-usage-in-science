@@ -5,17 +5,19 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
+from itertools import islice
 from json import dumps, loads
 from logging import Logger
+from math import ceil
+from typing import Literal
 
-import pandas as pd
-from openai import OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame, Series
 from progress.bar import Bar
 from pydantic import BaseModel
 
 from aius.db import DB
+from aius.inference.inference_backend import InferenceBackend
 from aius.runners.runner import Runner
 
 
@@ -30,107 +32,67 @@ class AnalysisRunner(Runner):  # noqa: D101
         self,
         logger: Logger,
         db: DB,
-        prompt_id: str,
-        alcf_auth_token: str,
+        system_prompt_id: str,
+        index: int = 0,
+        stride: int = 20,
+        auth_key: str = "",
+        backend: Literal["alcf", "ollama"] = "alcf",
+        ollama_endpoint: str = "",
     ) -> None:
-        self.logger: Logger = logger
-        self.db: DB = db
-        self.prompt_id: str = prompt_id
+        super().__init__(name="analysis", db=db, logger=logger)
 
-        self.openai_client: OpenAI = OpenAI(
-            api_key=alcf_auth_token,
-            base_url="https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1",
+        self.stride: int = stride
+        self.index: int = index
+        self.endpoint: str = ollama_endpoint
+        self.model_name: str = "gpt-oss:20b"
+
+        if backend == "alcf":
+            self.endpoint = (
+                "https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1"
+            )
+            self.model_name: str = "openai/gpt-oss-20b"
+
+        self.inference_backend: InferenceBackend = InferenceBackend(
+            logger=self.logger,
+            name="inference_backend",
+            index=index,
+            stride=stride,
+            auth_key=auth_key,
+            openai_endpoint=self.endpoint,
+            model_name=self.model_name,
         )
-        self.model: str = "openai/gpt-oss-20b"
 
-    def get_prompt(self) -> str:  # noqa: D102
-        df: DataFrame = pd.read_sql_table(
-            table_name="_llm_prompts",
-            con=self.db.engine,
-            index_col="_id",
-        )
+        self.system_prompt_id: str = system_prompt_id.lower()
+        self.system_prompt: str = self._get_system_prompt()
 
-        prompt_df: DataFrame = df[df["tag"] == self.prompt_id].reset_index(drop=True)
+    def _get_system_prompt(self) -> str:
+        return self.db.get_llm_prompt(llm_prompt_id=self.system_prompt_id)
 
-        return prompt_df["prompt"][0]
+    def _get_documents(self) -> tuple[islice, int]:
+        df: DataFrame = DataFrame()
 
-    def get_data(self) -> DataFrame:  # noqa: D102
-        match self.prompt_id:
+        match self.system_prompt_id:
             case "uses_dl":
-                return pd.read_sql_table(
-                    table_name="markdown",
-                    con=self.db.engine,
-                    index_col="_id",
-                )
-            case "uses_ptms":
-                return pd.read_sql_table(
-                    table_name="uses_dl_analysis",
-                    con=self.db.engine,
-                    index_col="_id",
-                )
+                df = self.db.read_table_to_dataframe(table_name="markdown")
 
-        return DataFrame()
+        row_count: int = ceil(df.shape[0] / self.stride)
 
-    def inference(  # noqa: D102
-        self,
-        system_prompt: str,
-        user_prompt: str,
-    ) -> ChatCompletion:
-        return self.openai_client.chat.completions.create(
-            model=self.model,
-            reasoning_effort="high",
-            frequency_penalty=0,
-            stream=False,
-            seed=42,
-            n=1,
-            temperature=0.1,
-            top_p=0.1,
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
+        df_islice: islice = islice(
+            df.iterrows(),
+            self.index,
+            None,
+            self.stride,
         )
+
+        return (df_islice, row_count)
 
     def execute(self) -> int:  # noqa: D102
-        data: dict[str, list[str]] = {
-            "doi": [],
-            "response": [],
-            "reasoning": [],
-        }
+        document_iterator: islice
+        document_count: int
+        document_iterator, document_count = self._get_documents()
 
-        system_prompt: str = self.get_prompt()
-        df: DataFrame = self.get_data()
+        responses: DataFrame = self.inference_backend.inference_doucments(system_prompt=self.system_prompt,document_iterator=document_iterator, document_count=document_count,)
 
-        with Bar(
-            f"Inferencing with {self.model} on {self.prompt_id} system prompt...",
-            max=df.shape[0],
-        ) as bar:
-            row: Series
-            for _, row in df.iterrows():
-                user_prompt: str = row["markdown"]
+        self.db.write_dataframe_to_table(df=responses, table_name=f"{self.system_prompt_id}_analysis",)
 
-                try:
-                    resp: ChatCompletion = self.inference(
-                        system_prompt=system_prompt,
-                        user_prompt=user_prompt,
-                    )
-                except Exception:  # noqa: BLE001
-                    bar.next()
-                    continue
-
-                data["doi"].append(row["doi"])
-                data["reasoning"].append(resp.choices[0].message.reasoning_content)
-                data["response"].append(
-                    dumps(
-                        obj=loads(s=resp.choices[0].message.content),
-                        indent=4,
-                    )
-                )
-
-                bar.next()
-
-        self.db.write_dataframe_to_table(
-            df=DataFrame(data=data), table_name=f"{self.prompt_id}_analysis"
-        )
         return 0

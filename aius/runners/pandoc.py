@@ -57,22 +57,6 @@ class PandocRunner(Runner):  # noqa: D101
 
         return soup.prettify()
 
-    def _write_data_to_table(
-        self,
-        table: str,
-        data: DataFrame,
-    ) -> None:
-        self.logger.info("Writing data to the `%s` table", table)
-        self.logger.debug("Data: %s", data)
-        data.to_sql(
-            name=table,
-            con=self.db.engine,
-            if_exists="append",
-            index=True,
-            index_label="_id",
-        )
-        self.logger.info("Wrote data to the `%s` table", table)
-
     def execute(self) -> int:  # noqa: D102
         data: dict[str, list[str]] = {"doi": [], "markdown": []}
 
