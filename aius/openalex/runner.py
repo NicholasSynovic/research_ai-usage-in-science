@@ -16,7 +16,7 @@ from requests import Response, Session
 
 from aius.db import DB
 from aius.openalex import MetadataModel
-from aius.runners.runner import Runner
+from aius.runner import Runner
 from aius.util.http_session import HTTPSession
 
 

@@ -9,10 +9,10 @@ from logging import Logger
 
 from aius.db import DB, connect_to_db
 from aius.init.runner import InitRunner
+from aius.openalex.runner import OpenAlexRunner
 from aius.runner import Runner
 from aius.runners.analysis import AnalysisRunner
 from aius.runners.jats import JATSRunner
-from aius.runners.openalex import OpenAlexRunner
 from aius.runners.pandoc import PandocRunner
 from aius.search.runner import SearchRunner
 
@@ -43,12 +43,12 @@ def runner_factory(  # noqa: D103
                 logger=logger,
                 megajournal_name=kwargs["search.journal"],
             )
-        # case "openalex":
-        #     runner = OpenAlexRunner(
-        #         db=db,
-        #         logger=logger,
-        #         email=kwargs["openalex.email"],
-        #     )
+        case "openalex":
+            runner = OpenAlexRunner(
+                db=db,
+                logger=logger,
+                email=kwargs["openalex.email"],
+            )
         # case "jats":
         #     runner = JATSRunner(
         #         db=db,
