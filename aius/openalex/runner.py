@@ -6,66 +6,51 @@ Copyright 2025 (C) Nicholas M. Synovic
 """
 
 from datetime import datetime, timezone
-from json import dumps
 from logging import Logger
 from string import Template
 
 import pandas as pd
 from pandas import DataFrame
 from progress.bar import Bar
-from pydantic import BaseModel
 from requests import Response, Session
-from requests.adapters import HTTPAdapter, Retry
 
 from aius.db import DB
+from aius.openalex import MetadataModel
 from aius.runners.runner import Runner
-
-
-class MetadataModel(BaseModel):  # noqa: D101
-    timestamp: float
-    doi: str
-    cited_by_count: int
-    open_access: bool
-    topic_0: str | None
-    topic_1: str | None
-    topic_2: str | None
-    json_data: dict
+from aius.util.http_session import HTTPSession
 
 
 class OpenAlexRunner(Runner):  # noqa: D101
     def __init__(  # noqa: D107
         self,
+        db: DB,
         logger: Logger,
         email: str,
-        db: DB,
     ) -> None:
         # Set class constants
-        self.logger: Logger = logger
+        super().__init__(name="openalex", db=db, logger=logger)
         self.email: str = email
-        self.db: DB = db
+
         self.search_template: Template = Template(
             template="https://api.openalex.org/works?per-page=100&mailto=${email}&filter=doi:${dois}"
         )
 
         # Custom HTTPS session with exponential backoff enabled
-        self.session: Session = Session()
-        self.session.mount(
-            "https://",
-            HTTPAdapter(
-                max_retries=Retry(total=10, backoff_factor=1),
-            ),
-        )
+        session_util: HTTPSession = HTTPSession()
+        self.timeout: int = session_util.timeout
+        self.session: Session = session_util.session
 
+    def _get_doi_chunks(self, chunk_size: int = 50) -> list[list[str]]:
         # Get all DOIs from the database
-        dois: list[str] = [
-            "https://doi.org/" + doi
-            for doi in pd.read_sql_query(
-                sql="SELECT DISTINCT doi FROM articles;", con=self.db.engine
-            )["doi"].tolist()
-        ]
-        self.doi_chunks: list[list[str]] = [
-            dois[i : i + 50] for i in range(0, len(dois), 50)
-        ]
+        sql: str = "SELECT DISTINCT doi FROM articles;"
+        doi_df: DataFrame = pd.read_sql_query(sql=sql, con=self.db.engine)
+        doi_list: list[str] = doi_df["doi"].tolist()
+
+        # Format dois
+        doi_list = ["https://doi.org/" + doi for doi in doi_list]
+
+        # Chunk dois into groups
+        return [doi_list[i : i + 50] for i in range(0, len(doi_list), 50)]
 
     @staticmethod
     def extract_topics(topics: list[dict[str, dict]]) -> tuple:  # noqa: D102
@@ -83,29 +68,14 @@ class OpenAlexRunner(Runner):  # noqa: D101
 
         return (topic_0, topic_1, topic_2)
 
-    @staticmethod
-    def metadata_model_to_df(mm: MetadataModel) -> DataFrame:  # noqa: D102
-        data: dict[str, list] = {
-            "timestamp": [mm.timestamp],
-            "doi": [mm.doi],
-            "cited_by_count": [mm.cited_by_count],
-            "open_access": [mm.open_access],
-            "topic_0": [mm.topic_0],
-            "topic_1": [mm.topic_1],
-            "topic_2": [mm.topic_2],
-            "json_data": [dumps(obj=mm.json_data)],
-        }
-
-        return DataFrame(data=data)
-
     def search(self) -> list[MetadataModel]:  # noqa: D102
         data: list[MetadataModel] = []
 
-        with Bar(
-            "Searching OpenAlex for DOI metadata...", max=len(self.doi_chunks)
-        ) as bar:
+        doi_chunks: list[list[str]] = self._get_doi_chunks()
+
+        with Bar("Searching OpenAlex for DOI metadata...", max=len(doi_chunks)) as bar:
             chunk: list[str]
-            for chunk in self.doi_chunks:
+            for chunk in doi_chunks:
                 url: str = self.search_template.substitute(
                     email=self.email,
                     dois="|".join(chunk),
@@ -153,7 +123,7 @@ class OpenAlexRunner(Runner):  # noqa: D101
         # Create DataFrame of searches
         self.logger.info(msg="Preparing searches for database write")
         searches_df: DataFrame = pd.concat(
-            objs=[self.metadata_model_to_df(mm=mm) for mm in searches],
+            objs=[mm.to_df for mm in searches],
             ignore_index=True,
         )
 

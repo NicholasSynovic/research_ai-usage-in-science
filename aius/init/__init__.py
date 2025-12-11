@@ -5,7 +5,6 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
-
 from pandas import DataFrame
 
 NATURAL_SCIENCE_OA_FIELDS: DataFrame = DataFrame(
@@ -38,6 +37,9 @@ JOURNAL_SEARCH_KEYWORDS: DataFrame = DataFrame(
 )
 
 
-def compute_journal_search_years(min_year: int, max_year: int,) -> DataFrame:
+def compute_journal_search_years(
+    min_year: int,
+    max_year: int,
+) -> DataFrame:
     years: list[int] = list(range(min_year, max_year + 1))
     return DataFrame(data={"year": years})
