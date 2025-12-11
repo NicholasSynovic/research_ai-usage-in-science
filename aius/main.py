@@ -12,7 +12,7 @@ from pathlib import Path
 
 from aius import MODULE_NAME
 from aius.cli.argparse import Argparse
-from aius.factory import factory
+from aius.factory import Runner, runner_factory
 
 
 def setup_logging() -> None:  # noqa: D103
@@ -49,11 +49,16 @@ def main() -> int:  # noqa: D103
 
     # This function identifies which runner to execute, and then moves the code
     # over to aius/runners/__init__.py for further execution
-    runner_status = factory(
+    runner: Runner | int = runner_factory(
         logger=logger,
         runner_name=subparser,
         **args,
     )
+
+    if isinstance(runner, int):
+        return 1
+
+    runner_status: int = runner.execute()
 
     if runner_status == 1:
         logger.error("Unable to get the proper subparser runner: %s", subparser)

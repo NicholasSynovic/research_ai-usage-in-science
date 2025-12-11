@@ -9,8 +9,8 @@ from logging import Logger
 from pathlib import Path
 
 from aius.db import DB
+from aius.init import InitRunner
 from aius.runners.analysis import AnalysisRunner
-from aius.runners.init import InitRunner
 from aius.runners.jats import JATSRunner
 from aius.runners.openalex import OpenAlexRunner
 from aius.runners.pandoc import PandocRunner

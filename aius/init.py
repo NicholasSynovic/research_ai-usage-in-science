@@ -10,8 +10,8 @@ from logging import Logger
 from pandas import DataFrame
 
 from aius.db import DB
+from aius.factory import Runner
 from aius.inference import SYSTEM_PROMPT_TAG_MAPPING, COSTAR_SystemPrompt
-from aius.runners.runner import Runner
 
 
 class InitRunner(Runner):  # noqa: D101

@@ -5,30 +5,41 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 """
 
+from abc import ABC, abstractmethod
 from logging import Logger
 
 from aius.db import DB, connect_to_db
+from aius.init import InitRunner
 from aius.runners.analysis import AnalysisRunner
-from aius.runners.init import InitRunner
 from aius.runners.jats import JATSRunner
 from aius.runners.openalex import OpenAlexRunner
 from aius.runners.pandoc import PandocRunner
 from aius.runners.search import SearchRunner
 
 
+class Runner(ABC):  # noqa: D101
+    def __init__(self, name: str, db: DB, logger: Logger) -> None:  # noqa: D107
+        self.logger: Logger = logger
+        self.name: str = name
+        self.db: DB = db
+
+    @abstractmethod
+    def execute(self) -> int: ...  # noqa: D102
+
+
 # Factory method design pattern implementation
-def factory(  # noqa: D103
+def runner_factory(  # noqa: D103
     logger: Logger,
     runner_name: str,
     **kwargs,  # noqa: ANN003
-) -> int:
+) -> Runner | int:
     logger.info("%s kwargs: %s", runner_name, kwargs)
 
     # Connect to the database
     db: DB = connect_to_db(logger=logger, db_path=kwargs[f"{runner_name}.db"])
 
     match runner_name:
-        case "init":
+        case "init":  # Step 0
             runner = InitRunner(
                 db=db,
                 logger=logger,
@@ -73,4 +84,4 @@ def factory(  # noqa: D103
         case _:
             return 1
 
-    return runner.execute()
+    return runner
