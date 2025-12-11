@@ -44,6 +44,7 @@ class InferenceBackend:
         system_prompt: str,
     ) -> ModelResponse:
         start_time: float = time()
+        self.logger.info("Sending query to inference server...")
         try:
             resp: ChatCompletion = self.openai_client.chat.completions.create(
                 model=self.model_name,
@@ -61,6 +62,7 @@ class InferenceBackend:
                 ],
             )
         except InternalServerError:
+            self.logger.error("Internal server error raised with DOI: %s", document.doi)
             end_time: float = time()
 
             return ModelResponse(
@@ -80,6 +82,7 @@ class InferenceBackend:
         try:
             model_reasoning = resp.choices[0].message.reasoning_content
         except AttributeError:
+            self.logger.error("No reasoning output for DOI: %s", document.doi)
             pass
 
         return ModelResponse(
@@ -106,6 +109,7 @@ class InferenceBackend:
                     doi=row["doi"],
                     content=row["markdown"],
                 )
+                self.logger.debug("Inferencing content from DOI: %s", document.doi)
                 data.append(
                     self.inference_single_document(
                         document=document,
