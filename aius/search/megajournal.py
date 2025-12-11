@@ -96,7 +96,7 @@ class MegaJournal(ABC):
         logger.debug(msg=f"Response status code: {resp.status_code}")
         return SearchModel(
             timestamp=timestamp,
-            megajournal=self.megajournal,
+            megajournal=self.name,
             search_keyword=keyword_year_pair[0],
             status_code=resp.status_code,
             year=keyword_year_pair[1],
