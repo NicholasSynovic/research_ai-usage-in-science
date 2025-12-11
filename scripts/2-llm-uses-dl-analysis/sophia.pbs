@@ -125,7 +125,7 @@ run_aius() {
     local port="$2"
 
     local host="127.0.0.1"
-    local addr="${host}:${port}/v1"
+    local addr="http://${host}:${port}/v1"
 
     export OLLAMA_HOST="$addr"
 
