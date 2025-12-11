@@ -4,6 +4,7 @@ Argparse CLI implementation.
 Copyright (C) 2025 Nicholas M. Synovic
 """
 
+import sys
 from argparse import ArgumentParser, _SubParsersAction
 from datetime import datetime, timezone
 from pathlib import Path
@@ -60,7 +61,7 @@ class Argparse(CLI):  # noqa: D101
         parser.add_argument(
             "--min-year",
             default=2015,
-            type=lambda x: max([2000, x]),
+            type=lambda x: max([1999, int(x)]),
             help="Minimum year to search journals through",
             dest="init.min",
         )
@@ -68,7 +69,7 @@ class Argparse(CLI):  # noqa: D101
         parser.add_argument(
             "--max-year",
             default=2024,
-            type=lambda x: min([current_year, x]),
+            type=lambda x: min([current_year, int(x)]),
             help="Maximum year to search journals through",
             dest="init.max",
         )
@@ -239,4 +240,8 @@ class Argparse(CLI):  # noqa: D101
     def identify_subcommand(self) -> str:  # noqa: D102
         args: dict = self.parse_cli()
         arg_keys: list[str] = list(args.keys())
-        return arg_keys[0].split(sep=".")[0]
+        try:
+            return arg_keys[0].split(sep=".")[0]
+        except IndexError:
+            print("Help command: aius [-h] [--help]")
+            sys.exit(1)

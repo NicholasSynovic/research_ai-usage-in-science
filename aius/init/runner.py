@@ -8,13 +8,13 @@ Copyright 2025 (C) Nicholas M. Synovic
 from logging import Logger
 
 from aius.db import DB
-from aius.factory import Runner
 from aius.inference import SYSTEM_PROMPT_TAG_MAPPING_DF
 from aius.init import (
     JOURNAL_SEARCH_KEYWORDS,
     NATURAL_SCIENCE_OA_FIELDS,
     compute_journal_search_years,
 )
+from aius.runner import Runner
 
 
 class InitRunner(Runner):  # noqa: D101
