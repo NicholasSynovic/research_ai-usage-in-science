@@ -4,7 +4,7 @@ from logging import Logger
 from time import time
 
 import pandas as pd
-from openai import OpenAI
+from openai import InternalServerError, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame, Series
 from progress.bar import Bar
@@ -44,21 +44,34 @@ class InferenceBackend:
         system_prompt: str,
     ) -> ModelResponse:
         start_time: float = time()
-        resp: ChatCompletion = self.openai_client.chat.completions.create(
-            model=self.model_name,
-            reasoning_effort="high",
-            frequency_penalty=0,
-            stream=False,
-            seed=42,
-            n=1,
-            temperature=0.1,
-            top_p=0.1,
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": document.content},
-            ],
-        )
+        try:
+            resp: ChatCompletion = self.openai_client.chat.completions.create(
+                model=self.model_name,
+                reasoning_effort="high",
+                frequency_penalty=0,
+                stream=False,
+                seed=42,
+                n=1,
+                temperature=0.1,
+                top_p=0.1,
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": document.content},
+                ],
+            )
+        except InternalServerError:
+            end_time: float = time()
+
+            return ModelResponse(
+                doi=document.doi,
+                system_prompt=system_prompt,
+                user_prompt=document.content,
+                model_response="",
+                model_reasoning="",
+                compute_time_seconds=end_time - start_time,
+            )
+
         end_time: float = time()
 
         model_response: str = resp.choices[0].message.content
