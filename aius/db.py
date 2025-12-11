@@ -28,11 +28,15 @@ from sqlalchemy import (
     text,
 )
 
-DEFAULT_DATABASE_PATH: Path = Path("aius.sqlite3").resolve()
+from aius import MODULE_NAME
+
+DEFAULT_DATABASE_PATH: Path = Path(f"{MODULE_NAME}.sqlite3").resolve()
 
 
 class DB:  # noqa: D101
     def __init__(self, logger: Logger, db_path: Path) -> None:  # noqa: D107
+        self.logger: Logger = logger
+
         # Supress warnings
         warnings.filterwarnings(action="ignore")
 
@@ -42,13 +46,10 @@ class DB:  # noqa: D101
         # Connect to the database
         uri: str = f"sqlite:///{db_path}"
         self.engine: Engine = create_engine(url=uri)
-        self.logger: Logger = logger
-
         self.logger.info("Connected to SQLite3 database: %s", uri)
 
         # Create tables if they do not exists
         self._create_tables()
-
         self.logger.info("Created tables if they did not already exist")
 
     def _create_tables(self) -> None:
@@ -162,35 +163,35 @@ class DB:  # noqa: D101
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
         view_sql = """
-CREATE VIEW IF NOT EXISTS natural_science_article_dois AS
-WITH field_values AS (
-    SELECT
-        field
-    FROM
-        _openalex_natural_science_fields
-)
-SELECT
-    DISTINCT oa.doi
-FROM
-    openalex oa
-WHERE
-    oa.cited_by_count > 0
-    AND (
-        (
-            oa.topic_0 IN field_values
-            AND oa.topic_1 IN field_values
-        )
-        OR (
-            oa.topic_0 IN field_values
-            AND oa.topic_2 IN field_values
-        )
-        OR (
-            oa.topic_1 IN field_values
-            AND oa.topic_2 IN field_values
-        )
-    )
-;
-"""
+            CREATE VIEW IF NOT EXISTS natural_science_article_dois AS
+            WITH field_values AS (
+                SELECT
+                    field
+                FROM
+                    _openalex_natural_science_fields
+            )
+            SELECT
+                DISTINCT oa.doi
+            FROM
+                openalex oa
+            WHERE
+                oa.cited_by_count > 0
+                AND (
+                    (
+                        oa.topic_0 IN field_values
+                        AND oa.topic_1 IN field_values
+                    )
+                    OR (
+                        oa.topic_0 IN field_values
+                        AND oa.topic_2 IN field_values
+                    )
+                    OR (
+                        oa.topic_1 IN field_values
+                        AND oa.topic_2 IN field_values
+                    )
+                )
+            ;
+            """
 
         # Execute the SQL to create the view
         with self.engine.connect() as conn:
@@ -222,7 +223,7 @@ WHERE
 
         return df["year"].tolist()
 
-    def get_llm_prompt(self, llm_prompt_id: str) -> str:
+    def get_llm_prompt(self, llm_prompt_id: str) -> str:  # noqa: D102
         df: DataFrame = pd.read_sql_table(
             table_name="_llm_prompts",
             con=self.engine,
@@ -250,7 +251,11 @@ WHERE
 
         return last_row_id
 
-    def write_dataframe_to_table(self, table_name: str, df: DataFrame) -> None:
+    def write_dataframe_to_table(  # noqa: D102
+        self,
+        table_name: str,
+        df: DataFrame,
+    ) -> None:
         self.logger.info("Writing data to the `%s` table", table_name)
         self.logger.debug("Data: %s", table_name)
         df.to_sql(
@@ -262,7 +267,7 @@ WHERE
         )
         self.logger.info("Wrote data to the `%s` table", table_name)
 
-    def read_table_to_dataframe(self, table_name: str) -> DataFrame:
+    def read_table_to_dataframe(self, table_name: str) -> DataFrame:  # noqa: D102
         self.logger.info("Reading data to the `%s` table", table_name)
         self.logger.debug("Data: %s", table_name)
         return pd.read_sql_table(
