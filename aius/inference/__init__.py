@@ -1,8 +1,5 @@
-# from abc import ABC, abstractmethod
+from pandas import DataFrame
 
-# from openai.types.chat import ChatCompletion
-
-# from aius.inference.models import Document, ModelResponse, UsesDL
 from aius.inference.prompts import *
 
 SYSTEM_PROMPT_TAG_MAPPING: dict[str, COSTAR_SystemPrompt] = {
@@ -13,24 +10,12 @@ SYSTEM_PROMPT_TAG_MAPPING: dict[str, COSTAR_SystemPrompt] = {
     "identify_ptm_impact": IDENTIFY_PTM_IMPACT_IN_SCIENTIFIC_PROCESS,
 }
 
-
-# class Inference(ABC):
-#     def __init__(self) -> None:
-#         pass
-
-#     @abstractmethod
-#     def inference_document(
-#         self,
-#         system_prompt: str,
-#         document: Document,
-#     ) -> ChatCompletion: ...
-
-#     @abstractmethod
-#     def inference_documents(
-#         self,
-#         system_prompt: str,
-#         documents: list[Document],
-#     ) -> list[ModelResponse]: ...
-
-#     @abstractmethod
-#     def parse_uses_dl(self, responses: list[ModelResponse]) -> list[UsesDL]: ...
+SYSTEM_PROMPT_TAG_MAPPING_DF: DataFrame = DataFrame(
+    data={
+        "tag": [p.tag for p in SYSTEM_PROMPT_TAG_MAPPING.values()],
+        "prompt": [p.create_prompt() for p in SYSTEM_PROMPT_TAG_MAPPING.values()],
+        "json_string": [
+            p.model_dump_json(indent=4) for p in SYSTEM_PROMPT_TAG_MAPPING.values()
+        ],
+    }
+)
