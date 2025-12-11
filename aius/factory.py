@@ -17,7 +17,7 @@ from aius.runners.search import SearchRunner
 
 
 # Factory method design pattern implementation
-def runner_factory(  # noqa: D103
+def factory(  # noqa: D103
     logger: Logger,
     runner_name: str,
     **kwargs,  # noqa: ANN003

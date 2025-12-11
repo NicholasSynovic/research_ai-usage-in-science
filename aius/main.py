@@ -10,8 +10,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from aius import MODULE_NAME, runners
+from aius import MODULE_NAME
 from aius.cli.argparse import Argparse
+from aius.factory import factory
 
 
 def setup_logging() -> None:  # noqa: D103
@@ -48,7 +49,7 @@ def main() -> int:  # noqa: D103
 
     # This function identifies which runner to execute, and then moves the code
     # over to aius/runners/__init__.py for further execution
-    runner_status = runners.runner_factory(
+    runner_status = factory(
         logger=logger,
         runner_name=subparser,
         **args,
