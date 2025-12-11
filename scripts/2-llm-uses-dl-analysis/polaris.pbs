@@ -133,7 +133,6 @@ run_aius() {
     --db /home/nsynovic/aius_12-10-2025.db \
     --system-prompt uses_dl \
     --auth-key "" \
-    --index 1 \
     --stride 20 \
     --backend ollama \
     --ollama ${addr}
