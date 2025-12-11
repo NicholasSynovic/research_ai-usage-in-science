@@ -275,3 +275,8 @@ class DB:  # noqa: D101
             con=self.engine,
             index_col="_id",
         )
+
+
+def connect_to_db(logger: Logger, db_path: Path) -> DB:  # noqa: D103
+    logger.info("Connected to SQLite3 database: %s", db_path)
+    return DB(logger=logger, db_path=db_path)
