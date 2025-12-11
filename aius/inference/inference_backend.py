@@ -61,12 +61,20 @@ class InferenceBackend:
         )
         end_time: float = time()
 
+        model_response: str = resp.choices[0].message.content
+
+        model_reasoning: str = ""
+        try:
+            model_reasoning = resp.choices[0].message.reasoning_content
+        except AttributeError:
+            pass
+
         return ModelResponse(
             doi=document.doi,
             system_prompt=system_prompt,
             user_prompt=document.content,
-            model_response=resp.choices[0].message.content,
-            model_reasoning=resp.choices[0].message.reasoning_content,
+            model_response=model_response,
+            model_reasoning=model_reasoning,
             compute_time_seconds=end_time - start_time,
         )
 
