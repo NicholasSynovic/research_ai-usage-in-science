@@ -129,12 +129,21 @@ run_aius() {
 
     export OLLAMA_HOST="$addr"
 
-    aius llm-analysis \
-    --db /home/nsynovic/aius.sqlite3 \
-    --model ${AIUS_MODEL} \
-    --ollama ${addr} \
-    --index ${AIUS_INDEX} \
-    --stride ${AIUS_STRIDE} 2>&1 | tee $LOGFILE
+    aius analyze \
+    --db /home/nsynovic/aius_12-10-2025.db \
+    --system-prompt uses_dl \
+    --auth-key "" \
+    --index 1 \
+    --stride 20 \
+    --backend ollama \
+    --ollama ${addr}
+
+    # aius llm-analysis \
+    # --db /home/nsynovic/aius.sqlite3 \
+    # --model ${AIUS_MODEL} \
+    # --ollama ${addr} \
+    # --index ${AIUS_INDEX} \
+    # --stride ${AIUS_STRIDE} 2>&1 | tee $LOGFILE
 }
 
 
