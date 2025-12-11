@@ -7,7 +7,7 @@ import pandas
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
-from aius.db.db import DB
+from aius.db import DB
 
 
 def get_db_df(db: DB) -> DataFrame:

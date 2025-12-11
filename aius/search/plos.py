@@ -5,7 +5,7 @@ from string import Template
 
 from progress.bar import Bar
 
-from aius.db.db import DB
+from aius.db import DB
 from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
 
 

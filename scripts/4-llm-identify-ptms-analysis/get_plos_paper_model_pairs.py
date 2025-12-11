@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas
 from pandas import DataFrame
 
-from aius.db.db import DB
+from aius.db import DB
 
 json_file: Path = Path("../../data/gpt_oss/gpt-oss-20b_identify_ptms.json").resolve()
 db: DB = DB(db_path=Path("../../data/aius_10-20-2025.sqlite3").resolve())

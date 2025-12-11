@@ -6,7 +6,7 @@ import pandas
 import seaborn as sns
 from pandas import DataFrame
 
-from aius.db.db import DB
+from aius.db import DB
 
 
 def get_data(db: DB) -> DataFrame:

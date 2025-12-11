@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.engine.cursor import CursorResult
 from sqlalchemy.sql.elements import TextClause
 
-from aius.db.db import DB
+from aius.db import DB
 
 
 # Get the number of PLOS papers

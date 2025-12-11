@@ -18,7 +18,7 @@ from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import HTTPError
 
-from aius.db.db import DB
+from aius.db import DB
 from aius.runners.runner import Runner
 
 

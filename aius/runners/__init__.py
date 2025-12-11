@@ -8,7 +8,7 @@ Copyright 2025 (C) Nicholas M. Synovic
 from logging import Logger
 from pathlib import Path
 
-from aius.db.db import DB
+from aius.db import DB
 from aius.runners.analysis import AnalysisRunner
 from aius.runners.init import InitRunner
 from aius.runners.jats import JATSRunner

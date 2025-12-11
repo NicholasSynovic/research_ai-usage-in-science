@@ -6,7 +6,7 @@ import click
 import pandas
 from pandas import DataFrame, Series
 
-from aius.db.db import DB
+from aius.db import DB
 
 
 def get_aa(db: DB) -> DataFrame:

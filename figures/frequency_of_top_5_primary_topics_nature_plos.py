@@ -9,7 +9,7 @@ import seaborn as sns
 from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
-from aius.db.db import DB
+from aius.db import DB
 
 PROGRAM_NAME: str = "Frequency Of Top-5 Primary Topics"
 DB_HELP: str = "Path to database"

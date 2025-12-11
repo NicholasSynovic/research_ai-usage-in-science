@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 
-from aius.db.db import DB
+from aius.db import DB
 from aius.runners.runner import Runner
 
 

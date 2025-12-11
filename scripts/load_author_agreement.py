@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from aius.db.db import DB
+from aius.db import DB
 
 
 class LoadAuthorAgreement:

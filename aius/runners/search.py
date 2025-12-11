@@ -10,7 +10,7 @@ from logging import Logger
 import pandas as pd
 from pandas import DataFrame
 
-from aius.db.db import DB
+from aius.db import DB
 from aius.runners.runner import Runner
 from aius.search.bmj import BMJ
 from aius.search.f1000 import F1000

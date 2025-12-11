@@ -13,7 +13,7 @@ from typing import Literal
 from pandas import DataFrame
 from pydantic import BaseModel
 
-from aius.db.db import DB
+from aius.db import DB
 from aius.inference.inference_backend import InferenceBackend
 from aius.runners.runner import Runner
 
