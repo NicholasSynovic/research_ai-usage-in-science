@@ -14,7 +14,7 @@ from aius.db import DEFAULT_DATABASE_PATH
 from aius.documents import ALL_OF_PLOS_DEFAULT_PATH
 from aius.inference import SYSTEM_PROMPT_TAG_MAPPING
 from aius.pandoc import DEFAULT_PANDOC_URI
-from aius.search import JOURNAL_SEARCH_MAPPING
+from aius.search import MEGAJOURNAL_MAPPING
 
 
 class Argparse(CLI):  # noqa: D101
@@ -91,9 +91,9 @@ class Argparse(CLI):  # noqa: D101
 
         parser.add_argument(
             "--journal",
-            default=next(iter(JOURNAL_SEARCH_MAPPING.keys())),
+            default=next(iter(MEGAJOURNAL_MAPPING.keys())),
             type=str,
-            choices=list(JOURNAL_SEARCH_MAPPING.keys()),
+            choices=list(MEGAJOURNAL_MAPPING.keys()),
             help="Journal to search for natural science documents reusing PTMs",
             dest="search.journal",
         )

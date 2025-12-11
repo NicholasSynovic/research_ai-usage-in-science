@@ -55,9 +55,7 @@ class F1000(MegaJournal):
         logger.info(msg=f"Search URL: {url}")
 
         timestamp: float = datetime.now(tz=timezone.utc).timestamp()
-        resp: Response = self.session.get(
-            url=url,
-        )
+        resp: Response = self.session.get(url=url, timeout=self.timeout)
         logger.debug(msg=f"Response status code: {resp.status_code}")
 
         if resp.status_code != 200:

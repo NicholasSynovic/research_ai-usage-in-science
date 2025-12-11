@@ -8,9 +8,9 @@ from string import Template
 from pandas import DataFrame
 from pydantic import BaseModel
 from requests import Response, Session
-from requests.adapters import HTTPAdapter, Retry
 
 from aius.db import DB
+from aius.util.http_session import HTTPSession
 
 
 class SearchModel(BaseModel):
@@ -70,13 +70,9 @@ class MegaJournal(ABC):
         self.keyword_year_products: product = product()
 
         # Custom HTTPS session with exponential backoff enabled
-        self.session: Session = Session()
-        self.session.mount(
-            "https://",
-            HTTPAdapter(
-                max_retries=Retry(total=5, backoff_factor=1),
-            ),
-        )
+        session_util: HTTPSession = HTTPSession()
+        self.timeout: int = session_util.timeout
+        self.session: Session = session_util.session
 
     def search_single_page(
         self,
@@ -92,7 +88,7 @@ class MegaJournal(ABC):
         logger.info(msg=f"Searching URL: {search_url}")
 
         timestamp: float = datetime.now(tz=timezone.utc).timestamp()
-        resp: Response = self.session.get(url=search_url)
+        resp: Response = self.session.get(url=search_url, timeout=self.timeout)
         logger.debug(msg=f"Response status code: {resp.status_code}")
         return SearchModel(
             timestamp=timestamp,

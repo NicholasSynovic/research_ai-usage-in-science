@@ -66,6 +66,7 @@ class FrontiersIn(MegaJournal):
         resp: Response = self.session.post(
             url=self.search_api_endpoint,
             json=search_request_body,
+            timeout=self.timeout,
         )
         logger.debug(msg=f"Response status code: {resp.status_code}")
 
