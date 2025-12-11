@@ -21,7 +21,7 @@ class InferenceBackend:
         stride: int,
         auth_key: str,
         openai_endpoint: str,
-        model_name: str = "gpt-oss:20b",
+        model_name: str = "gpt-oss-aius:20b",
         http_timeout: int = 3600,
         http_retries: int = 10,
     ) -> None:

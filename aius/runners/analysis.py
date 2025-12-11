@@ -41,7 +41,7 @@ class AnalysisRunner(Runner):  # noqa: D101
         self.stride: int = stride
         self.index: int = index
         self.endpoint: str = ollama_endpoint
-        self.model_name: str = "gpt-oss:20b"
+        self.model_name: str = "gpt-oss-aius:20b"
 
         if backend == "alcf":
             self.endpoint = (
