@@ -5,7 +5,7 @@ import click
 import pandas
 from pandas import DataFrame, Series
 
-from aius.db import DB
+from aius.db.db import DB
 
 
 def load_author_agreement_data(db: DB) -> DataFrame:

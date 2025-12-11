@@ -1,7 +1,7 @@
 import pandas as pd
 
 import aius
-from aius.db import DB
+from aius.db.db import DB
 
 
 class LoadPromptEngineeringPapers:

@@ -7,7 +7,7 @@ Copyright (C) 2025 Nicholas M. Synovic
 from abc import ABC, abstractmethod
 from logging import Logger
 
-from aius.db import DB
+from aius.db.db import DB
 
 
 class Runner(ABC):  # noqa: D101

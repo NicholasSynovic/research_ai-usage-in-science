@@ -8,7 +8,7 @@ import pandas
 from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
 
-from aius.db import DB
+from aius.db.db import DB
 
 
 def get_db_df(db: DB) -> DataFrame:

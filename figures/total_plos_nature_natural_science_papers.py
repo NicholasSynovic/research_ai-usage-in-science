@@ -6,7 +6,7 @@ import pandas
 import seaborn as sns
 from pandas import DataFrame
 
-from aius.db import DB
+from aius.db.db import DB
 
 PROGRAM_NAME: str = "Total Nature and PLOS Natural Science Papers"
 DB_HELP: str = "Path to database"

@@ -5,7 +5,7 @@ import click
 import pandas
 from pandas import DataFrame
 
-from aius.db import DB
+from aius.db.db import DB
 
 
 def get_aa_data(db: DB) -> DataFrame:

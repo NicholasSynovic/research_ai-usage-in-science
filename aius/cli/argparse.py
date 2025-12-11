@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from aius.cli import CLI, DATABASE_HELP_MESSAGE
-from aius.db import DEFAULT_DATABASE_PATH
+from aius.db.db import DEFAULT_DATABASE_PATH
 from aius.documents import ALL_OF_PLOS_DEFAULT_PATH
 from aius.inference import SYSTEM_PROMPT_TAG_MAPPING
 from aius.pandoc import DEFAULT_PANDOC_URI

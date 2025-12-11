@@ -14,7 +14,7 @@ from pandas import DataFrame, Series
 from progress.bar import Bar
 from requests import Response, post
 
-from aius.db import DB
+from aius.db.db import DB
 from aius.runners.runner import Runner
 
 

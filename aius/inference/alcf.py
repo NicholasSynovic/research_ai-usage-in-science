@@ -1,4 +1,3 @@
-from abc import ABCMeta, abstractmethod
 from itertools import islice
 from logging import Logger
 from time import time
@@ -9,23 +8,30 @@ from openai.types.chat.chat_completion import ChatCompletion
 from pandas import DataFrame, Series
 from progress.bar import Bar
 
+from aius.inference.inference_backend import InferenceBackend
 from aius.inference.models import Document, ModelResponse
 
 
-class InferenceBackend(ABCMeta):
+class ALCF(InferenceBackend):
     def __init__(
         self,
         logger: Logger,
         index: int,
         stride: int,
-        http_timeout: int = 3600,
-        http_retries: int = 10,
+        auth_key: str,
+        model_name: str = "openai/gpt-oss-20b",
     ) -> None:
-        self.logger: Logger = logger
-        self.index: int = index
-        self.stride: int = stride
-        self.name = name
+        super().__init__(logger=logger, index=index, stride=stride)
+
+        self.name = "ALCF inference server"
         self.model_name: str = model_name
+
+        self.openai_client: OpenAI = OpenAI(
+            api_key=auth_key,
+            base_url="https://inference-api.alcf.anl.gov/resource_server/sophia/vllm/v1",
+            timeout=3600,
+            max_retries=10,
+        )
 
     def inference_single_document(
         self,

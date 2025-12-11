@@ -10,7 +10,7 @@ from pandas import DataFrame
 from pandas.core.groupby import DataFrameGroupBy
 
 import aius
-from aius.db import DB
+from aius.db.db import DB
 
 PROGRAM_NAME: str = "Frequency Of Natural Science Topics"
 DB_HELP: str = "Path to database"

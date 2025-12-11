@@ -6,7 +6,7 @@ import pandas
 from pandas import DataFrame, Series
 from pandas.core.groupby import DataFrameGroupBy
 
-from aius.db import DB
+from aius.db.db import DB
 
 
 def get_oa_data(db: DB) -> DataFrame:

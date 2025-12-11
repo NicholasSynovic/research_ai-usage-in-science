@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from aius.db import DB
+from aius.db.db import DB
 
 
 class LoadPilotStudy:

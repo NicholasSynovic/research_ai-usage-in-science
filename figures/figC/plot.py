@@ -9,7 +9,7 @@ import seaborn as sns
 import upsetplot
 from pandas import DataFrame
 
-from aius.db import DB
+from aius.db.db import DB
 
 warnings.filterwarnings(action="ignore")
 

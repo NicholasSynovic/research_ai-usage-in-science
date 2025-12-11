@@ -7,7 +7,7 @@ import pandas
 import seaborn as sns
 from pandas import DataFrame, Series
 
-from aius.db import DB
+from aius.db.db import DB
 
 
 def get_data(db: DB) -> tuple[DataFrame, DataFrame]:

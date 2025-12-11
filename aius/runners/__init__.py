@@ -8,7 +8,7 @@ Copyright 2025 (C) Nicholas M. Synovic
 from logging import Logger
 from pathlib import Path
 
-from aius.db import DB
+from aius.db.db import DB
 from aius.runners.analysis import AnalysisRunner
 from aius.runners.init import InitRunner
 from aius.runners.jats import JATSRunner
@@ -33,38 +33,38 @@ def runner_factory(logger: Logger, runner_name: str, **kwargs) -> int:  # noqa: 
         case "init":
             runner = InitRunner(
                 db=db,
+                logger=logger,
                 min_year=kwargs["init.min"],
                 max_year=kwargs["init.max"],
-                logger=logger,
             )
         case "search":
             runner = SearchRunner(
-                logger=logger,
                 db=db,
+                logger=logger,
                 megajournal_name=kwargs["search.journal"],
             )
         case "openalex":
             runner = OpenAlexRunner(
-                logger=logger,
                 db=db,
+                logger=logger,
                 email=kwargs["openalex.email"],
             )
         case "jats":
             runner = JATSRunner(
-                logger=logger,
                 db=db,
+                logger=logger,
                 plos_zip_fp=kwargs["jats.plos_zip"],
             )
         case "pandoc":
             runner = PandocRunner(
-                logger=logger,
                 db=db,
+                logger=logger,
                 pandoc_uri=kwargs["pandoc.uri"],
             )
         case "analyze":
             runner = AnalysisRunner(
-                logger=logger,
                 db=db,
+                logger=logger,
                 system_prompt_id=kwargs["analyze.system_prompt"],
                 index=kwargs["analyze.index"],
                 stride=kwargs["analyze.stride"],

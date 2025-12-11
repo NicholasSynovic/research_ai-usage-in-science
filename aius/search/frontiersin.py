@@ -6,7 +6,7 @@ from logging import Logger
 from progress.bar import Bar
 from requests import Response
 
-from aius.db import DB
+from aius.db.db import DB
 from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
 
 

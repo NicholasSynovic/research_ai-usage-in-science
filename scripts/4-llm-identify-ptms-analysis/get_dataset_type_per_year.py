@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas
 from pandas import DataFrame, Series
 
-from aius.db import DB
+from aius.db.db import DB
 
 csv_file: Path = Path("model_paper_pairs.csv").resolve()
 db: DB = DB(db_path=Path("../../data/aius_10-20-2025.sqlite3").resolve())
