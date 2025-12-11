@@ -11,13 +11,9 @@ from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
 
 class PLOS(MegaJournal):
     def __init__(self, logger: Logger, db: DB) -> None:
-        self.logger: Logger = logger
-
         # Load default variable values
-        super().__init__()
+        super().__init__(logger=logger, db=db)
 
-        # Set constants
-        self.db = db
         self.megajournal: str = "PLOS"
         self.search_url_template: Template = Template(
             template="https://journals.plos.org/plosone/dynamicSearch?filterArticleTypes=Research Article&sortOrder=DATE_NEWEST_FIRST&resultsPerPage=100&q=${search_keyword}&filterStartDate=${year}-01-01&filterEndDate=${year}-12-31&page=${page}"

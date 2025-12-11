@@ -11,10 +11,8 @@ import pandas as pd
 from pandas import DataFrame
 
 from aius.db import DB
-from aius.runners.runner import Runner
-from aius.search.bmj import BMJ
-from aius.search.f1000 import F1000
-from aius.search.frontiersin import FrontiersIn
+from aius.runner import Runner
+from aius.search import MEGAJOURNAL_MAPPING
 from aius.search.megajournal import (
     ArticleModel,
     MegaJournal,
@@ -22,7 +20,6 @@ from aius.search.megajournal import (
     article_model_to_df,
     search_model_to_df,
 )
-from aius.search.plos import PLOS
 
 
 # Template method design pattern
@@ -40,29 +37,29 @@ class SearchRunner(Runner):  # noqa: D101
 
         # Identify which megajournal to use
         # Factory method design pattern
-        self.megajournal: MegaJournal
-        match self.megajournal_name:
-            case "bmj":
-                self.megajournal = BMJ(logger=self.logger, db=self.db)
-            case "frontiersin":
-                self.megajournal = FrontiersIn(logger=self.logger, db=self.db)
-            case "f1000":
-                self.megajournal = F1000(logger=self.logger, db=self.db)
-            case "plos":
-                self.megajournal = PLOS(logger=self.logger, db=self.db)
-
+        self.megajournal: MegaJournal = MEGAJOURNAL_MAPPING[self.megajournal_name](
+            logger=self.logger, db=self.db
+        )
         self.logger.info("Identified journal as %s", self.megajournal.name)
 
-    def execute(self) -> int:  # noqa: D102
+    def _get_table_row_count(self, table_name: str) -> int:
+        row_count: int = self.megajournal.db.get_last_row_id(table_name)
+        self.logger.info(
+            "%s rows previously existed in table `%s`", row_count, table_name
+        )
+        return row_count
+
+    def _update_df_index(self, table_row_count: int, df: DataFrame) -> None:
+        if table_row_count != 0:
+            update_val: int = table_row_count + 1
+            self.logger.info("Updating search IDs by %s", update_val)
+            df.index += update_val
+
+    def search_for_articles(self) -> list[SearchModel]:
         # Get the current row count of the `searches` table to ensure that the
         # SQL Unique constraint is not violated by updating DataFrame index
         # later
-        search_table_row_count: int = self.megajournal.db.get_last_row_id(
-            table_name="searches"
-        )
-        article_table_row_count: int = self.megajournal.db.get_last_row_id(
-            table_name="articles"
-        )
+        row_count: int = self._get_table_row_count(table_name="searches")
 
         # Conduct searches
         self.logger.info("Executing %s search", self.megajournal.name)
@@ -72,6 +69,28 @@ class SearchRunner(Runner):  # noqa: D101
             len(searches),
             self.megajournal.name,
         )
+
+        # Create DataFrame of searches
+        self.logger.info(msg="Preparing searches for database write")
+        searches_df: DataFrame = pd.concat(
+            objs=[search_model_to_df(sm=sm) for sm in searches],
+            ignore_index=True,
+        )
+        self.logger.debug("Search DataFrame: %s", searches_df)
+
+        # Update unique search IDs
+        self._update_df_index(table_row_count=row_count, df=searches_df)
+
+        # Write data
+        self.db.write_dataframe_to_table(table_name="searches", df=searches_df)
+
+        return searches
+
+    def parse_articles(self, searches: list[SearchModel]) -> None:
+        # Get the current row count of the `articles` table to ensure that the
+        # SQL Unique constraint is not violated by updating DataFrame index
+        # later
+        row_count: int = self._get_table_row_count(table_name="articles")
 
         # Parse searches for articles
         self.logger.info("Executing %s article extraction", self.megajournal.name)
@@ -83,14 +102,6 @@ class SearchRunner(Runner):  # noqa: D101
             len(articles),
             self.megajournal.name,
         )
-
-        # Create DataFrame of searches
-        self.logger.info(msg="Preparing searches for database write")
-        searches_df: DataFrame = pd.concat(
-            objs=[search_model_to_df(sm=sm) for sm in searches],
-            ignore_index=True,
-        )
-        self.logger.debug("Data: %s", searches_df)
 
         # Create DataFrame of articles
         self.logger.info(msg="Preparing articles for database write")
@@ -109,20 +120,14 @@ class SearchRunner(Runner):  # noqa: D101
         )
         articles_df = articles_df.drop(columns=["search_id"])
 
-        # Update unique search IDs
-        if search_table_row_count != 0:
-            update_val: int = search_table_row_count + 1
-            self.logger.info("Updating search IDs by %s", update_val)
-            searches_df.index += update_val
-
         # Update unique article IDs
-        if article_table_row_count != 0:
-            update_val: int = article_table_row_count + 1
-            self.logger.info("Updating search IDs by %s", update_val)
-            articles_df.index += update_val
+        self._update_df_index(table_row_count=row_count, df=articles_df)
 
         # Write DataFrames to the database
-        self.db.write_dataframe_to_table(table_name="searches", df=searches_df)
         self.db.write_dataframe_to_table(table_name="articles", df=articles_df)
+
+    def execute(self) -> int:  # noqa: D102
+        searches: list[SearchModel] = self.search_for_articles()
+        self.parse_articles(searches=searches)
 
         return 0

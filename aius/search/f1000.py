@@ -15,13 +15,9 @@ from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
 
 class F1000(MegaJournal):
     def __init__(self, logger: Logger, db: DB) -> None:
-        self.logger: Logger = logger
-
         # Load default variable values
-        super().__init__()
+        super().__init__(logger=logger, db=db)
 
-        # Set constants
-        self.db = db
         self.megajournal: str = "F1000"
         self.search_url_template: Template = Template(
             template="https://f1000research.com/extapi/search?page=${page}&rows=100&start=0&q=R_TE:${query} AND R_PUD:%5B${t1} TO ${t2}%5D&wt=json"

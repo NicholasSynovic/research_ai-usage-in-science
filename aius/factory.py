@@ -14,7 +14,7 @@ from aius.runners.analysis import AnalysisRunner
 from aius.runners.jats import JATSRunner
 from aius.runners.openalex import OpenAlexRunner
 from aius.runners.pandoc import PandocRunner
-from aius.runners.search import SearchRunner
+from aius.search.runner import SearchRunner
 
 
 # Factory method design pattern implementation
@@ -37,12 +37,12 @@ def runner_factory(  # noqa: D103
                 min_year=kwargs["init.min"],
                 max_year=kwargs["init.max"],
             )
-        # case "search":
-        #     runner = SearchRunner(
-        #         db=db,
-        #         logger=logger,
-        #         megajournal_name=kwargs["search.journal"],
-        #     )
+        case "search":
+            runner = SearchRunner(
+                db=db,
+                logger=logger,
+                megajournal_name=kwargs["search.journal"],
+            )
         # case "openalex":
         #     runner = OpenAlexRunner(
         #         db=db,

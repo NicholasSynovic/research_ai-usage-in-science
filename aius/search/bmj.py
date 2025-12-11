@@ -14,13 +14,9 @@ from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
 
 class BMJ(MegaJournal):
     def __init__(self, logger: Logger, db: DB) -> None:
-        self.logger: Logger = logger
-
         # Load default variable values
-        super().__init__()
+        super().__init__(logger=logger, db=db)
 
-        # Set constants
-        self.db = db
         self.megajournal: str = "BMJ"
         self.search_url_template: Template = Template(
             template="https://journals.bmj.com/search/${query} limit_from:${year}-01-01 limit_to:${year}-12-31 jcode:bmjcimm||bmjdhai||bmjgh||bmjhci||bmjmed||bmjno||bmjnph||bmjonc||bmjopen||bmjph||bmjdrc||bmjgast||bmjophth||bmjqir||bmjresp||bmjosem||bmjpo||bmjccgg||bmjconc||bmjsit||egastro||fmch||gocm||gpsych||jmepb||jitc||lupusscimed||openhrt||rmdopen||svnbmj||tsaco||wjps exclude_meeting_abstracts:0 numresults:100 sort:publication-date direction:descending format_result:standard button:Submit button2:Submit button3:Submit?page=${page}"

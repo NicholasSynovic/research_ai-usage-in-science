@@ -12,13 +12,10 @@ from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
 
 class FrontiersIn(MegaJournal):
     def __init__(self, logger: Logger, db: DB) -> None:
-        self.logger: Logger = logger
-
         # Load default variable values
-        super().__init__()
+        super().__init__(logger=logger, db=db)
 
         # Set constants
-        self.db = db
         self.megajournal: str = "FrontiersIn"
         self.search_api_endpoint: str = "https://www.frontiersin.org/api/v2/search"
         self.search_api_body: dict = {
