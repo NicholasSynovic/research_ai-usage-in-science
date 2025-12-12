@@ -9,7 +9,8 @@ from pandas import DataFrame, Series
 from progress.bar import Bar
 
 from aius.db import DB
-from aius.megajournals import ArticleModel, MegaJournal, SearchModel
+from aius.megajournals.megajournal import MegaJournal
+from aius.megajournals.models import ArticleModel, SearchModel
 
 
 class PLOS(MegaJournal):
@@ -121,7 +122,7 @@ class PLOS(MegaJournal):
                 "Extracting JATS XML content from PLOS zip archive...",
                 max=df.shape[0],
             ) as bar,
-            ZipFile(file=plos_zip_fp, mode="r") as zf,
+            ZipFile(file=kwargs["plos_zip_fp"], mode="r") as zf,
         ):
             # For each filename, open the file's content and add it to the
             # data structure
@@ -129,18 +130,21 @@ class PLOS(MegaJournal):
             for _, row in df.iterrows():
                 # Open the file and decode the content
                 filename: str = row["doi"].split("/")[1] + ".xml"
-                with zf.open(name=filename, mode="r") as fp:
-                    data["doi"].append(row["doi"])
+                try:
+                    with zf.open(name=filename, mode="r") as fp:
+                        data["doi"].append(row["doi"])
 
-                    # Add prettified JATS XML to the data structure
-                    data["jats_xml"].append(
-                        BeautifulSoup(
-                            markup=fp.read().decode("UTF-8").strip("\n"),
-                            features="lxml",
-                        ).prettify()
-                    )
+                        # Add prettified JATS XML to the data structure
+                        data["jats_xml"].append(
+                            BeautifulSoup(
+                                markup=fp.read().decode("UTF-8").strip("\n"),
+                                features="lxml",
+                            ).prettify()
+                        )
 
-                    fp.close()
+                        fp.close()
+                except KeyError:
+                    pass
                 bar.next()
             zf.close()
 

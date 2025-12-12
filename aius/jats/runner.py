@@ -14,7 +14,8 @@ from requests import Session
 
 from aius.db import DB
 from aius.jats import ALL_OF_PLOS_DEFAULT_PATH
-from aius.megajournals import MEGAJOURNAL_MAPPING, MegaJournal
+from aius.megajournals import MEGAJOURNAL_MAPPING
+from aius.megajournals.megajournal import MegaJournal
 from aius.runner import Runner
 from aius.util.http_session import HTTPSession
 
@@ -41,7 +42,8 @@ class JATSRunner(Runner):  # noqa: D101
         self.megajournal_name: str = megajournal_name.lower()
         self.logger.info("Journal name: %s", self.megajournal_name)
         self.megajournal: MegaJournal = MEGAJOURNAL_MAPPING[self.megajournal_name](
-            logger=self.logger, db=self.db
+            logger=self.logger,
+            db=self.db,
         )
         self.logger.info("Identified journal as %s", self.megajournal.name)
 

@@ -9,7 +9,8 @@ from progress.bar import Bar
 from requests import HTTPError, Response
 
 from aius.db import DB
-from aius.megajournals import ArticleModel, MegaJournal, SearchModel
+from aius.megajournals.megajournal import MegaJournal
+from aius.megajournals.models import ArticleModel, SearchModel
 
 
 class F1000(MegaJournal):

@@ -13,8 +13,8 @@ from aius.cli import CLI, DATABASE_HELP_MESSAGE
 from aius.db import DEFAULT_DATABASE_PATH
 from aius.inference import SYSTEM_PROMPT_TAG_MAPPING
 from aius.jats import ALL_OF_PLOS_DEFAULT_PATH
+from aius.megajournals import MEGAJOURNAL_MAPPING
 from aius.pandoc import DEFAULT_PANDOC_URI
-from aius.search import MEGAJOURNAL_MAPPING
 
 
 class Argparse(CLI):  # noqa: D101
@@ -95,7 +95,7 @@ class Argparse(CLI):  # noqa: D101
             type=str,
             choices=list(MEGAJOURNAL_MAPPING.keys()),
             help="Journal to search for natural science documents reusing PTMs",
-            dest="search.journal",
+            dest="search.megajournal",
         )
 
     def add_openalex_subparser(self) -> None:  # noqa: D102
@@ -134,6 +134,14 @@ class Argparse(CLI):  # noqa: D101
             type=lambda x: Path(x).resolve(),
             help=DATABASE_HELP_MESSAGE,
             dest="jats.db",
+        )
+        parser.add_argument(
+            "--journal",
+            default=next(iter(MEGAJOURNAL_MAPPING.keys())),
+            type=str,
+            choices=list(MEGAJOURNAL_MAPPING.keys()),
+            help="Journal to download JATS documents from",
+            dest="jats.megajournal",
         )
         parser.add_argument(
             "--plos-zip",

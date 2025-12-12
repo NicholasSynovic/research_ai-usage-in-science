@@ -11,12 +11,9 @@ import pandas as pd
 from pandas import DataFrame
 
 from aius.db import DB
-from aius.megajournals import (
-    MEGAJOURNAL_MAPPING,
-    ArticleModel,
-    MegaJournal,
-    SearchModel,
-)
+from aius.megajournals import MEGAJOURNAL_MAPPING
+from aius.megajournals.megajournal import MegaJournal
+from aius.megajournals.models import ArticleModel, SearchModel
 from aius.runner import Runner
 
 

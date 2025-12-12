@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from itertools import islice
 from logging import Logger
 from time import time
@@ -12,7 +12,7 @@ from progress.bar import Bar
 from aius.inference.models import Document, ModelResponse
 
 
-class InferenceBackend(ABCMeta):
+class InferenceBackend(ABC):
     def __init__(
         self,
         logger: Logger,
