@@ -88,7 +88,7 @@ class AnalysisRunner(Runner):  # noqa: D101
         )
 
         df.to_parquet(
-            path=f"aius_{self.backend.name}index-{self.index}_stride-{self.stride}.parquet",
+            path=f"aius_{self.backend.name}_{self.system_prompt_id}_index-{self.index}_stride-{self.stride}.parquet",
             engine="auto",
         )
 
