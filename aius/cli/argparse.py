@@ -208,6 +208,15 @@ class Argparse(CLI):  # noqa: D101
         )
 
         parser.add_argument(
+            "--index",
+            type=int,
+            required=False,
+            default=0,
+            help="Starting index of documents. Default is 0.",
+            dest="analyze.index",
+        )
+
+        parser.add_argument(
             "--max-context-tokens",
             type=int,
             required=False,
@@ -234,39 +243,29 @@ class Argparse(CLI):  # noqa: D101
         )
 
         parser.add_argument(
-            "--system-prompt",
-            default=next(iter(SYSTEM_PROMPT_TAG_MAPPING.keys())),
+            "--ollama-endpoint",
             type=str,
-            choices=list(SYSTEM_PROMPT_TAG_MAPPING.keys()),
-            help="LLM system prompt to use for analysis",
-            dest="analyze.system_prompt",
-        )
-
-        parser.add_argument(
-            "--index",
-            type=int,
             required=False,
-            default=0,
-            help="Starting index of documents",
-            dest="analyze.index",
+            default="http://localhost:11434",
+            help="Ollama inferencing URL. Default is http://localhost:11434",
+            dest="analyze.ollama_endpoint",
         )
-
         parser.add_argument(
             "--stride",
             type=int,
             required=False,
             default=20,
-            help="Stride of documents",
+            help="Stride of documents. Default is 20",
             dest="analyze.stride",
         )
 
         parser.add_argument(
-            "--ollama",
+            "--system-prompt-id",
+            default=next(iter(SYSTEM_PROMPT_TAG_MAPPING.keys())),
             type=str,
-            required=False,
-            default="http://localhost:11434/v1",
-            help="OpenAI inferencing URL",
-            dest="analyze.ollama",
+            choices=list(SYSTEM_PROMPT_TAG_MAPPING.keys()),
+            help="LLM system prompt to use for analysis",
+            dest="analyze.system_prompt_id",
         )
 
     def parse_cli(self) -> dict:  # noqa: D102

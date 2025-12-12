@@ -66,13 +66,15 @@ def runner_factory(  # noqa: D103
             runner = AnalysisRunner(
                 db=db,
                 logger=logger,
-                model_name=kwargs["analyze.model"],
-                system_prompt_id=kwargs["analyze.system_prompt"],
+                auth_key=kwargs["analyze.auth_key"],
+                backend_name=kwargs["analyze.backend"],
                 index=kwargs["analyze.index"],
+                max_context_tokens=kwargs["analyze.max_context_tokens"],
+                max_predict_tokens=kwargs["analyze.max_predict_tokens"],
+                model_name=kwargs["analyze.model_name"],
+                ollama_endpoint=kwargs["analyze.ollama_endpoint"],
                 stride=kwargs["analyze.stride"],
-                auth_key=kwargs["analyze.auth"],
-                backend=kwargs["analyze.backend"],
-                ollama_endpoint=kwargs["analyze.ollama"],
+                system_prompt_id=kwargs["analyze.system_prompt_id"],
             )
         case _:
             runner = 1

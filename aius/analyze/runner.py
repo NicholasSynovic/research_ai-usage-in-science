@@ -11,7 +11,6 @@ from typing import Literal
 
 import pandas as pd
 from pandas import DataFrame
-from pydantic import BaseModel
 
 from aius.analyze import BACKEND_MAPPING, Document, ModelResponse
 from aius.analyze.backend import Backend
@@ -19,23 +18,19 @@ from aius.db import DB
 from aius.runner import Runner
 
 
-class UsesDL_Model(BaseModel):  # noqa: D101, N801
-    doi: str
-    uses_dl: bool
-    reasoning: str
-
-
 class AnalysisRunner(Runner):  # noqa: D101
     def __init__(  # noqa: D107, PLR0917, PLR0913
         self,
         db: DB,
         logger: Logger,
-        system_prompt_id: str,
+        index: int,
         model_name: str,
-        index: int = 0,
-        stride: int = 20,
+        stride: int,
+        system_prompt_id: str,
         auth_key: str = "",
-        backend_name: Literal["metis", "ollama", "sophia"] = "sophia",
+        backend: Literal["metis", "ollama", "sophia"] = "sophia",
+        max_context_tokens: int = 100000,
+        max_predict_tokens: int = 10000,
         ollama_endpoint: str = "",
     ) -> None:
         super().__init__(name="analysis", db=db, logger=logger)
@@ -45,8 +40,10 @@ class AnalysisRunner(Runner):  # noqa: D101
         self.ollama_endpoint: str = ollama_endpoint
         self.system_prompt_id: str = system_prompt_id.lower()
 
-        self.backend: Backend = BACKEND_MAPPING[self.backend_name](
-            name=backend_name, logger=self.logger
+        self.backend: Backend = BACKEND_MAPPING[backend](
+            name=backend,
+            logger=self.logger,
+            model_name=model_name,
         )
 
         self.system_prompt: str = self._get_system_prompt()
