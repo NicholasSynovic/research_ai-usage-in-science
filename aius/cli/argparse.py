@@ -186,7 +186,7 @@ class Argparse(CLI):  # noqa: D101
             type=str,
             required=False,
             default="",
-            help="Inference serve auth key (required for sophia and metis backends; leave empty for ollama)",
+            help="Inference serve auth key (required for sophia and metis backends)",
             dest="analyze.auth_key",
         )
 

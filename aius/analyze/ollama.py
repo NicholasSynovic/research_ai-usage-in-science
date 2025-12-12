@@ -4,8 +4,8 @@ from time import time
 from progress.bar import Bar
 from requests import Response
 
-from aius.analyze import Document, ModelResponse
 from aius.analyze.backend import Backend
+from aius.analyze.data_models import Document, ModelResponse
 
 
 class Ollama(Backend):

@@ -5,8 +5,8 @@ from openai import InternalServerError, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from progress.bar import Bar
 
-from aius.analyze import Document, ModelResponse
 from aius.analyze.backend import Backend
+from aius.analyze.data_models import Document, ModelResponse
 
 
 class Sophia(Backend):
@@ -71,6 +71,8 @@ class Sophia(Backend):
         end_time: float = time()
 
         model_response: str = resp.choices[0].message.content
+        if model_response is None:
+            model_response = ""
 
         model_reasoning: str = ""
         try:
@@ -88,7 +90,7 @@ class Sophia(Backend):
             compute_time_seconds=end_time - start_time,
         )
 
-    def inference_doucments(
+    def inference_documents(
         self,
         documents: list[Document],
         system_prompt: str,

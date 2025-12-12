@@ -7,8 +7,8 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 from logging import Logger
 
+from aius.analyze import SYSTEM_PROMPT_TAG_MAPPING_DF
 from aius.db import DB
-from aius.inference import SYSTEM_PROMPT_TAG_MAPPING_DF
 from aius.init import (
     JOURNAL_SEARCH_KEYWORDS,
     NATURAL_SCIENCE_OA_FIELDS,

@@ -3,7 +3,7 @@ from logging import Logger
 
 from requests import Session
 
-from aius.analyze import Document, ModelResponse
+from aius.analyze.data_models import Document, ModelResponse
 from aius.util.http_session import HTTPSession
 
 

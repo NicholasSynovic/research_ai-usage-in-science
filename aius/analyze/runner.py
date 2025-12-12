@@ -12,8 +12,9 @@ from typing import Literal
 import pandas as pd
 from pandas import DataFrame
 
-from aius.analyze import BACKEND_MAPPING, Document, ModelResponse
+from aius.analyze import BACKEND_MAPPING
 from aius.analyze.backend import Backend
+from aius.analyze.data_models import Document, ModelResponse
 from aius.db import DB
 from aius.runner import Runner
 
@@ -88,7 +89,7 @@ class AnalysisRunner(Runner):  # noqa: D101
 
         df.to_parquet(
             path=f"aius_{self.backend.name}index-{self.index}_stride-{self.stride}.parquet",
-            engine="pyarrow",
+            engine="auto",
         )
 
         return 0
