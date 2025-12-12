@@ -6,7 +6,7 @@ from string import Template
 from progress.bar import Bar
 
 from aius.db import DB
-from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
+from aius.megajournals import ArticleModel, MegaJournal, SearchModel
 
 
 class PLOS(MegaJournal):

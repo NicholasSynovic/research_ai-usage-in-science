@@ -1,16 +1,14 @@
 from datetime import datetime, timezone
 from itertools import product
 from logging import Logger
-from math import ceil
 from string import Template
-from urllib.parse import quote_plus
 
 from bs4 import BeautifulSoup, ResultSet, Tag
 from progress.bar import Bar
 from requests import Response
 
 from aius.db import DB
-from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
+from aius.megajournals import ArticleModel, MegaJournal, SearchModel
 
 
 class F1000(MegaJournal):

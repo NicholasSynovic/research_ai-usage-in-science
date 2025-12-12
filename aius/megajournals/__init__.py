@@ -23,20 +23,20 @@ class SearchModel(BaseModel):
     status_code: int
     json_data: dict
 
+    @property
+    def to_df(self) -> DataFrame:
+        datum: dict[str, list] = {
+            "timestamp": [self.timestamp],
+            "megajournal": [self.megajournal],
+            "search_keyword": [self.search_keyword],
+            "year": [self.year],
+            "page": [self.page],
+            "url": [self.url],
+            "status_code": [self.status_code],
+            "json_data": [dumps(obj=self.json_data)],
+        }
 
-def search_model_to_df(sm: SearchModel) -> DataFrame:
-    datum: dict[str, list] = {
-        "timestamp": [sm.timestamp],
-        "megajournal": [sm.megajournal],
-        "search_keyword": [sm.search_keyword],
-        "year": [sm.year],
-        "page": [sm.page],
-        "url": [sm.url],
-        "status_code": [sm.status_code],
-        "json_data": [dumps(obj=sm.json_data)],
-    }
-
-    return DataFrame(data=datum)
+        return DataFrame(data=datum)
 
 
 class ArticleModel(BaseModel):
@@ -46,17 +46,17 @@ class ArticleModel(BaseModel):
     journal: str
     search_id: int
 
+    @property
+    def to_df(self) -> DataFrame:
+        datum: dict[str, list] = {
+            "doi": [self.doi],
+            "title": [self.title],
+            "megajournal": [self.megajournal],
+            "journal": [self.journal],
+            "search_id": [self.search_id],
+        }
 
-def article_model_to_df(am: ArticleModel) -> DataFrame:
-    datum: dict[str, list] = {
-        "doi": [am.doi],
-        "title": [am.title],
-        "megajournal": [am.megajournal],
-        "journal": [am.journal],
-        "search_id": [am.search_id],
-    }
-
-    return DataFrame(data=datum)
+        return DataFrame(data=datum)
 
 
 class MegaJournal(ABC):
@@ -90,6 +90,7 @@ class MegaJournal(ABC):
         timestamp: float = datetime.now(tz=timezone.utc).timestamp()
         resp: Response = self.session.get(url=search_url, timeout=self.timeout)
         logger.debug(msg=f"Response status code: {resp.status_code}")
+
         return SearchModel(
             timestamp=timestamp,
             megajournal=self.name,

@@ -11,15 +11,9 @@ import pandas as pd
 from pandas import DataFrame
 
 from aius.db import DB
+from aius.megajournals import ArticleModel, MegaJournal, SearchModel
 from aius.runner import Runner
 from aius.search import MEGAJOURNAL_MAPPING
-from aius.search.megajournal import (
-    ArticleModel,
-    MegaJournal,
-    SearchModel,
-    article_model_to_df,
-    search_model_to_df,
-)
 
 
 # Template method design pattern
@@ -73,7 +67,7 @@ class SearchRunner(Runner):  # noqa: D101
         # Create DataFrame of searches
         self.logger.info(msg="Preparing searches for database write")
         searches_df: DataFrame = pd.concat(
-            objs=[search_model_to_df(sm=sm) for sm in searches],
+            objs=[sm.to_df for sm in searches],
             ignore_index=True,
         )
         self.logger.debug("Search DataFrame: %s", searches_df)
@@ -106,7 +100,7 @@ class SearchRunner(Runner):  # noqa: D101
         # Create DataFrame of articles
         self.logger.info(msg="Preparing articles for database write")
         articles_df: DataFrame = pd.concat(
-            objs=[article_model_to_df(am=am) for am in articles],
+            objs=[am.to_df for am in articles],
             ignore_index=True,
         )
         self.logger.debug("Data: %s", articles_df)

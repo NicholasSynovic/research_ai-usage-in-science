@@ -9,7 +9,7 @@ from progress.bar import Bar
 from requests import Response
 
 from aius.db import DB
-from aius.search.megajournal import ArticleModel, MegaJournal, SearchModel
+from aius.megajournals import ArticleModel, MegaJournal, SearchModel
 
 
 class BMJ(MegaJournal):
