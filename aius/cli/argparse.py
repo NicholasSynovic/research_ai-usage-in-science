@@ -52,7 +52,7 @@ class Argparse(CLI):  # noqa: D101
 
         parser.add_argument(
             "--db",
-            default=parser,
+            default=DEFAULT_DATABASE_PATH,
             type=lambda x: Path(x).resolve(),
             help=DATABASE_HELP_MESSAGE,
             dest="init.db",

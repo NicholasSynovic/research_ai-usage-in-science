@@ -67,7 +67,8 @@ class SearchRunner(Runner):  # noqa: D101
 
         # Create DataFrame of searches
         self.logger.info(msg="Preparing searches for database write")
-        searches_df: DataFrame = pd.concat(
+
+        searches_df = pd.concat(
             objs=[sm.to_df for sm in searches],
             ignore_index=True,
         )
