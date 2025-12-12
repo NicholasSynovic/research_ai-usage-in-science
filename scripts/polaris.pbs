@@ -23,11 +23,6 @@ OLLAMA_PORT_END=11500
 OLLAMA_LOGFILE=ollama-${AIUS_INDEX}.log
 export OLLAMA_MODELS=/eagle/EVITA/ollama-models
 
-# Set AIUS input variables
-AIUS_STRIDE=20
-# AIUS_MODEL="gpt-oss:20b"  # Set this via qsub -v AIUS_MODEL="",...
-# AIUS_INDEX=0  # # Set this via qsub -v AIUS_INDEX="",...
-
 # Load necessary module files
 module use /soft/modulefiles
 module load spack-pe-base
@@ -125,24 +120,20 @@ run_aius() {
     local port="$2"
 
     local host="127.0.0.1"
-    local addr="http://${host}:${port}/v1"
+    local addr="http://${host}:${port}"
 
     export OLLAMA_HOST="$addr"
 
+    # Set AIUS_INDEX via `qsub -v AIUS_INDEX=`
     aius analyze \
-    --db /home/nsynovic/aius_12-10-2025.db \
-    --system-prompt uses_dl \
-    --auth-key "" \
-    --stride 20 \
+    --db /home/nsynovic/aius_12-12-2025.db \
     --backend ollama \
-    --ollama ${addr}
+    --index ${AIUS_INDEX} \
+    --model-name "gpt-oss:20b" \
+    --ollama-endpoint ${addr} \
+    --system-prompt uses_dl \
+    --stride 3000 2>&1 | tee $LOGFILE
 
-    # aius llm-analysis \
-    # --db /home/nsynovic/aius.sqlite3 \
-    # --model ${AIUS_MODEL} \
-    # --ollama ${addr} \
-    # --index ${AIUS_INDEX} \
-    # --stride ${AIUS_STRIDE} 2>&1 | tee $LOGFILE
 }
 
 

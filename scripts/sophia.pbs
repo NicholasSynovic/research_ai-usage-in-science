@@ -129,20 +129,15 @@ run_aius() {
 
     export OLLAMA_HOST="$addr"
 
+    # Set AIUS_INDEX via `qsub -v AIUS_INDEX=`
     aius analyze \
-    --db /home/nsynovic/aius_12-10-2025.db \
-    --system-prompt uses_dl \
-    --auth-key "" \
-    --stride 20 \
+    --db /home/nsynovic/aius_12-12-2025.db \
     --backend ollama \
-    --ollama ${addr}
-
-    # aius llm-analysis \
-    # --db /home/nsynovic/aius.sqlite3 \
-    # --model ${AIUS_MODEL} \
-    # --ollama ${addr} \
-    # --index ${AIUS_INDEX} \
-    # --stride ${AIUS_STRIDE} 2>&1 | tee $LOGFILE
+    --index ${AIUS_INDEX} \
+    --model-name "gpt-oss:20b" \
+    --ollama-endpoint ${addr} \
+    --system-prompt uses_dl \
+    --stride 3000 2>&1 | tee $LOGFILE
 }
 
 
