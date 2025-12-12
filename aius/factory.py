@@ -11,9 +11,9 @@ from aius.db import DB, connect_to_db
 from aius.init.runner import InitRunner
 from aius.jats.runner import JATSRunner
 from aius.openalex.runner import OpenAlexRunner
+from aius.pandoc.runner import PandocRunner
 from aius.runner import Runner
 from aius.runners.analysis import AnalysisRunner
-from aius.runners.pandoc import PandocRunner
 from aius.search.runner import SearchRunner
 
 
@@ -56,12 +56,12 @@ def runner_factory(  # noqa: D103
                 megajournal_name=kwargs["jats.megajournal"],
                 plos_zip_fp=kwargs["jats.plos_zip"],
             )
-        # case "pandoc":
-        #     runner = PandocRunner(
-        #         db=db,
-        #         logger=logger,
-        #         pandoc_uri=kwargs["pandoc.uri"],
-        #     )
+        case "pandoc":
+            runner = PandocRunner(
+                db=db,
+                logger=logger,
+                pandoc_uri=kwargs["pandoc.uri"],
+            )
         # case "analyze":
         #     runner = AnalysisRunner(
         #         db=db,

@@ -15,27 +15,20 @@ from progress.bar import Bar
 from requests import Response, post
 
 from aius.db import DB
-from aius.runners.runner import Runner
+from aius.runner import Runner
 
 
 class PandocRunner(Runner):  # noqa: D101
     def __init__(self, logger: Logger, db: DB, pandoc_uri: str) -> None:  # noqa: D107
+        super().__init__(name="pandoc", db=db, logger=logger)
+
         # Set class constants
-        self.logger: Logger = logger
-        self.db: DB = db
         self.pandoc_uri: str = pandoc_uri
         self.json_body: dict[str, str] = {
             "from": "jats",
             "to": "markdown",
             "text": "",
         }
-
-    def get_data(self) -> DataFrame:  # noqa: D102
-        return pd.read_sql_table(
-            table_name="jats",
-            con=self.db.engine,
-            index_col="_id",
-        )
 
     @staticmethod
     def format_xml(xml: str) -> str:  # noqa: D102
@@ -60,7 +53,11 @@ class PandocRunner(Runner):  # noqa: D101
     def execute(self) -> int:  # noqa: D102
         data: dict[str, list[str]] = {"doi": [], "markdown": []}
 
-        df: DataFrame = self.get_data()
+        df: DataFrame = pd.read_sql_table(
+            table_name="jats",
+            con=self.db.engine,
+            index_col="_id",
+        )
 
         with Bar("Converting JATS XML to Markdown...", max=df.shape[0]) as bar:
             row: Series
@@ -70,6 +67,7 @@ class PandocRunner(Runner):  # noqa: D101
                 xml: str = self.format_xml(xml=row["jats_xml"])
                 self.json_body["text"] = xml
 
+                self.logger.info("Converting %s from JATS XML to Markdown", row["doi"])
                 resp: Response = post(
                     url=self.pandoc_uri,
                     json=self.json_body,
