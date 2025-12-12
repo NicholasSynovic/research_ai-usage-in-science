@@ -110,7 +110,7 @@ class PLOS(MegaJournal):
 
         return data
 
-    def download_jats(self, df: DataFrame) -> DataFrame:
+    def download_jats(self, df: DataFrame, **kwargs) -> DataFrame:
         data: dict[str, list[str | int]] = {
             "doi": [],
             "jats_xml": [],
@@ -121,7 +121,7 @@ class PLOS(MegaJournal):
                 "Extracting JATS XML content from PLOS zip archive...",
                 max=df.shape[0],
             ) as bar,
-            ZipFile(file=self.plos_zip_fp, mode="r") as zf,
+            ZipFile(file=plos_zip_fp, mode="r") as zf,
         ):
             # For each filename, open the file's content and add it to the
             # data structure

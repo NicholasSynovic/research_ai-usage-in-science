@@ -144,7 +144,7 @@ class FrontiersIn(MegaJournal):
 
         return data
 
-    def download_jats(self, df: DataFrame) -> DataFrame:
+    def download_jats(self, df: DataFrame, **kwargs) -> DataFrame:
         data: dict[str, list[str]] = {
             "doi": [],
             "jats_xml": [],

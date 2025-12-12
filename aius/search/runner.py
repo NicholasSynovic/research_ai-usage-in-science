@@ -11,9 +11,13 @@ import pandas as pd
 from pandas import DataFrame
 
 from aius.db import DB
-from aius.megajournals import ArticleModel, MegaJournal, SearchModel
+from aius.megajournals import (
+    MEGAJOURNAL_MAPPING,
+    ArticleModel,
+    MegaJournal,
+    SearchModel,
+)
 from aius.runner import Runner
-from aius.search import MEGAJOURNAL_MAPPING
 
 
 # Template method design pattern
@@ -26,11 +30,11 @@ class SearchRunner(Runner):  # noqa: D101
     ) -> None:
         # Set constants
         super().__init__(name="search", db=db, logger=logger)
-        self.megajournal_name: str = megajournal_name.lower()
-        self.logger.info("Journal name: %s", self.megajournal_name)
 
         # Identify which megajournal to use
         # Factory method design pattern
+        self.megajournal_name: str = megajournal_name.lower()
+        self.logger.info("Journal name: %s", self.megajournal_name)
         self.megajournal: MegaJournal = MEGAJOURNAL_MAPPING[self.megajournal_name](
             logger=self.logger, db=self.db
         )

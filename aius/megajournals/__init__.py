@@ -10,7 +10,18 @@ from pydantic import BaseModel
 from requests import Response, Session
 
 from aius.db import DB
+from aius.megajournals.bmj import BMJ
+from aius.megajournals.f1000 import F1000
+from aius.megajournals.frontiersin import FrontiersIn
+from aius.megajournals.plos import PLOS
 from aius.util.http_session import HTTPSession
+
+MEGAJOURNAL_MAPPING: dict[str, object] = {
+    "bmj": BMJ,
+    "f1000": F1000,
+    "frontiersin": FrontiersIn,
+    "plos": PLOS,
+}
 
 
 class SearchModel(BaseModel):
@@ -109,4 +120,4 @@ class MegaJournal(ABC):
     def parse_response(self, responses: list[SearchModel]) -> list[ArticleModel]: ...
 
     @abstractmethod
-    def download_jats(self, df: DataFrame) -> DataFrame: ...
+    def download_jats(self, df: DataFrame, **kwargs) -> DataFrame: ...

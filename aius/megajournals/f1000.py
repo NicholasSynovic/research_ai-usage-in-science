@@ -170,7 +170,7 @@ class F1000(MegaJournal):
 
         return data
 
-    def download_jats(self, df: DataFrame) -> DataFrame:  # noqa: D102
+    def download_jats(self, df: DataFrame, **kwargs) -> DataFrame:  # noqa: D102
         data: dict[str, list[str]] = {
             "doi": [],
             "jats_xml": [],
