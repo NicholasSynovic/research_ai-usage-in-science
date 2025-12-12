@@ -13,14 +13,15 @@ class Ollama(Backend):
         self,
         name: str,
         logger: Logger,
-        ollama_uri: str,
+        ollama_endpoint: str,
         model_name: str = "gpt-oss:20b",
         max_context_tokens: int = 100000,
         max_predict_tokens: int = 10000,
+        **kwargs,
     ) -> None:
         super().__init__(name=name, logger=logger, model_name=model_name)
 
-        self.ollama_uri: str = f"http://{ollama_uri}/api/generate"
+        self.ollama_endpoint: str = f"http://{ollama_endpoint}/api/generate"
 
         self.max_context_tokens: int = max_context_tokens
         self.max_predict_tokens: int = max_predict_tokens
@@ -54,7 +55,7 @@ class Ollama(Backend):
         self.logger.info("Sending query to ALCF sophia server...")
 
         resp: Response = self.session.post(
-            url=self.ollama_uri,
+            url=self.ollama_endpoint,
             timeout=self.timeout,
             json=json_data,
         )

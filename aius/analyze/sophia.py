@@ -15,6 +15,7 @@ class Sophia(Backend):
         logger: Logger,
         auth_key: str = "",
         model_name: str = "openai/gpt-oss-20b",
+        **kwargs,
     ) -> None:
         super().__init__(
             name="alcf_sophia",

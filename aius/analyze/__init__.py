@@ -13,7 +13,7 @@ from aius.analyze.metis import Metis
 from aius.analyze.ollama import Ollama
 from aius.analyze.sophia import Sophia
 
-BACKEND_MAPPING: dict[str, object] = {
+BACKEND_MAPPING: dict[str, type] = {
     "metis": Metis,
     "ollama": Ollama,
     "sophia": Sophia,

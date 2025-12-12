@@ -67,7 +67,7 @@ def runner_factory(  # noqa: D103
                 db=db,
                 logger=logger,
                 auth_key=kwargs["analyze.auth_key"],
-                backend_name=kwargs["analyze.backend"],
+                backend=kwargs["analyze.backend"],
                 index=kwargs["analyze.index"],
                 max_context_tokens=kwargs["analyze.max_context_tokens"],
                 max_predict_tokens=kwargs["analyze.max_predict_tokens"],

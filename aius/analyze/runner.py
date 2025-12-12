@@ -44,6 +44,10 @@ class AnalysisRunner(Runner):  # noqa: D101
             name=backend,
             logger=self.logger,
             model_name=model_name,
+            auth_key=auth_key,
+            ollama_endpoint=ollama_endpoint,
+            max_context_tokens=max_context_tokens,
+            max_predict_tokens=max_predict_tokens,
         )
 
         self.system_prompt: str = self._get_system_prompt()
@@ -83,7 +87,7 @@ class AnalysisRunner(Runner):  # noqa: D101
         )
 
         df.to_parquet(
-            path=f"aius_index-{self.index}_stride-{self.stride}.parquet",
+            path=f"aius_{self.backend.name}index-{self.index}_stride-{self.stride}.parquet",
             engine="pyarrow",
         )
 

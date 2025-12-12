@@ -16,6 +16,7 @@ class Metis(Backend):
         logger: Logger,
         auth_key: str,
         model_name: str = "gpt-oss-120b-131072",
+        **kwargs,
     ) -> None:
         super().__init__(
             name="alcf_metis",

@@ -8,7 +8,13 @@ from aius.util.http_session import HTTPSession
 
 
 class Backend(ABC):
-    def __init__(self, name: str, logger: Logger, model_name: str) -> None:
+    def __init__(
+        self,
+        name: str,
+        logger: Logger,
+        model_name: str,
+        **kwargs,
+    ) -> None:
         self.name: str = name
         self.logger: Logger = logger
         self.model_name: str = model_name
