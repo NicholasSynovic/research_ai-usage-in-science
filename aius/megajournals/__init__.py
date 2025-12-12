@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from itertools import product
 from json import dumps
 from logging import Logger
-from pathlib import Path
 from string import Template
 
 from pandas import DataFrame
@@ -12,8 +11,6 @@ from requests import Response, Session
 
 from aius.db import DB
 from aius.util.http_session import HTTPSession
-
-ALL_OF_PLOS_DEFAULT_PATH: Path = Path("allofplos.zip").resolve()
 
 
 class SearchModel(BaseModel):
