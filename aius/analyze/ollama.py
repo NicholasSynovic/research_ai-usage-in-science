@@ -4,8 +4,8 @@ from time import time
 from progress.bar import Bar
 from requests import Response
 
-from aius.analysis import Document, ModelResponse
-from aius.analysis.backend import Backend
+from aius.analyze import Document, ModelResponse
+from aius.analyze.backend import Backend
 
 
 class Ollama(Backend):
@@ -18,11 +18,10 @@ class Ollama(Backend):
         max_context_tokens: int = 100000,
         max_predict_tokens: int = 10000,
     ) -> None:
-        super().__init__(name=name, logger=logger)
+        super().__init__(name=name, logger=logger, model_name=model_name)
 
         self.ollama_uri: str = f"http://{ollama_uri}/api/generate"
 
-        self.model_name: str = model_name
         self.max_context_tokens: int = max_context_tokens
         self.max_predict_tokens: int = max_predict_tokens
 

@@ -32,7 +32,7 @@ in natural science publications
     def add_openalex_subparser(self) -> None: ...  # noqa: D102
 
     @abstractmethod
-    def add_documents_subparser(self) -> None: ...  # noqa: D102
+    def add_jats_subparser(self) -> None: ...  # noqa: D102
 
     @abstractmethod
     def add_pandoc_subparser(self) -> None: ...  # noqa: D102
@@ -55,6 +55,6 @@ in natural science publications
         self.add_init_subparser()
         self.add_search_subparser()
         self.add_openalex_subparser()
-        self.add_documents_subparser()
+        self.add_jats_subparser()
         self.add_pandoc_subparser()
         self.add_analyze_subparser()

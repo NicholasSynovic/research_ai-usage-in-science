@@ -9,15 +9,15 @@ from itertools import islice
 from logging import Logger
 from typing import Literal
 
+import pandas as pd
 from pandas import DataFrame
 from pydantic import BaseModel
 
-from aius.analysis import BACKEND_MAPPING
+from aius.analyze import BACKEND_MAPPING, Document, ModelResponse
+from aius.analyze.backend import Backend
 from aius.db import DB
 from aius.runner import Runner
-from aius.analysis.backend import Backend
-from aius.analysis import Document, ModelResponse
-import pandas as pd
+
 
 class UsesDL_Model(BaseModel):  # noqa: D101, N801
     doi: str
@@ -68,15 +68,26 @@ class AnalysisRunner(Runner):  # noqa: D101
             self.stride,
         )
 
-        return [Document(doi=row["doi"], content=row["markdown"]) for _, row in df_islice]
+        return [
+            Document(doi=row["doi"], content=row["markdown"]) for _, row in df_islice
+        ]
 
     def execute(self) -> int:  # noqa: D102
         documents: list[Document] = self._get_documents()
 
-        responses: list[ModelResponse] = self.backend.inference_documents(documents=documents, system_prompt=self.system_prompt,)
+        responses: list[ModelResponse] = self.backend.inference_documents(
+            documents=documents,
+            system_prompt=self.system_prompt,
+        )
 
-        df: DataFrame = pd.concat(objs=[resp.to_df for resp in responses], ignore_index=True,)
+        df: DataFrame = pd.concat(
+            objs=[resp.to_df for resp in responses],
+            ignore_index=True,
+        )
 
-        df.to_parquet(path=f"aius_index-{self.index}_stride-{self.stride}.parquet", engine="pyarrow",)
+        df.to_parquet(
+            path=f"aius_index-{self.index}_stride-{self.stride}.parquet",
+            engine="pyarrow",
+        )
 
         return 0

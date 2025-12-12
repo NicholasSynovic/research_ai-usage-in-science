@@ -9,9 +9,9 @@ from argparse import ArgumentParser, _SubParsersAction
 from datetime import datetime, timezone
 from pathlib import Path
 
+from aius.analyze import SYSTEM_PROMPT_TAG_MAPPING
 from aius.cli import CLI, DATABASE_HELP_MESSAGE
 from aius.db import DEFAULT_DATABASE_PATH
-from aius.inference import SYSTEM_PROMPT_TAG_MAPPING
 from aius.jats import ALL_OF_PLOS_DEFAULT_PATH
 from aius.megajournals import MEGAJOURNAL_MAPPING
 from aius.pandoc import DEFAULT_PANDOC_URI
@@ -59,19 +59,19 @@ class Argparse(CLI):  # noqa: D101
         )
 
         parser.add_argument(
-            "--min-year",
-            default=2015,
-            type=lambda x: max([1999, int(x)]),
-            help="Minimum year to search journals through",
-            dest="init.min",
-        )
-
-        parser.add_argument(
             "--max-year",
             default=2024,
             type=lambda x: min([current_year, int(x)]),
             help="Maximum year to search journals through",
             dest="init.max",
+        )
+
+        parser.add_argument(
+            "--min-year",
+            default=2015,
+            type=lambda x: max([1999, int(x)]),
+            help="Minimum year to search journals through",
+            dest="init.min",
         )
 
     def add_search_subparser(self) -> None:  # noqa: D102
@@ -121,7 +121,7 @@ class Argparse(CLI):  # noqa: D101
             dest="openalex.email",
         )
 
-    def add_documents_subparser(self) -> None:  # noqa: D102
+    def add_jats_subparser(self) -> None:  # noqa: D102
         parser: ArgumentParser = self.subparsers.add_parser(
             name="jats",
             help="Get JATS XML from DOIs",
@@ -136,11 +136,11 @@ class Argparse(CLI):  # noqa: D101
             dest="jats.db",
         )
         parser.add_argument(
-            "--journal",
+            "--megajournal",
             default=next(iter(MEGAJOURNAL_MAPPING.keys())),
             type=str,
             choices=list(MEGAJOURNAL_MAPPING.keys()),
-            help="Journal to download JATS documents from",
+            help="Megajournal to download JATS XML natural science works from",
             dest="jats.megajournal",
         )
         parser.add_argument(
@@ -182,11 +182,55 @@ class Argparse(CLI):  # noqa: D101
         )
 
         parser.add_argument(
+            "--auth-key",
+            type=str,
+            required=False,
+            default="",
+            help="Inference serve auth key (required for sophia and metis backends; leave empty for ollama)",
+            dest="analyze.auth_key",
+        )
+
+        parser.add_argument(
+            "--backend",
+            type=str,
+            required=True,
+            choices=["metis", "ollama", "sophia"],
+            help="LLM inferencing backend",
+            dest="analyze.backend",
+        )
+
+        parser.add_argument(
             "--db",
             default=DEFAULT_DATABASE_PATH,
             type=lambda x: Path(x).resolve(),
             help=DATABASE_HELP_MESSAGE,
             dest="analyze.db",
+        )
+
+        parser.add_argument(
+            "--max-context-tokens",
+            type=int,
+            required=False,
+            default=100000,
+            help="Maximum context tokens per document (only for ollama backend)",
+            dest="analyze.max_context_tokens",
+        )
+
+        parser.add_argument(
+            "--max-predict-tokens",
+            type=int,
+            required=False,
+            default=10000,
+            help="Maximum predictions tokens per response (only for ollama backend)",
+            dest="analyze.max_predict_tokens",
+        )
+
+        parser.add_argument(
+            "--model-name",
+            required=True,
+            type=str,
+            help="LLM to analyze documents on",
+            dest="analyze.model_name",
         )
 
         parser.add_argument(
@@ -196,14 +240,6 @@ class Argparse(CLI):  # noqa: D101
             choices=list(SYSTEM_PROMPT_TAG_MAPPING.keys()),
             help="LLM system prompt to use for analysis",
             dest="analyze.system_prompt",
-        )
-
-        parser.add_argument(
-            "--auth-key",
-            type=str,
-            required=True,
-            help="ALCF Inference server token",
-            dest="analyze.auth",
         )
 
         parser.add_argument(
@@ -222,15 +258,6 @@ class Argparse(CLI):  # noqa: D101
             default=20,
             help="Stride of documents",
             dest="analyze.stride",
-        )
-
-        parser.add_argument(
-            "--backend",
-            type=str,
-            required=True,
-            choices=["alcf", "ollama"],
-            help="AI inferencing backend",
-            dest="analyze.backend",
         )
 
         parser.add_argument(

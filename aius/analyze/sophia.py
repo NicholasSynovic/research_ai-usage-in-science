@@ -5,18 +5,22 @@ from openai import InternalServerError, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from progress.bar import Bar
 
-from aius.analysis import Document, ModelResponse
-from aius.analysis.backend import Backend
+from aius.analyze import Document, ModelResponse
+from aius.analyze.backend import Backend
 
 
 class Sophia(Backend):
     def __init__(
         self,
         logger: Logger,
-        auth_key: str,
+        auth_key: str = "",
         model_name: str = "openai/gpt-oss-20b",
     ) -> None:
-        super().__init__(name="alcf_sophia", logger=logger)
+        super().__init__(
+            name="alcf_sophia",
+            logger=logger,
+            model_name=model_name,
+        )
 
         self.model_name: str = model_name
 

@@ -7,13 +7,13 @@ Copyright 2025 (C) Nicholas M. Synovic
 
 from logging import Logger
 
+from aius.analyze.runner import AnalysisRunner
 from aius.db import DB, connect_to_db
 from aius.init.runner import InitRunner
 from aius.jats.runner import JATSRunner
 from aius.openalex.runner import OpenAlexRunner
 from aius.pandoc.runner import PandocRunner
 from aius.runner import Runner
-from aius.analysis.runner import AnalysisRunner
 from aius.search.runner import SearchRunner
 
 

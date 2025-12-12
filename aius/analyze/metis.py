@@ -6,8 +6,8 @@ from openai import InternalServerError, OpenAI
 from openai.types.chat.chat_completion import ChatCompletion
 from progress.bar import Bar
 
-from aius.analysis import Document, ModelResponse
-from aius.analysis.backend import Backend
+from aius.analyze import Document, ModelResponse
+from aius.analyze.backend import Backend
 
 
 class Metis(Backend):
@@ -15,11 +15,13 @@ class Metis(Backend):
         self,
         logger: Logger,
         auth_key: str,
-        model_name: str = "openai/gpt-oss-20b",
+        model_name: str = "gpt-oss-120b-131072",
     ) -> None:
-        super().__init__(name="alcf_metis", logger=logger)
-
-        self.model_name: str = model_name
+        super().__init__(
+            name="alcf_metis",
+            logger=logger,
+            model_name=model_name,
+        )
 
         self.openai_client: OpenAI = OpenAI(
             api_key=auth_key,
