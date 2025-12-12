@@ -9,6 +9,16 @@ import mdformat
 from pandas import DataFrame
 from pydantic import BaseModel
 
+from aius.analysis.metis import Metis
+from aius.analysis.ollama import Ollama
+from aius.analysis.sophia import Sophia
+
+BACKEND_MAPPING: dict[str, object] = {
+    "metis": Metis,
+    "ollama": Ollama,
+    "sophia": Sophia,
+}
+
 
 class Document(BaseModel):
     doi: str

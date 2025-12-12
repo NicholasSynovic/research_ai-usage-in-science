@@ -1,110 +1,32 @@
 from abc import ABC, abstractmethod
-from itertools import islice
 from logging import Logger
-from time import time
 
-import pandas as pd
-from openai import InternalServerError, OpenAI
-from openai.types.chat.chat_completion import ChatCompletion
-from pandas import DataFrame, Series
-from progress.bar import Bar
+from requests import Session
 
-from aius.inference.models import Document, ModelResponse
+from aius.analysis import Document, ModelResponse
+from aius.util.http_session import HTTPSession
 
 
-class InferenceBackend(ABC):
-    def __init__(
-        self,
-        logger: Logger,
-        index: int,
-        stride: int,
-        http_timeout: int = 3600,
-        http_retries: int = 10,
-    ) -> None:
+class Backend(ABC):
+    def __init__(self, name: str, logger: Logger) -> None:
+        self.name: str = name
         self.logger: Logger = logger
-        self.index: int = index
-        self.stride: int = stride
-        self.name = name
-        self.model_name: str = model_name
 
-    def inference_single_document(
+        session_util: HTTPSession = HTTPSession()
+        self.timeout: int = session_util.timeout
+        self.session: Session = session_util.session
+        self.max_retries: int = session_util.max_retries
+
+    @abstractmethod
+    def inference_document(
         self,
         document: Document,
         system_prompt: str,
-    ) -> ModelResponse:
-        start_time: float = time()
-        self.logger.info("Sending query to inference server...")
-        try:
-            resp: ChatCompletion = self.openai_client.chat.completions.create(
-                model=self.model_name,
-                reasoning_effort="high",
-                frequency_penalty=0,
-                stream=False,
-                seed=42,
-                n=1,
-                temperature=0.1,
-                top_p=0.1,
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": document.content},
-                ],
-            )
-        except InternalServerError:
-            self.logger.error("Internal server error raised with DOI: %s", document.doi)
-            end_time: float = time()
+    ) -> ModelResponse: ...
 
-            return ModelResponse(
-                doi=document.doi,
-                system_prompt=system_prompt,
-                user_prompt=document.content,
-                model_response="",
-                model_reasoning="",
-                compute_time_seconds=end_time - start_time,
-            )
-
-        end_time: float = time()
-
-        model_response: str = resp.choices[0].message.content
-
-        model_reasoning: str = ""
-        try:
-            model_reasoning = resp.choices[0].message.reasoning_content
-        except AttributeError:
-            self.logger.error("No reasoning output for DOI: %s", document.doi)
-            pass
-
-        return ModelResponse(
-            doi=document.doi,
-            system_prompt=system_prompt,
-            user_prompt=document.content,
-            model_response=model_response,
-            model_reasoning=model_reasoning,
-            compute_time_seconds=end_time - start_time,
-        )
-
-    def inference_doucments(
+    @abstractmethod
+    def inference_documents(
         self,
+        documents: list[Document],
         system_prompt: str,
-        document_iterator: islice,
-        document_count: int,
-    ) -> DataFrame:
-        data: list[DataFrame] = []
-
-        with Bar(f"Inferencing on documents...", max=document_count) as bar:
-            row: Series
-            for _, row in document_iterator:
-                document: Document = Document(
-                    doi=row["doi"],
-                    content=row["markdown"],
-                )
-                self.logger.debug("Inferencing content from DOI: %s", document.doi)
-                data.append(
-                    self.inference_single_document(
-                        document=document,
-                        system_prompt=system_prompt,
-                    ).df
-                )
-                bar.next()
-
-        return pd.concat(objs=data, ignore_index=True)
+    ) -> list[ModelResponse]: ...

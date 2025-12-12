@@ -5,6 +5,7 @@ from requests.adapters import HTTPAdapter, Retry
 class HTTPSession:
     def __init__(self) -> None:
         self.timeout: int = 3600
+        self.max_retries: int = 10
 
         self.session: Session = Session()
         self.session.mount(

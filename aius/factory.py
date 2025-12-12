@@ -13,7 +13,7 @@ from aius.jats.runner import JATSRunner
 from aius.openalex.runner import OpenAlexRunner
 from aius.pandoc.runner import PandocRunner
 from aius.runner import Runner
-from aius.runners.analysis import AnalysisRunner
+from aius.analysis.runner import AnalysisRunner
 from aius.search.runner import SearchRunner
 
 
@@ -62,17 +62,18 @@ def runner_factory(  # noqa: D103
                 logger=logger,
                 pandoc_uri=kwargs["pandoc.uri"],
             )
-        # case "analyze":
-        #     runner = AnalysisRunner(
-        #         db=db,
-        #         logger=logger,
-        #         system_prompt_id=kwargs["analyze.system_prompt"],
-        #         index=kwargs["analyze.index"],
-        #         stride=kwargs["analyze.stride"],
-        #         auth_key=kwargs["analyze.auth"],
-        #         backend=kwargs["analyze.backend"],
-        #         ollama_endpoint=kwargs["analyze.ollama"],
-        #     )
+        case "analyze":
+            runner = AnalysisRunner(
+                db=db,
+                logger=logger,
+                model_name=kwargs["analyze.model"],
+                system_prompt_id=kwargs["analyze.system_prompt"],
+                index=kwargs["analyze.index"],
+                stride=kwargs["analyze.stride"],
+                auth_key=kwargs["analyze.auth"],
+                backend=kwargs["analyze.backend"],
+                ollama_endpoint=kwargs["analyze.ollama"],
+            )
         case _:
             runner = 1
 
