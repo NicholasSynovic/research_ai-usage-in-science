@@ -4,8 +4,9 @@ from logging import Logger
 from string import Template
 
 from bs4 import BeautifulSoup, ResultSet, Tag
+from pandas import DataFrame, Series
 from progress.bar import Bar
-from requests import Response
+from requests import HTTPError, Response
 
 from aius.db import DB
 from aius.megajournals import ArticleModel, MegaJournal, SearchModel
@@ -168,3 +169,33 @@ class F1000(MegaJournal):
                 bar.next()
 
         return data
+
+    def download_jats(self, df: DataFrame) -> DataFrame:  # noqa: D102
+        data: dict[str, list[str]] = {
+            "doi": [],
+            "jats_xml": [],
+        }
+
+        with Bar(
+            "Downloading JATS XML content from F1000...",
+            max=df.shape[0],
+        ) as bar:
+            row: Series
+            for _, row in df.iterrows():
+                xml_url: str = (
+                    f"https://f1000research.com/extapi/article/xml?doi={row['doi']}"
+                )
+                self.logger.info("Getting JATS XML from: %s ...", xml_url)
+
+                try:
+                    resp: Response = self.session.get(url=xml_url, timeout=60)
+                    self.logger.info("Response status code: %s ...", resp.status_code)
+                    resp.raise_for_status()
+                    data["doi"].append(row["doi"])
+                    data["jats_xml"].append(resp.content.decode("UTF-8").strip("\n"))
+                except HTTPError:
+                    pass
+
+                bar.next()
+
+        return DataFrame(data=data)

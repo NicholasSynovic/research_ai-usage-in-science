@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
 from itertools import product
-from json import dumps
+from json import dumps, loads
 from logging import Logger
 
+from pandas import DataFrame, Series
 from progress.bar import Bar
-from requests import Response
+from requests import HTTPError, Response
 
 from aius.db import DB
 from aius.megajournals import ArticleModel, MegaJournal, SearchModel
@@ -142,3 +143,43 @@ class FrontiersIn(MegaJournal):
                 bar.next()
 
         return data
+
+    def download_jats(self, df: DataFrame) -> DataFrame:
+        data: dict[str, list[str]] = {
+            "doi": [],
+            "jats_xml": [],
+        }
+
+        with Bar(
+            "Downloading JATS XML content from FrontiersIn...",
+            max=df.shape[0],
+        ) as bar:
+            row: Series
+            for _, row in df.iterrows():
+                oa_json: dict = loads(s=row["json_data"])
+                open_access_pdf_url: str = oa_json["best_oa_location"]["pdf_url"]
+
+                try:
+                    xml_url: str = open_access_pdf_url.replace(
+                        "/pdf",
+                        "/xml",
+                    )
+                except AttributeError:
+                    self.logger.debug("No url for %s", row["doi"])
+                    bar.next()
+                    continue
+
+                self.logger.info("Getting JATS XML from: %s ...", xml_url)
+
+                try:
+                    resp: Response = self.session.get(url=xml_url, timeout=60)
+                    self.logger.info("Response status code: %s ...", resp.status_code)
+                    resp.raise_for_status()
+                    data["doi"].append(row["doi"])
+                    data["jats_xml"].append(resp.content.decode("UTF-8").strip("\n"))
+                except HTTPError:
+                    pass
+
+                bar.next()
+
+        return DataFrame(data=data)
