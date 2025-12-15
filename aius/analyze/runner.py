@@ -6,6 +6,7 @@ Copyright 2025 (C) Nicholas M. Synovic
 """
 
 from itertools import islice
+from json import loads
 from logging import Logger
 from typing import Literal
 
@@ -62,6 +63,18 @@ class AnalysisRunner(Runner):  # noqa: D101
         match self.system_prompt_id:
             case "uses_dl":
                 df = self.db.read_table_to_dataframe(table_name="markdown")
+            case "uses_ptms":
+                df = self.db.read_table_to_dataframe(table_name="uses_dl_analysis")
+                df["model_response"] = df["model_response"].replace(
+                    to_replace="",
+                    value=float("NaN"),
+                    inplace=False,
+                )
+                df = df.dropna(inplace=False, ignore_index=True)
+                df["model_response"] = df["model_response"].apply(loads)
+                df = df[df["model_response"].apply(lambda d: d.get("result") is True)]
+                df.reset_index(drop=True, inplace=True)
+                df.rename(columns={"user_prompt": "markdown"}, inplace=True)
 
         df_islice: islice = islice(
             df.iterrows(),
