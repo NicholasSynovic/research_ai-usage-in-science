@@ -1,3 +1,4 @@
+from json import dumps, loads
 from logging import Logger
 from os import listdir
 from pathlib import Path
@@ -45,7 +46,14 @@ def main(parquet_dir: Path, db_path: Path, db_table: str) -> None:
     dfs: list[DataFrame] = get_dataframes(parquet_files=parquet_files)
     df: DataFrame = pd.concat(objs=dfs, ignore_index=True)
 
-    print(df)
+    df["model_response"] = df["model_response"].apply(
+        lambda x: dumps(
+            obj=loads(s=x),
+            indent=4,
+        )
+    )
+
+    db.write_dataframe_to_table(table_name=db_table, df=df)
 
 
 if __name__ == "__main__":
