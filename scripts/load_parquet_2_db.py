@@ -46,13 +46,6 @@ def main(parquet_dir: Path, db_path: Path, db_table: str) -> None:
     dfs: list[DataFrame] = get_dataframes(parquet_files=parquet_files)
     df: DataFrame = pd.concat(objs=dfs, ignore_index=True)
 
-    df["model_response"] = df["model_response"].apply(
-        lambda x: dumps(
-            obj=loads(s=x),
-            indent=4,
-        )
-    )
-
     db.write_dataframe_to_table(table_name=db_table, df=df)
 
 
