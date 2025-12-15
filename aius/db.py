@@ -160,7 +160,7 @@ class DB:  # noqa: D101
             Column("compute_time_seconds", Float),
         )
 
-        # uses_dl analyis table
+        # uses_ptms analyis table
         _: Table = Table(
             "uses_ptms_analysis",
             self.metadata,
