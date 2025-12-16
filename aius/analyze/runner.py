@@ -79,8 +79,13 @@ class AnalysisRunner(Runner):  # noqa: D101
             case "uses_ptms":
                 df = self.db.read_table_to_dataframe(table_name="uses_dl_analysis")
                 df = self.__set_dataframe_formatting(df=df)
-
             case "identify_ptms":
+                df = self.db.read_table_to_dataframe(table_name="uses_ptms_analysis")
+                df = self.__set_dataframe_formatting(df=df)
+            case "identify_ptm_reuse":
+                df = self.db.read_table_to_dataframe(table_name="uses_ptms_analysis")
+                df = self.__set_dataframe_formatting(df=df)
+            case "identify_ptm_impact":
                 df = self.db.read_table_to_dataframe(table_name="uses_ptms_analysis")
                 df = self.__set_dataframe_formatting(df=df)
 
