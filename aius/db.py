@@ -186,6 +186,32 @@ class DB:  # noqa: D101
             Column("compute_time_seconds", Float),
         )
 
+        # identify_ptm_reuse analyis table
+        _: Table = Table(
+            "identify_ptm_reuse_analysis",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("doi", String),
+            Column("system_prompt", String),
+            Column("user_prompt", String),
+            Column("model_response", String),
+            Column("model_reasoning", String),
+            Column("compute_time_seconds", Float),
+        )
+
+        # identify_ptm_impact analyis table
+        _: Table = Table(
+            "identify_ptm_impact_analysis",
+            self.metadata,
+            Column("_id", Integer, primary_key=True),
+            Column("doi", String),
+            Column("system_prompt", String),
+            Column("user_prompt", String),
+            Column("model_response", String),
+            Column("model_reasoning", String),
+            Column("compute_time_seconds", Float),
+        )
+
         self.metadata.create_all(bind=self.engine, checkfirst=True)
 
         view_sql = """
