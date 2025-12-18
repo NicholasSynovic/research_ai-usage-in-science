@@ -27,6 +27,7 @@ def set_dataframe_formatting(df: DataFrame) -> DataFrame:
     df = df.dropna(inplace=False, ignore_index=True)
     df["model_response"] = df["model_response"].apply(loads)
     df = df[df["model_response"].apply(lambda d: d.get("result") is True)]
+    # df = df[df["json_data"].apply(loads)]
     df.reset_index(drop=True, inplace=True)
     df.rename(columns={"user_prompt": "markdown"}, inplace=True)
     return df
@@ -34,32 +35,23 @@ def set_dataframe_formatting(df: DataFrame) -> DataFrame:
 
 def get_natural_science_papers_per_journal(db: Engine) -> DataFrame:
     sql: str = """
-SELECT
-    udl.*, oa.topic_0, oa.topic_1, oa.topic_2
-FROM
-    uses_dl_analysis udl
-JOIN
-    openalex oa
-ON
-    oa.doi = udl.doi;
+SELECT udl.*, oa.json_data FROM uses_dl_analysis udl
+JOIN openalex oa on oa.doi = udl.doi;
 """
     return pd.read_sql(sql=sql, con=db)
 
 
 def create_data(df: DataFrame) -> Series:
-    data: dict[str, list[str]] = {
-        "topics": [],
+    data: dict[str, list[int]] = {
+        "year": [],
     }
 
-    data["topics"].extend(df["topic_0"].tolist())
-    data["topics"].extend(df["topic_1"].tolist())
-    data["topics"].extend(df["topic_2"].tolist())
+    row: Series
+    for _, row in df.iterrows():
+        json: dict = loads(s=row["json_data"])
+        data["year"].append(json["publication_year"])
 
-    return (
-        DataFrame(data=data)["topics"]
-        .value_counts()[FIELD]
-        .sort_values(ascending=False)
-    )
+    return DataFrame(data=data)["year"].value_counts()
 
 
 def main() -> None:
@@ -71,7 +63,6 @@ def main() -> None:
     data: Series = create_data(df=papers)
 
     print(data)
-    print(data.sum())
 
 
 if __name__ == "__main__":
