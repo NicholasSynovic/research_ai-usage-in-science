@@ -48,7 +48,7 @@ def create_data(df: DataFrame) -> DataFrame:
         topics: list[str] = [row["topic_0"], row["topic_1"], row["topic_2"]]
         json: dict = loads(row["json_data"])
         for topic in topics:
-            if json["publication_year"] > 2019:
+            if json["publication_year"] >= 2012:
                 data["year"].append(json["publication_year"])
                 data["field"].append(topic)
 
@@ -91,16 +91,89 @@ def plot(df: DataFrame) -> None:
 
     # Formatting
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-    ax.set_ylim(0, df["count"].max() * 1.15)
+    ymax = df["count"].max() * 1.15
+    ax.set_ylim(0, ymax)
 
     ax.set_xlabel("Year")
     ax.set_ylabel("Paper Count")
     ax.set_title("Paper Counts by Field and Year")
     ax.legend(title="Field", frameon=False)
-
     plt.xticks(rotation=45)
+
+    # ==========================================================
+    # Add dashed vertical lines with labels
+    # ==========================================================
+    ax.axvline(
+        x=0,
+        linestyle="--",
+        linewidth=1,
+        color="black",
+        alpha=0.7,
+    )
+    ax.text(
+        0 - 0.18,
+        ymax * 0.5,
+        "AlexNet released",
+        rotation=90,
+        ha="center",
+        va="top",
+        fontsize=9,
+    )
+
+    ax.axvline(
+        x=4,
+        linestyle="--",
+        linewidth=1,
+        color="black",
+        alpha=0.7,
+    )
+    ax.text(
+        4 - 0.18,
+        ymax * 0.5,
+        "HuggingFace released",
+        rotation=90,
+        ha="center",
+        va="top",
+        fontsize=9,
+    )
+
+    ax.axvline(
+        x=5.459154929577,
+        linestyle="--",
+        linewidth=1,
+        color="black",
+        alpha=0.7,
+    )
+    ax.text(
+        5.459154929577 - 0.18,
+        ymax * 0.5,
+        "Attention Is All You Need paper",
+        rotation=90,
+        ha="center",
+        va="top",
+        fontsize=9,
+    )
+
+    ax.axvline(
+        x=10.861971830986,
+        linestyle="--",
+        linewidth=1,
+        color="black",
+        alpha=0.7,
+    )
+    ax.text(
+        10.861971830986 + 0.2,
+        ymax * 0.5,
+        "ChatGPT release",
+        rotation=90,
+        ha="center",
+        va="top",
+        fontsize=9,
+    )
+
     plt.tight_layout()
-    plt.savefig("figS.pdf")
+    plt.savefig("figS.png")
+    plt.close()
 
 
 def main() -> None:
