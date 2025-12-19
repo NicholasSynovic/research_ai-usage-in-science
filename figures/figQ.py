@@ -103,9 +103,10 @@ def plot(df: DataFrame) -> None:
     ymax = df_long["count"].max()
     ax.set_ylim(0, ymax * 1.15)  # 15% headroom
 
-    plt.xlabel("Journal")
+    plt.xlabel("Megajournal")
     plt.ylabel("Paper Count")
-    plt.title("Paper Counts by Journal")
+    plt.suptitle(t="Paper Counts by Megajournal")
+    plt.title(label="17,511 papers; 13,815 with citations; 4,384 natural science")
     plt.legend(title="")
     plt.tight_layout()
     plt.savefig("figQ.pdf")

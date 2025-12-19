@@ -71,7 +71,8 @@ def create_data(df: DataFrame) -> DataFrame:
 
 
 def plot(df: DataFrame) -> None:
-    plt.figure(figsize=(7, 6))
+    plt.figure(figsize=(8, 6))
+    plt.suptitle(t="Number Of PTM Reusing Papers Per Field And Year")
 
     ax = sns.barplot(
         data=df,
@@ -96,83 +97,83 @@ def plot(df: DataFrame) -> None:
 
     ax.set_xlabel("Year")
     ax.set_ylabel("Paper Count")
-    ax.set_title("Paper Counts by Field and Year")
-    ax.legend(title="Field", frameon=False)
+    ax.set_title("Top three most prevelant fields presented")
+    ax.legend(title="Field", frameon=True)
     plt.xticks(rotation=45)
 
     # ==========================================================
     # Add dashed vertical lines with labels
     # ==========================================================
-    ax.axvline(
-        x=0,
-        linestyle="--",
-        linewidth=1,
-        color="black",
-        alpha=0.7,
-    )
-    ax.text(
-        0 - 0.18,
-        ymax * 0.5,
-        "AlexNet released",
-        rotation=90,
-        ha="center",
-        va="top",
-        fontsize=9,
-    )
+    # ax.axvline(
+    #     x=0,
+    #     linestyle="--",
+    #     linewidth=1,
+    #     color="black",
+    #     alpha=0.7,
+    # )
+    # ax.text(
+    #     0 - 0.18,
+    #     ymax * 0.5,
+    #     "AlexNet released",
+    #     rotation=90,
+    #     ha="center",
+    #     va="top",
+    #     fontsize=9,
+    # )
 
-    ax.axvline(
-        x=4,
-        linestyle="--",
-        linewidth=1,
-        color="black",
-        alpha=0.7,
-    )
-    ax.text(
-        4 - 0.18,
-        ymax * 0.5,
-        "HuggingFace released",
-        rotation=90,
-        ha="center",
-        va="top",
-        fontsize=9,
-    )
+    # ax.axvline(
+    #     x=4,
+    #     linestyle="--",
+    #     linewidth=1,
+    #     color="black",
+    #     alpha=0.7,
+    # )
+    # ax.text(
+    #     4 - 0.18,
+    #     ymax * 0.5,
+    #     "HuggingFace released",
+    #     rotation=90,
+    #     ha="center",
+    #     va="top",
+    #     fontsize=9,
+    # )
 
-    ax.axvline(
-        x=5.459154929577,
-        linestyle="--",
-        linewidth=1,
-        color="black",
-        alpha=0.7,
-    )
-    ax.text(
-        5.459154929577 - 0.18,
-        ymax * 0.5,
-        "Attention Is All You Need paper",
-        rotation=90,
-        ha="center",
-        va="top",
-        fontsize=9,
-    )
+    # ax.axvline(
+    #     x=5.459154929577,
+    #     linestyle="--",
+    #     linewidth=1,
+    #     color="black",
+    #     alpha=0.7,
+    # )
+    # ax.text(
+    #     5.459154929577 - 0.18,
+    #     ymax * 0.5,
+    #     "Attention Is All You Need paper",
+    #     rotation=90,
+    #     ha="center",
+    #     va="top",
+    #     fontsize=9,
+    # )
 
-    ax.axvline(
-        x=10.861971830986,
-        linestyle="--",
-        linewidth=1,
-        color="black",
-        alpha=0.7,
-    )
-    ax.text(
-        10.861971830986 + 0.2,
-        ymax * 0.5,
-        "ChatGPT release",
-        rotation=90,
-        ha="center",
-        va="top",
-        fontsize=9,
-    )
+    # ax.axvline(
+    #     x=10.861971830986,
+    #     linestyle="--",
+    #     linewidth=1,
+    #     color="black",
+    #     alpha=0.7,
+    # )
+    # ax.text(
+    #     10.861971830986 + 0.2,
+    #     ymax * 0.5,
+    #     "ChatGPT release",
+    #     rotation=90,
+    #     ha="center",
+    #     va="top",
+    #     fontsize=9,
+    # )
 
     plt.tight_layout()
-    plt.savefig("figS.png")
+    plt.savefig("figS.pdf")
     plt.close()
 
 

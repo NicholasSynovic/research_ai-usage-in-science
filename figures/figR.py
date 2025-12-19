@@ -48,7 +48,7 @@ def create_data(df: DataFrame) -> DataFrame:
         topics: list[str] = [row["topic_0"], row["topic_1"], row["topic_2"]]
         json: dict = loads(row["json_data"])
         for topic in topics:
-            if json["publication_year"] > 2019:
+            if json["publication_year"] > 2016:
                 data["year"].append(json["publication_year"])
                 data["field"].append(topic)
 
@@ -71,7 +71,8 @@ def create_data(df: DataFrame) -> DataFrame:
 
 
 def plot(df: DataFrame) -> None:
-    plt.figure(figsize=(7, 6))
+    plt.figure(figsize=(8, 6))
+    plt.suptitle(t="Number Of Deep Learning Using Papers Per Field And Year")
 
     ax = sns.barplot(
         data=df,
@@ -87,6 +88,7 @@ def plot(df: DataFrame) -> None:
             fmt="{:,.0f}",
             padding=3,
             fontsize=9,
+            # rotation=90,
         )
 
     # Formatting
@@ -95,8 +97,8 @@ def plot(df: DataFrame) -> None:
 
     ax.set_xlabel("Year")
     ax.set_ylabel("Paper Count")
-    ax.set_title("Paper Counts by Field and Year")
-    ax.legend(title="Field", frameon=False)
+    ax.set_title("Top three most prevelant fields presented")
+    ax.legend(title="Field", frameon=True)
 
     plt.xticks(rotation=45)
     plt.tight_layout()
