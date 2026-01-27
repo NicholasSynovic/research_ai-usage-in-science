@@ -98,7 +98,7 @@ def plot(df: DataFrame) -> None:
     ax.set_xlabel("Year")
     ax.set_ylabel("Paper Count")
     ax.set_title("Top three most prevelant fields presented")
-    ax.legend(title="Field", frameon=True)
+    ax.legend(title="Natural Science Field", frameon=True)
 
     plt.xticks(rotation=45)
     plt.tight_layout()
