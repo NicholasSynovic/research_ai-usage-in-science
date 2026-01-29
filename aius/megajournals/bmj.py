@@ -8,7 +8,7 @@ from string import Template
 from bs4 import BeautifulSoup, ResultSet, Tag
 from pandas import DataFrame, Series
 from progress.bar import Bar
-from requests import HTTPError, Response
+from requests import HTTPError, Response, get
 
 from aius.db import DB
 from aius.megajournals.megajournal import MegaJournal
@@ -226,13 +226,14 @@ class BMJ(MegaJournal):
                 self.logger.info("Getting JATS XML from: %s ...", xml_url)
 
                 try:
-                    resp: Response = self.session.get(url=xml_url, timeout=60)
+                    # Doesn't use self.session
+                    resp: Response = get(url=xml_url, timeout=60)
                     self.logger.info("Response status code: %s ...", resp.status_code)
                     resp.raise_for_status()
                     data["doi"].append(row["doi"])
                     data["jats_xml"].append(resp.content.decode("UTF-8").strip("\n"))
                 except HTTPError:
-                    pass
+                    self.logger.error("HTTPError with: %s ...", xml_url)
 
                 bar.next()
 
