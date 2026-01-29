@@ -11,6 +11,11 @@ class HTTPSession:
         self.session.mount(
             "https://",
             HTTPAdapter(
-                max_retries=Retry(total=10, backoff_factor=1),
+                max_retries=Retry(
+                    total=10,
+                    backoff_factor=1,
+                    status_forcelist=[403, 429, 500, 502, 503, 504],
+                    allowed_methods=["HEAD", "GET", "OPTIONS", "POST"],
+                ),
             ),
         )
