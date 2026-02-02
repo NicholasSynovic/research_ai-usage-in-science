@@ -26,7 +26,9 @@ def runner_factory(  # noqa: D103
     logger.info("%s kwargs: %s", runner_name, kwargs)
 
     # Connect to the database
-    db: DB = connect_to_db(logger=logger, db_path=kwargs[f"{runner_name}.db"])
+    db: DB | int = connect_to_db(logger=logger, db_path=kwargs[f"{runner_name}.db"])
+    if isinstance(db, int):
+        return 2
 
     runner: Runner | int
     match runner_name:
