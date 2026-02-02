@@ -227,7 +227,11 @@ class BMJ(MegaJournal):
 
                 try:
                     # Doesn't use self.session
-                    resp: Response = get(url=xml_url, timeout=60)
+                    resp: Response = get(
+                        url=xml_url,
+                        timeout=60,
+                        allow_redirects=True,
+                    )
                     self.logger.info("Response status code: %s ...", resp.status_code)
                     resp.raise_for_status()
                     data["doi"].append(row["doi"])
