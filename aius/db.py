@@ -27,6 +27,7 @@ from sqlalchemy import (
     create_engine,
     text,
 )
+from sqlalchemy.exc import OperationalError
 
 from aius import MODULE_NAME
 
@@ -329,6 +330,13 @@ class DB:  # noqa: D101
         )
 
 
-def connect_to_db(logger: Logger, db_path: Path) -> DB:  # noqa: D103
-    logger.info("Connected to SQLite3 database: %s", db_path)
-    return DB(logger=logger, db_path=db_path)
+def connect_to_db(logger: Logger, db_path: Path) -> DB | int:  # noqa: D103
+    db: DB | int = -1
+
+    try:
+        db = DB(logger=logger, db_path=db_path)
+        logger.info("Connected to SQLite3 database: %s", db_path)
+    except OperationalError:
+        logger.error("Unable to connect to SQLite3 database: %s", db_path)
+
+    return db
