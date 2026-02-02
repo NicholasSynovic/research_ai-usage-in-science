@@ -189,7 +189,11 @@ class F1000(MegaJournal):
                 self.logger.info("Getting JATS XML from: %s ...", xml_url)
 
                 try:
-                    resp: Response = self.session.get(url=xml_url, timeout=60)
+                    resp: Response = self.session.get(
+                        url=xml_url,
+                        timeout=60,
+                        allow_redirects=True,
+                    )
                     self.logger.info("Response status code: %s ...", resp.status_code)
                     resp.raise_for_status()
                     data["doi"].append(row["doi"])
