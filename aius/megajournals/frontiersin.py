@@ -157,19 +157,9 @@ class FrontiersIn(MegaJournal):
         ) as bar:
             row: Series
             for _, row in df.iterrows():
-                oa_json: dict = loads(s=row["json_data"])
-                open_access_pdf_url: str = oa_json["best_oa_location"]["pdf_url"]
-
-                try:
-                    xml_url: str = open_access_pdf_url.replace(
-                        "/pdf",
-                        "/xml",
-                    )
-                except AttributeError:
-                    self.logger.debug("No url for %s", row["doi"])
-                    bar.next()
-                    continue
-
+                doi: str = row["doi"]
+                resolved_url: str = self.session_util.resolve_doi(doi_id=doi)
+                xml_url = resolved_url.replace("/full", "/xml")
                 self.logger.info("Getting JATS XML from: %s ...", xml_url)
 
                 try:
@@ -180,10 +170,10 @@ class FrontiersIn(MegaJournal):
                     )
                     self.logger.info("Response status code: %s ...", resp.status_code)
                     resp.raise_for_status()
-                    data["doi"].append(row["doi"])
+                    data["doi"].append(doi)
                     data["jats_xml"].append(resp.content.decode("UTF-8").strip("\n"))
                 except HTTPError:
-                    pass
+                    self.logger.error("HTTPError with URL: %s", xml_url)
 
                 bar.next()
 
