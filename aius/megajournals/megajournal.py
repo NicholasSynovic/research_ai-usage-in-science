@@ -23,9 +23,9 @@ class MegaJournal(ABC):
         self.keyword_year_products: product = product()
 
         # Custom HTTPS session with exponential backoff enabled
-        session_util: HTTPSession = HTTPSession()
-        self.timeout: int = session_util.timeout
-        self.session: Session = session_util.session
+        self.session_util: HTTPSession = HTTPSession()
+        self.timeout: int = self.session_util.timeout
+        self.session: Session = self.session_util.session
 
     def search_single_page(
         self,
