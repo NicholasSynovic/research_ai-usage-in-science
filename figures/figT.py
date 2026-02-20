@@ -6,32 +6,70 @@ from typing import Any
 import click
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
+from matplotlib.container import BarContainer
+from matplotlib.ticker import FuncFormatter
 from pandas import DataFrame
+
+SUPTITLE_FONT_SIZE: int = 24
+TITLE_FONT_SIZE: int = 22
+XY_LABEL_FONT_SIZE: int = 20
+XY_TICK_FONT_SIZE: int = 18
+OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
 
 
 def plot(df: DataFrame, output_path: Path) -> None:
     # Aggregate counts per year and classification
-    counts = (
-        df.groupby(["publication_year", "classification"])
-        .size()
-        .reset_index(name="count")
+    counts = df.groupby(["publication_year", "classification"]).size().reset_index()
+    counts.columns = ["publication_year", "classification", "count"]
+
+    counts["classification"] = counts["classification"].replace(
+        to_replace="adaptation_reuse", value="Adaptation Reuse"
+    )
+    counts["classification"] = counts["classification"].replace(
+        to_replace="conceptual_reuse", value="Conceptual Reuse"
+    )
+    counts["classification"] = counts["classification"].replace(
+        to_replace="deployment_reuse", value="Deployment Reuse"
     )
 
-    # Pivot for plotting
-    pivot = counts.pivot(
-        index="publication_year",
-        columns="classification",
-        values="count",
-    ).fillna(0)
+    fig, ax = plt.subplots(figsize=(12, 9))
+    sns.barplot(
+        data=counts,
+        x="publication_year",
+        y="count",
+        hue="classification",
+        ax=ax,
+    )
 
-    # Plot
-    plt.figure()
-    pivot.plot(kind="bar")
-    plt.xlabel("Year")
-    plt.ylabel("Count")
-    plt.title("PTM Reuse Pattern Counts per Year")
-    plt.tight_layout()
-    plt.savefig(output_path)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
+    ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
+    ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
+    ax.set_title(
+        "PTM Reuse Pattern Counts per Year",
+        fontsize=TITLE_FONT_SIZE,
+    )
+    ax.tick_params(axis="both", labelsize=XY_TICK_FONT_SIZE)
+    ax.tick_params(axis="x", rotation=45)
+    ax.legend(
+        title="Reuse Classification",
+        fontsize=OTHER_FONT_SIZE,
+        title_fontsize=OTHER_FONT_SIZE,
+        frameon=True,
+    )
+
+    for container in ax.containers:
+        if isinstance(container, BarContainer):
+            ax.bar_label(
+                container,
+                fmt="{:,.0f}",
+                padding=3,
+                fontsize=OTHER_FONT_SIZE,
+            )
+
+    fig.tight_layout()
+    fig.savefig(output_path)
+    plt.close(fig)
 
 
 def extract_classification(obj: Any) -> list[Any]:
@@ -58,7 +96,7 @@ def extract_classification(obj: Any) -> list[Any]:
 def normalize_data(df: DataFrame) -> DataFrame:
     # 1. Drop NULL and empty / whitespace-only strings
     df = df.dropna(subset=["model_response"])
-    df = df[df["model_response"].str.strip() != ""]
+    df = df.loc[df["model_response"].str.strip() != ""]
 
     # 2. Parse JSON safely
     def parse_json(s: str) -> dict[str, Any] | None:
