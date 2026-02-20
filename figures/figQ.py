@@ -8,6 +8,11 @@ from pandas import DataFrame, Series
 from sqlalchemy import Engine, create_engine
 
 DB_PATH: Path = Path("../data/aius_12-17-2025.db").resolve()
+SUPTITLE_FONT_SIZE: int = 24
+TITLE_FONT_SIZE: int = 22
+XY_LABEL_FONT_SIZE: int = 20
+XY_TICK_FONT_SIZE: int = 18
+OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
 
 
 def get_papers_per_journal(db: Engine) -> DataFrame:
@@ -81,13 +86,29 @@ def plot(df: DataFrame) -> None:
     )
 
     # Plot grouped bar chart
-    # plt.figure(figsize=(9, 5))
+    plt.figure(figsize=(12, 9))
     ax = sns.barplot(
         data=df_long,
         x="journal",
         y="count",
         hue="category",
+        # log_scale=True,
     )
+
+    # ---- Y-AXIS: commas + headroom ----
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
+    ax.set_ylim(0, df_long["count"].max() * 1.15)  # 15% headroom
+
+    plt.suptitle(t="Paper Counts by Megajournal", fontsize=SUPTITLE_FONT_SIZE)
+    plt.title(
+        label="17,511 papers; 13,815 with citations; 4,384 natural science",
+        fontsize=TITLE_FONT_SIZE,
+    )
+    plt.xlabel("Megajournal", fontsize=XY_LABEL_FONT_SIZE)
+    plt.ylabel("Paper Count", fontsize=XY_LABEL_FONT_SIZE)
+    plt.yticks(fontsize=XY_TICK_FONT_SIZE)
+    plt.xticks(fontsize=XY_TICK_FONT_SIZE)
+    plt.legend(title="", fontsize=OTHER_FONT_SIZE)
 
     # ---- ADD VALUE LABELS ----
     for container in ax.containers:
@@ -95,19 +116,9 @@ def plot(df: DataFrame) -> None:
             container,
             fmt="{:,.0f}",
             padding=3,
-            fontsize=9,
+            fontsize=OTHER_FONT_SIZE,
         )
 
-    # ---- Y-AXIS: commas + headroom ----
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-    ymax = df_long["count"].max()
-    ax.set_ylim(0, ymax * 1.15)  # 15% headroom
-
-    plt.xlabel("Megajournal")
-    plt.ylabel("Paper Count")
-    plt.suptitle(t="Paper Counts by Megajournal")
-    plt.title(label="17,511 papers; 13,815 with citations; 4,384 natural science")
-    plt.legend(title="")
     plt.tight_layout()
     plt.savefig("figQ.pdf")
 

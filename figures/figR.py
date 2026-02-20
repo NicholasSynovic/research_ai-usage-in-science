@@ -2,6 +2,7 @@ from json import loads
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
@@ -19,6 +20,11 @@ FIELD: list[str] = [
     "Neuroscience",
     "Physics and Astronomy",
 ]
+SUPTITLE_FONT_SIZE: int = 24
+TITLE_FONT_SIZE: int = 22
+XY_LABEL_FONT_SIZE: int = 20
+XY_TICK_FONT_SIZE: int = 18
+OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
 
 
 def get_papers_per_journal(db: Engine) -> DataFrame:
@@ -41,6 +47,13 @@ ON
 
 
 def create_data(df: DataFrame) -> DataFrame:
+    top_fields: list[str] = [
+        "Biochemistry, Genetics and Molecular Biology",
+        "Neuroscience",
+        "Environmental Science",
+        "Other",
+    ]
+
     data: dict[str, list[str | int]] = {"year": [], "field": []}
 
     row: Series
@@ -53,15 +66,8 @@ def create_data(df: DataFrame) -> DataFrame:
                 data["field"].append(topic)
 
     df = DataFrame(data=data)
-    df = df[
-        df["field"].isin(
-            [
-                "Biochemistry, Genetics and Molecular Biology",
-                "Neuroscience",
-                "Environmental Science",
-            ]
-        )
-    ]
+    df["field"] = np.where(df["field"].isin(top_fields), df["field"], "Other")
+    df = df[df["field"].isin(top_fields)]
     counts: Series = df.value_counts()
 
     df = counts.reset_index()
@@ -71,8 +77,7 @@ def create_data(df: DataFrame) -> DataFrame:
 
 
 def plot(df: DataFrame) -> None:
-    plt.figure(figsize=(8, 6))
-    plt.suptitle(t="Number Of Deep Learning Using Papers Per Field And Year")
+    plt.figure(figsize=(15, 12))
 
     ax = sns.barplot(
         data=df,
@@ -87,18 +92,23 @@ def plot(df: DataFrame) -> None:
             container,
             fmt="{:,.0f}",
             padding=3,
-            fontsize=9,
-            # rotation=90,
+            fontsize=OTHER_FONT_SIZE,
         )
 
     # Formatting
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-    ax.set_ylim(0, df["count"].max() * 1.15)
+    ax.set_ylim(0, df["count"].max() * 1.15)  # 15% headroom
 
-    ax.set_xlabel("Year")
-    ax.set_ylabel("Paper Count")
-    ax.set_title("Top three most prevelant fields presented")
-    ax.legend(title="Natural Science Field", frameon=True)
+    plt.title(
+        "Number Of Papers Using Deep Learning per Year",
+        fontsize=TITLE_FONT_SIZE,
+    )
+    # plt.title("Top three most prevelant fields presented", fontsize=MAX_FONT_SIZE-2,)
+    plt.xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
+    plt.ylabel("Paper Count", fontsize=XY_LABEL_FONT_SIZE)
+    plt.yticks(fontsize=XY_TICK_FONT_SIZE)
+    plt.xticks(fontsize=XY_TICK_FONT_SIZE)
+    plt.legend(title="", fontsize=OTHER_FONT_SIZE)
 
     plt.xticks(rotation=45)
     plt.tight_layout()
