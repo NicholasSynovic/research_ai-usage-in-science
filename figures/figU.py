@@ -3,12 +3,13 @@ from json import loads
 from pathlib import Path
 from typing import Any
 
+import click
 import matplotlib.pyplot as plt
 import pandas as pd
-from pandas import DataFrame, Series
+from pandas import DataFrame
 
 
-def plot(df: DataFrame) -> None:
+def plot(df: DataFrame, output_path: Path) -> None:
     # Aggregate counts per year and classification
     counts = (
         df.groupby(["publication_year", "classification"])
@@ -30,7 +31,7 @@ def plot(df: DataFrame) -> None:
     plt.ylabel("Count")
     plt.title("PTM Reuse Impact Counts per Year")
     plt.tight_layout()
-    plt.savefig("figU.pdf")
+    plt.savefig(output_path)
 
 
 def extract_classification(obj: Any) -> list[Any]:
@@ -93,8 +94,26 @@ JOIN identify_ptm_impact_analysis impact ON oa.doi = impact.doi;
     return df.sort_values(by="publication_year")
 
 
-def main() -> None:
-    db_path: Path = Path("../data/aius_12-17-2025.db").absolute()
+@click.command()
+@click.option(
+    "--db",
+    "db_path",
+    default=Path("../data/aius_12-17-2025.db").absolute(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Path to the SQLite database.",
+)
+@click.option(
+    "--output",
+    "output_path",
+    default=Path("figU.pdf").absolute(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Output path for the plot.",
+)
+def main(db_path: Path, output_path: Path) -> None:
+    db_path = db_path.absolute()
+    output_path = output_path.absolute()
 
     df: DataFrame = load_model_responses(db_path=db_path)
 
@@ -107,7 +126,7 @@ def main() -> None:
 
     df = df.explode(column="classification")
 
-    plot(df)
+    plot(df, output_path=output_path)
 
 
 if __name__ == "__main__":

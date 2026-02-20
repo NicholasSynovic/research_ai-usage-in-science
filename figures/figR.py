@@ -1,6 +1,7 @@
 from json import loads
 from pathlib import Path
 
+import click
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,7 +10,6 @@ from matplotlib.ticker import FuncFormatter
 from pandas import DataFrame, Series
 from sqlalchemy import Engine, create_engine
 
-DB_PATH: Path = Path("../data/aius_12-17-2025.db").resolve()
 FIELD: list[str] = [
     "Agricultural and Biological Sciences",
     "Biochemistry, Genetics and Molecular Biology",
@@ -76,7 +76,7 @@ def create_data(df: DataFrame) -> DataFrame:
     return df
 
 
-def plot(df: DataFrame) -> None:
+def plot(df: DataFrame, output_path: Path) -> None:
     plt.figure(figsize=(15, 12))
 
     ax = sns.barplot(
@@ -112,17 +112,36 @@ def plot(df: DataFrame) -> None:
 
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig("figR.pdf")
+    plt.savefig(output_path)
 
 
-def main() -> None:
-    db: Engine = create_engine(url=f"sqlite:///{DB_PATH}")
+@click.command()
+@click.option(
+    "--db",
+    "db_path",
+    default=Path("../data/aius_12-17-2025.db").absolute(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Path to the SQLite database.",
+)
+@click.option(
+    "--output",
+    "output_path",
+    default=Path("figR.pdf").absolute(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Output path for the plot.",
+)
+def main(db_path: Path, output_path: Path) -> None:
+    db_path = db_path.absolute()
+    output_path = output_path.absolute()
+    db: Engine = create_engine(url=f"sqlite:///{db_path}")
 
     papers: DataFrame = get_papers(db=db)
 
     df: DataFrame = create_data(df=papers)
 
-    plot(df=df)
+    plot(df=df, output_path=output_path)
 
 
 if __name__ == "__main__":

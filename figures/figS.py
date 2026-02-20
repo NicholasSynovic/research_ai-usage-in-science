@@ -1,6 +1,7 @@
 from json import loads
 from pathlib import Path
 
+import click
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -8,7 +9,6 @@ from matplotlib.ticker import FuncFormatter
 from pandas import DataFrame, Series
 from sqlalchemy import Engine, create_engine
 
-DB_PATH: Path = Path("../data/aius_12-17-2025.db").resolve()
 FIELD: list[str] = [
     "Agricultural and Biological Sciences",
     "Biochemistry, Genetics and Molecular Biology",
@@ -70,7 +70,7 @@ def create_data(df: DataFrame) -> DataFrame:
     return df
 
 
-def plot(df: DataFrame) -> None:
+def plot(df: DataFrame, output_path: Path) -> None:
     plt.figure(figsize=(8, 6))
     plt.suptitle(t="Number Of PTM Reusing Papers Per Field And Year")
 
@@ -101,90 +101,38 @@ def plot(df: DataFrame) -> None:
     ax.legend(title="Natural Science Field", frameon=True)
     plt.xticks(rotation=45)
 
-    # ==========================================================
-    # Add dashed vertical lines with labels
-    # ==========================================================
-    # ax.axvline(
-    #     x=0,
-    #     linestyle="--",
-    #     linewidth=1,
-    #     color="black",
-    #     alpha=0.7,
-    # )
-    # ax.text(
-    #     0 - 0.18,
-    #     ymax * 0.5,
-    #     "AlexNet released",
-    #     rotation=90,
-    #     ha="center",
-    #     va="top",
-    #     fontsize=9,
-    # )
-
-    # ax.axvline(
-    #     x=4,
-    #     linestyle="--",
-    #     linewidth=1,
-    #     color="black",
-    #     alpha=0.7,
-    # )
-    # ax.text(
-    #     4 - 0.18,
-    #     ymax * 0.5,
-    #     "HuggingFace released",
-    #     rotation=90,
-    #     ha="center",
-    #     va="top",
-    #     fontsize=9,
-    # )
-
-    # ax.axvline(
-    #     x=5.459154929577,
-    #     linestyle="--",
-    #     linewidth=1,
-    #     color="black",
-    #     alpha=0.7,
-    # )
-    # ax.text(
-    #     5.459154929577 - 0.18,
-    #     ymax * 0.5,
-    #     "Attention Is All You Need paper",
-    #     rotation=90,
-    #     ha="center",
-    #     va="top",
-    #     fontsize=9,
-    # )
-
-    # ax.axvline(
-    #     x=10.861971830986,
-    #     linestyle="--",
-    #     linewidth=1,
-    #     color="black",
-    #     alpha=0.7,
-    # )
-    # ax.text(
-    #     10.861971830986 + 0.2,
-    #     ymax * 0.5,
-    #     "ChatGPT release",
-    #     rotation=90,
-    #     ha="center",
-    #     va="top",
-    #     fontsize=9,
-    # )
-
     plt.tight_layout()
-    plt.savefig("figS.pdf")
+    plt.savefig(output_path)
     plt.close()
 
 
-def main() -> None:
-    db: Engine = create_engine(url=f"sqlite:///{DB_PATH}")
+@click.command()
+@click.option(
+    "--db",
+    "db_path",
+    default=Path("../data/aius_12-17-2025.db").absolute(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Path to the SQLite database.",
+)
+@click.option(
+    "--output",
+    "output_path",
+    default=Path("figS.pdf").absolute(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Output path for the plot.",
+)
+def main(db_path: Path, output_path: Path) -> None:
+    db_path = db_path.absolute()
+    output_path = output_path.absolute()
+    db: Engine = create_engine(url=f"sqlite:///{db_path}")
 
     papers: DataFrame = get_papers(db=db)
 
     df: DataFrame = create_data(df=papers)
 
-    plot(df=df)
+    plot(df=df, output_path=output_path)
 
 
 if __name__ == "__main__":
