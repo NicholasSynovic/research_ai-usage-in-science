@@ -10,6 +10,8 @@ from matplotlib.ticker import FuncFormatter
 from pandas import DataFrame, Series
 from sqlalchemy import Engine, create_engine
 
+DB_PATH: Path = Path("../data/aius_12-17-2025.db").resolve()
+
 FIELD: list[str] = [
     "Agricultural and Biological Sciences",
     "Biochemistry, Genetics and Molecular Biology",
@@ -58,61 +60,92 @@ def create_data(df: DataFrame) -> DataFrame:
 
     row: Series
     for _, row in df.iterrows():
-        topics: list[str] = [row["topic_0"], row["topic_1"], row["topic_2"]]
-        json: dict = loads(row["json_data"])
+        topics: list[str] = [
+            str(row["topic_0"]),
+            str(row["topic_1"]),
+            str(row["topic_2"]),
+        ]
+        json: dict = loads(str(row["json_data"]))
         for topic in topics:
             if json["publication_year"] > 2016:
                 data["year"].append(json["publication_year"])
                 data["field"].append(topic)
 
-    df = DataFrame(data=data)
-    df["field"] = np.where(df["field"].isin(top_fields), df["field"], "Other")
-    df = df[df["field"].isin(top_fields)]
-    counts: Series = df.value_counts()
+    data_df = DataFrame(data=data)
+    data_df["field"] = np.where(
+        data_df["field"].isin(top_fields),
+        data_df["field"],
+        "Other",
+    )
+    data_df = data_df[data_df["field"].isin(top_fields)]
+    counts: Series = data_df.value_counts()
 
-    df = counts.reset_index()
-    df.columns = ["year", "field", "count"]
+    counts_df = counts.reset_index()
+    counts_df.columns = ["year", "field", "count"]
 
-    return df
+    return counts_df
 
 
 def plot(df: DataFrame, output_path: Path) -> None:
-    plt.figure(figsize=(15, 12))
+    top_fields: list[str] = [
+        "Biochemistry, Genetics and Molecular Biology",
+        "Neuroscience",
+        "Environmental Science",
+        "Other",
+    ]
+    panel_labels: list[str] = ["(A)", "(B)", "(C)", "(D)"]
 
-    ax = sns.barplot(
-        data=df,
-        x="year",
-        y="count",
-        hue="field",
-    )
+    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(15, 12), sharey=True)
+    flat_axes = axes.flatten()
+    max_count = df["count"].max()
 
-    # Add value labels
-    for container in ax.containers:
-        ax.bar_label(
-            container,
-            fmt="{:,.0f}",
-            padding=3,
-            fontsize=OTHER_FONT_SIZE,
+    for index, field in enumerate(top_fields):
+        ax = flat_axes[index]
+        panel_data: DataFrame = df.loc[df["field"] == field]
+
+        sns.barplot(
+            data=panel_data,
+            x="year",
+            y="count",
+            ax=ax,
         )
 
-    # Formatting
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-    ax.set_ylim(0, df["count"].max() * 1.15)  # 15% headroom
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
+        ax.set_ylim(0, max_count * 1.15)
+        ax.set_title(field, fontsize=TITLE_FONT_SIZE)
+        ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
+        ax.set_ylabel("Paper Count", fontsize=XY_LABEL_FONT_SIZE)
+        ax.tick_params(axis="both", labelsize=XY_TICK_FONT_SIZE)
+        ax.tick_params(axis="x", rotation=45)
 
-    plt.title(
+        if ax.get_legend() is not None:
+            ax.get_legend().remove()
+
+        for container in ax.containers:
+            ax.bar_label(
+                container,
+                fmt="{:,.0f}",
+                padding=3,
+                fontsize=OTHER_FONT_SIZE,
+            )
+
+        ax.text(
+            0.02,
+            0.98,
+            panel_labels[index],
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            fontsize=TITLE_FONT_SIZE,
+            fontweight="bold",
+        )
+
+    fig.suptitle(
         "Number Of Papers Using Deep Learning per Year",
-        fontsize=TITLE_FONT_SIZE,
+        fontsize=SUPTITLE_FONT_SIZE,
     )
-    # plt.title("Top three most prevelant fields presented", fontsize=MAX_FONT_SIZE-2,)
-    plt.xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
-    plt.ylabel("Paper Count", fontsize=XY_LABEL_FONT_SIZE)
-    plt.yticks(fontsize=XY_TICK_FONT_SIZE)
-    plt.xticks(fontsize=XY_TICK_FONT_SIZE)
-    plt.legend(title="", fontsize=OTHER_FONT_SIZE)
-
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig(output_path)
+    fig.tight_layout()
+    fig.savefig(output_path)
 
 
 @click.command()
