@@ -42,6 +42,7 @@ def plot(df: DataFrame, output_path: Path) -> None:
         ax=ax,
     )
 
+    ax.set_yscale("log")
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
     ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
     ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
