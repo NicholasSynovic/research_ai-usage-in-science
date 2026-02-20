@@ -1,3 +1,4 @@
+import textwrap
 from json import loads
 from pathlib import Path
 
@@ -13,13 +14,13 @@ from sqlalchemy import Engine, create_engine
 DB_PATH: Path = Path("../data/aius_12-17-2025.db").resolve()
 
 FIELD: list[str] = [
-    "Agricultural and Biological Sciences",
     "Biochemistry, Genetics and Molecular Biology",
+    "Neuroscience",
+    "Environmental Science",
+    "Agricultural and Biological Sciences",
     "Chemistry",
     "Earth and Planetary Sciences",
-    "Environmental Science",
     "Immunology and Microbiology",
-    "Neuroscience",
     "Physics and Astronomy",
 ]
 SUPTITLE_FONT_SIZE: int = 24
@@ -49,13 +50,6 @@ ON
 
 
 def create_data(df: DataFrame) -> DataFrame:
-    top_fields: list[str] = [
-        "Biochemistry, Genetics and Molecular Biology",
-        "Neuroscience",
-        "Environmental Science",
-        "Other",
-    ]
-
     data: dict[str, list[str | int]] = {"year": [], "field": []}
 
     row: Series
@@ -72,12 +66,7 @@ def create_data(df: DataFrame) -> DataFrame:
                 data["field"].append(topic)
 
     data_df = DataFrame(data=data)
-    data_df["field"] = np.where(
-        data_df["field"].isin(top_fields),
-        data_df["field"],
-        "Other",
-    )
-    data_df = data_df[data_df["field"].isin(top_fields)]
+    data_df = data_df[data_df["field"].isin(FIELD)]
     counts: Series = data_df.value_counts()
 
     counts_df = counts.reset_index()
@@ -87,19 +76,28 @@ def create_data(df: DataFrame) -> DataFrame:
 
 
 def plot(df: DataFrame, output_path: Path) -> None:
-    top_fields: list[str] = [
-        "Biochemistry, Genetics and Molecular Biology",
-        "Neuroscience",
-        "Environmental Science",
-        "Other",
+    panel_labels: list[str] = [
+        "(A)",
+        "(B)",
+        "(C)",
+        "(D)",
+        "(E)",
+        "(F)",
+        "(G)",
+        "(H)",
     ]
-    panel_labels: list[str] = ["(A)", "(B)", "(C)", "(D)"]
 
-    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(15, 12), sharey=True)
+    totals = df.groupby("field")["count"].sum().to_dict()
+    ordered_fields = [
+        field
+        for field, _ in sorted(totals.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+    fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(24, 10), sharey=True)
     flat_axes = axes.flatten()
     max_count = df["count"].max()
 
-    for index, field in enumerate(top_fields):
+    for index, field in enumerate(ordered_fields):
         ax = flat_axes[index]
         panel_data: DataFrame = df.loc[df["field"] == field]
 
