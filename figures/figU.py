@@ -18,7 +18,7 @@ XY_TICK_FONT_SIZE: int = 18
 OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
 
 
-def plot(df: DataFrame, output_path: Path) -> None:
+def plot(df: DataFrame, output_path: Path, log_scale: bool = False) -> None:
     # Aggregate counts per year and classification
     counts = df.groupby(["publication_year", "classification"]).size().reset_index()
     counts.columns = ["publication_year", "classification", "count"]
@@ -29,10 +29,18 @@ def plot(df: DataFrame, output_path: Path) -> None:
         x="publication_year",
         y="count",
         hue="classification",
+        hue_order=[
+            "Observation",
+            "Hypothesis",
+            "Background",
+            "Analysis",
+            "Test",
+        ],
         ax=ax,
     )
 
-    ax.set_yscale("log")
+    if log_scale:
+        ax.set_yscale("log")
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
     ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
     ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
@@ -141,14 +149,14 @@ JOIN identify_ptm_impact_analysis impact ON oa.doi = impact.doi;
     help="Output path for the plot.",
 )
 @click.option(
-    "--log",
+    "--log-scale",
     "log_scale",
-    default=True,
+    default=False,
     type=bool,
     show_default=True,
-    help="Output path for the plot.",
+    help="Use log-scaling on the Y-axis.",
 )
-def main(db_path: Path, output_path: Path) -> None:
+def main(db_path: Path, output_path: Path, log_scale: bool = False) -> None:
     db_path = db_path.absolute()
     output_path = output_path.absolute()
 
@@ -163,7 +171,7 @@ def main(db_path: Path, output_path: Path) -> None:
 
     df = df.explode(column="classification")
 
-    plot(df, output_path=output_path)
+    plot(df, output_path=output_path, log_scale=log_scale)
 
 
 if __name__ == "__main__":
