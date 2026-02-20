@@ -18,7 +18,7 @@ XY_TICK_FONT_SIZE: int = 18
 OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
 
 
-def plot(df: DataFrame, output_path: Path) -> None:
+def plot(df: DataFrame, output_path: Path, log_scale: bool = False) -> None:
     # Aggregate counts per year and classification
     counts = df.groupby(["publication_year", "classification"]).size().reset_index()
     counts.columns = ["publication_year", "classification", "count"]
@@ -32,6 +32,15 @@ def plot(df: DataFrame, output_path: Path) -> None:
     counts["classification"] = counts["classification"].replace(
         to_replace="deployment_reuse", value="Deployment Reuse"
     )
+    counts["classification"] = pd.Categorical(
+        counts["classification"],
+        categories=[
+            "Conceptual Reuse",
+            "Deployment Reuse",
+            "Adaptation Reuse",
+        ],
+        ordered=True,
+    )
 
     fig, ax = plt.subplots(figsize=(12, 9))
     sns.barplot(
@@ -40,9 +49,16 @@ def plot(df: DataFrame, output_path: Path) -> None:
         y="count",
         hue="classification",
         ax=ax,
+        hue_order=[
+            "Conceptual Reuse",
+            "Deployment Reuse",
+            "Adaptation Reuse",
+        ],
     )
 
-    ax.set_yscale("log")
+    if log_scale:
+        ax.set_yscale("log")
+
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
     ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
     ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
@@ -152,7 +168,15 @@ FROM
     show_default=True,
     help="Output path for the plot.",
 )
-def main(db_path: Path, output_path: Path) -> None:
+@click.option(
+    "--log-scale",
+    "log_scale",
+    default=False,
+    type=bool,
+    show_default=True,
+    help="Use log-scaling on the Y-axis.",
+)
+def main(db_path: Path, output_path: Path, log_scale: bool) -> None:
     db_path = db_path.absolute()
     output_path = output_path.absolute()
 
@@ -162,12 +186,9 @@ def main(db_path: Path, output_path: Path) -> None:
 
     df["classification"] = df["model_response"].map(extract_classification)
 
-    # Optional: drop rows with no classification found
-    # df = df[df["classification"].map(bool)]
-
     df = df.explode(column="classification")
 
-    plot(df, output_path=output_path)
+    plot(df, output_path=output_path, log_scale=log_scale)
 
 
 if __name__ == "__main__":
