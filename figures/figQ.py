@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import click
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -7,7 +8,6 @@ from matplotlib.ticker import FuncFormatter
 from pandas import DataFrame, Series
 from sqlalchemy import Engine, create_engine
 
-DB_PATH: Path = Path("../data/aius_12-17-2025.db").resolve()
 SUPTITLE_FONT_SIZE: int = 24
 TITLE_FONT_SIZE: int = 22
 XY_LABEL_FONT_SIZE: int = 20
@@ -72,7 +72,7 @@ def create_data(df1: DataFrame, df2: DataFrame, df3: DataFrame) -> DataFrame:
     return DataFrame(data=data)
 
 
-def plot(df: DataFrame) -> None:
+def plot(df: DataFrame, output_path: Path) -> None:
     # Convert wide → long format
     df_long = df.melt(
         id_vars="journal",
@@ -120,11 +120,30 @@ def plot(df: DataFrame) -> None:
         )
 
     plt.tight_layout()
-    plt.savefig("figQ.pdf")
+    plt.savefig(output_path)
 
 
-def main() -> None:
-    db: Engine = create_engine(url=f"sqlite:///{DB_PATH}")
+@click.command()
+@click.option(
+    "--db",
+    "db_path",
+    default=Path("../data/aius_12-17-2025.db").resolve(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Path to the SQLite database.",
+)
+@click.option(
+    "--output",
+    "output_path",
+    default=Path("figQ.pdf").absolute(),
+    type=click.Path(path_type=Path),
+    show_default=True,
+    help="Output path for the plot.",
+)
+def main(db_path: Path, output_path: Path) -> None:
+    db_path = db_path.absolute()
+    output_path = output_path.absolute()
+    db: Engine = create_engine(url=f"sqlite:///{db_path}")
 
     papers: DataFrame = get_papers_per_journal(db=db)
     papers_with_citations: DataFrame = get_papers_with_citations_per_journal(db=db)
@@ -136,7 +155,7 @@ def main() -> None:
         df3=natural_science_papers,
     )
 
-    plot(df=df)
+    plot(df=df, output_path=output_path)
 
 
 if __name__ == "__main__":

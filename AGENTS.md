@@ -1,236 +1,157 @@
-# AIUS - AI Usage in Science: Agent Guidelines
+# AIUS Agent Guidelines
 
-This file contains development guidelines for agentic coding agents working on
-the AIUS (AI Usage in Science) research tool.
+Guidance for agentic coding assistants working in this repository. Keep changes
+aligned with the research workflow, data integrity, and reproducibility goals.
 
-## Project Overview
+## Quick Facts
 
-AIUS is a Python research tool for empirically measuring pre-trained deep
-learning model (PTM) usage and its impact in natural science publications. It
-analyzes scientific papers, extracts AI usage information, and provides
-statistical insights.
+- Package: `aius`
+- Python: 3.13 (project requires `~=3.13`)
+- Build backend: `hatchling`
+- Package manager: `uv`
+- CLI entrypoint: `aius` -> `aius.main:main`
 
-## Development Environment
+## Build, Lint, Test
 
-**Package Manager:** `uv` (modern Python package manager) **Build System:**
-hatchling **Python Version:** 3.13+ (target-version py310 in ruff.toml)
-
-### Environment Setup
+### Environment setup
 
 ```bash
-make create-dev    # Setup development environment with pre-commit hooks
-uv sync           # Install dependencies from lock file
+make create-dev   # pre-commit install + uv sync
+uv sync           # install deps from lock
 ```
 
-## Build/Lint/Test Commands
-
-### Essential Commands
+### Build/install
 
 ```bash
-# Build and install locally
-make build
-
-# Linting and formatting (pre-commit hooks run automatically)
-ruff check aius/           # Lint code
-ruff format aius/          # Format code
-isort aius/                # Sort imports
-
-# Testing
-pytest                     # Run all tests
-pytest path/to/test.py     # Run specific test file
-pytest -k "test_name"      # Run specific test by name
-
-# Security analysis
-bandit -r aius/           # Security vulnerability scan
+make build        # uv build + install sdist
+uv build          # build artifacts
 ```
 
-### Single Test Commands
+### Lint/format
 
 ```bash
-pytest tests/test_specific_file.py::test_function_name
-pytest -v tests/test_specific_file.py::test_function_name  # Verbose output
-pytest -x tests/  # Stop on first failure
+ruff check aius/        # lint (see ruff.toml)
+ruff format aius/       # format (ruff formatter)
 ```
 
-## Code Style Guidelines
+Notes:
 
-### Code Formatting
+- `ruff.toml` defines formatting (double quotes, magic trailing commas) and lint
+  rules. Black is configured in `pyproject.toml` with line-length 79 but Ruff
+  uses 88 by default; prefer Ruff formatter for consistency.
 
-- **Line Length:** 88 characters (ruff), 79 characters (isort/black)
-- **Indentation:** 4 spaces
-- **Quotes:** Double quotes for strings
-- **Trailing Commas:** Enabled for multi-line structures
+### Tests
 
-### Naming Conventions
+```bash
+pytest                         # all tests
+pytest tests/test_file.py       # single test file
+pytest -k "name_substring"      # subset by name
+pytest tests/test_file.py::TestClass::test_name
+```
 
-- **Classes:** PascalCase (e.g., `AnalysisRunner`, `COSTAR_SystemPrompt`)
-- **Functions/Variables:** snake_case
-- **Constants:** UPPER_SNAKE_CASE (e.g., `DEFAULT_DATABASE_PATH`)
-- **Private members:** Prefix with underscore (\_private_method)
+If tests are not under `tests/`, search for `test_*.py` before running.
 
-### Import Organization
+## Code Style
 
-1. Standard library imports (sorted alphabetically)
-1. Third-party imports (sorted alphabetically)
-1. Local imports (sorted alphabetically)
+### Imports
+
+- Group in three blocks: standard library, third-party, local.
+- Alphabetize within each block.
+- Prefer explicit imports; avoid wildcard imports.
+
+Example:
 
 ```python
-import os
-import sys
+from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-from openai import OpenAI
 
-from aius.core.database import DB
-from aius.runners.base import Runner
+from aius.db import DB
 ```
 
-### Type Hints
+### Formatting
 
-- Use type hints for all function parameters and return values
-- Use Union types (e.g., `Runner | int`) instead of Optional when appropriate
-- Use `Path` for file paths instead of strings
+- Indent with 4 spaces.
+- Use double quotes for strings (Ruff format).
+- Line length: 88 for Ruff formatter. Be aware Black is set to 79.
+- Use trailing commas in multiline literals/args.
+- Use `Path` for file paths when practical.
 
-```python
-def connect_to_db(logger: Logger, db_path: Path) -> DB | int:
-    """Connect to SQLite3 database."""
-```
+### Types
 
-## Architecture Patterns
+- Add type hints for function params and return values.
+- Prefer `X | None` over `Optional[X]` in new code.
+- Use concrete types in public APIs (e.g., `list[str]`, `dict[str, int]`).
+- Keep `Path` and `str` usage consistent at boundaries (convert early).
 
-### Design Patterns Used
+### Naming
 
-- **Factory Pattern:** For creating runners (`runner_factory`)
-- **Template Method:** For common runner workflows
-- **ABC Base Classes:** For defining interfaces
+- Classes: `PascalCase`.
+- Functions/vars: `snake_case`.
+- Constants: `UPPER_SNAKE_CASE`.
+- Private members: leading underscore.
+- Use descriptive names for domain concepts (e.g., `megajournal_name`).
 
-### File Organization
+### Docstrings
 
-- **aius/**: Main package with core functionality
-- **scripts/**: Standalone analysis scripts
-- **figures/**: Data visualization scripts
-- **statistics/**: Statistical analysis modules
-- **data/**: Data storage
+- Use concise docstrings for public classes/functions.
+- Ruff docstring rules are enabled; keep summaries brief and imperative.
+- Longer modules use file headers and module docstrings.
 
-## Error Handling
+### Error handling
 
-### Exception Handling Patterns
+- Prefer explicit exceptions with logging where failures are expected.
+- Use `logger.error` for recoverable failures; return status codes when needed.
+- Avoid bare `except:`; catch specific exceptions (e.g., `OperationalError`).
+- Use `contextlib.suppress` sparingly for tight, well-known cases.
+
+Example:
 
 ```python
 try:
     db = DB(logger=logger, db_path=db_path)
-    logger.info("Connected to SQLite3 database: %s", db_path)
 except OperationalError:
-    logger.error("Database connection failed")
+    logger.error("Unable to connect to SQLite3 database: %s", db_path)
     return -1
 ```
 
 ### Logging
 
-- Use the provided logger instance for all logging
-- Log at appropriate levels (INFO for normal operations, ERROR for failures)
-- Include relevant context in log messages
+- Use the provided `logger` (see `aius.main` setup).
+- Prefer structured messages with `%s` placeholders.
+- Log data access boundaries (read/write) and major pipeline steps.
 
-## Pre-commit Hooks
+## Architecture and Patterns
 
-The following hooks run automatically:
+- Runner pattern: CLI selects a runner via `runner_factory`.
+- Each runner returns an `int` status; `0` is success.
+- Database access is centralized in `aius.db.DB`.
+- Keep CLI arguments in `aius/cli/argparse.py` and map to runner kwargs.
 
-- ruff (linting + formatting)
-- isort (import sorting)
-- black (code formatting)
-- mdformat (markdown formatting)
-- bandit (security analysis)
-- File validation (JSON, YAML, XML, TOML)
-- detect-private-key (security)
+## File/Module Conventions
 
-## Key Dependencies
+- `aius/` is the main package.
+- `scripts/` and `figures/` contain analysis utilities and plotting scripts.
+- Historical scripts live in `scripts/_old` and `figures/_old`.
 
-### Core Libraries
+## Headers
 
-- **Data Processing:** pandas, numpy, pyarrow, sqlalchemy
-- **Scientific Computing:** matplotlib, seaborn, upsetplot
-- **AI/LLM Integration:** openai, ollama
-- **Web/API:** requests, beautifulsoup4, globus-sdk
-- **Document Processing:** pypdf, pandoc
-- **CLI Interface:** click, argparse
-
-## Development Workflow
-
-1. Make changes to code
-1. Pre-commit hooks will automatically run
-1. If hooks fail, fix the issues (most will be auto-fixable by ruff/isort)
-1. Run tests to ensure functionality
-1. Commit changes
-
-## Testing Strategy
-
-- Limited test coverage currently - focus on critical path testing
-- Use pytest for all new tests
-- Test file naming: `test_*.py`
-- Test function naming: `test_*`
-
-## Security Considerations
-
-- No secrets or keys should be committed to the repository
-- Use environment variables for sensitive configuration
-- Run bandit security analysis regularly
-- Follow OWASP guidelines for data handling
-
-## Code Review Guidelines
-
-When reviewing code, check for:
-
-- Proper type hints and documentation
-- Correct import organization
-- Appropriate error handling and logging
-- Security best practices
-- Performance considerations for data processing
-
-## Common Patterns to Follow
-
-### Database Operations
-
-```python
-def connect_to_db(logger: Logger, db_path: Path) -> DB | int:
-    try:
-        db = DB(logger=logger, db_path=db_path)
-        logger.info("Connected to SQLite3 database: %s", db_path)
-        return db
-    except OperationalError:
-        logger.error("Database connection failed")
-        return -1
-```
-
-### Runner Factory Pattern
-
-```python
-def runner_factory(logger: Logger, runner_name: str, **kwargs) -> Runner | int:
-    match runner_name:
-        case "init":
-            runner = InitRunner(logger=logger, **kwargs)
-        case "download":
-            runner = DownloadRunner(logger=logger, **kwargs)
-        case _:
-            logger.error("Unknown runner: %s", runner_name)
-            return -1
-    return runner
-```
-
-## File Headers
-
-All Python files should include the standard copyright header:
+Python files commonly include a header:
 
 ```python
 # Copyright 2025 (C) Nicholas M. Synovic
 ```
 
-## Additional Notes
+Follow existing file headers when adding new modules.
 
-- This is a scientific research tool - prioritize data integrity and
-  reproducibility
-- Use Path objects for file operations instead of strings
-- Follow modern Python practices (match-case, type unions, etc.)
-- Keep functions focused and modular
-- Document complex algorithms and data processing steps
+## Security and Data Integrity
+
+- Do not commit secrets or API keys.
+- Use environment variables or CLI args for credentials.
+- Avoid destructive operations on the database; prefer append/update semantics.
+
+## Cursor/Copilot Rules
+
+- No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` were
+  found in this repository. If they are added later, mirror their guidance here.
