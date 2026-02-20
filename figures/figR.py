@@ -93,9 +93,13 @@ def plot(df: DataFrame, output_path: Path) -> None:
         for field, _ in sorted(totals.items(), key=lambda item: (-item[1], item[0]))
     ]
 
-    fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(24, 10), sharey=True)
+    fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(24, 10), sharey="row")
     flat_axes = axes.flatten()
-    max_count = df["count"].max()
+    top_row_fields = ordered_fields[:4]
+    bottom_row_fields = ordered_fields[4:]
+    top_row_max = df.loc[df["field"].isin(top_row_fields), "count"].max()
+    bottom_row_max = df.loc[df["field"].isin(bottom_row_fields), "count"].max()
+    row_max = [top_row_max, bottom_row_max]
 
     for index, field in enumerate(ordered_fields):
         ax = flat_axes[index]
@@ -109,7 +113,8 @@ def plot(df: DataFrame, output_path: Path) -> None:
         )
 
         ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-        ax.set_ylim(0, max_count * 1.15)
+        row_index = index // 4
+        ax.set_ylim(0, row_max[row_index] * 1.3)
         ax.set_title(field, fontsize=TITLE_FONT_SIZE)
         ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
         ax.set_ylabel("Paper Count", fontsize=XY_LABEL_FONT_SIZE)

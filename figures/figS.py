@@ -48,13 +48,6 @@ ON
 
 
 def create_data(df: DataFrame) -> DataFrame:
-    top_fields: list[str] = [
-        "Biochemistry, Genetics and Molecular Biology",
-        "Neuroscience",
-        "Environmental Science",
-        "Other",
-    ]
-
     data: dict[str, list[str | int]] = {"year": [], "field": []}
 
     row: Series
@@ -71,12 +64,7 @@ def create_data(df: DataFrame) -> DataFrame:
                 data["field"].append(topic)
 
     data_df = DataFrame(data=data)
-    data_df["field"] = np.where(
-        data_df["field"].isin(top_fields),
-        data_df["field"],
-        "Other",
-    )
-    data_df = data_df[data_df["field"].isin(top_fields)]
+    data_df = data_df[data_df["field"].isin(FIELD)]
     counts: Series = data_df.value_counts()
 
     counts_df = counts.reset_index()
@@ -86,19 +74,32 @@ def create_data(df: DataFrame) -> DataFrame:
 
 
 def plot(df: DataFrame, output_path: Path) -> None:
-    top_fields: list[str] = [
-        "Biochemistry, Genetics and Molecular Biology",
-        "Neuroscience",
-        "Environmental Science",
-        "Other",
+    panel_labels: list[str] = [
+        "(A)",
+        "(B)",
+        "(C)",
+        "(D)",
+        "(E)",
+        "(F)",
+        "(G)",
+        "(H)",
     ]
-    panel_labels: list[str] = ["(A)", "(B)", "(C)", "(D)"]
 
-    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(15, 12), sharey=True)
+    totals = df.groupby("field")["count"].sum().to_dict()
+    ordered_fields = [
+        field
+        for field, _ in sorted(totals.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+    fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(24, 10), sharey="row")
     flat_axes = axes.flatten()
-    max_count = df["count"].max()
+    top_row_fields = ordered_fields[:4]
+    bottom_row_fields = ordered_fields[4:]
+    top_row_max = df.loc[df["field"].isin(top_row_fields), "count"].max()
+    bottom_row_max = df.loc[df["field"].isin(bottom_row_fields), "count"].max()
+    row_max = [top_row_max, bottom_row_max]
 
-    for index, field in enumerate(top_fields):
+    for index, field in enumerate(ordered_fields):
         ax = flat_axes[index]
         panel_data: DataFrame = df.loc[df["field"] == field]
 
@@ -110,7 +111,8 @@ def plot(df: DataFrame, output_path: Path) -> None:
         )
 
         ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-        ax.set_ylim(0, max_count * 1.15)
+        row_index = index // 4
+        ax.set_ylim(0, row_max[row_index] * 1.3)
         ax.set_title(field, fontsize=TITLE_FONT_SIZE)
         ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
         ax.set_ylabel("Paper Count", fontsize=XY_LABEL_FONT_SIZE)
