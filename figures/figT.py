@@ -32,58 +32,67 @@ def plot(df: DataFrame, output_path: Path, log_scale: bool = False) -> None:
     counts["classification"] = counts["classification"].replace(
         to_replace="deployment_reuse", value="Deployment Reuse"
     )
-    counts["classification"] = pd.Categorical(
-        counts["classification"],
-        categories=[
-            "Conceptual Reuse",
-            "Deployment Reuse",
-            "Adaptation Reuse",
-        ],
-        ordered=True,
-    )
 
-    fig, ax = plt.subplots(figsize=(12, 9))
-    sns.barplot(
-        data=counts,
-        x="publication_year",
-        y="count",
-        hue="classification",
-        ax=ax,
-        hue_order=[
-            "Conceptual Reuse",
-            "Deployment Reuse",
-            "Adaptation Reuse",
-        ],
-    )
+    ymax: int = counts[counts["classification"] == "Adaptation Reuse"]["count"].max()
 
-    if log_scale:
-        ax.set_yscale("log")
+    classifications = [
+        "Adaptation Reuse",
+        "Deployment Reuse",
+        "Conceptual Reuse",
+    ]
+    panel_labels = ["(A)", "(B)", "(C)"]
 
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-    ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
-    ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
-    ax.set_title(
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(24, 8), sharey=True)
+    for index, classification in enumerate(classifications):
+        ax = axes[index]
+        panel_data = counts.loc[counts["classification"] == classification]
+
+        sns.barplot(
+            data=panel_data,
+            x="publication_year",
+            y="count",
+            ax=ax,
+        )
+
+        if log_scale:
+            ax.set_yscale("log")
+        else:
+            ax.set_ylim(0, ymax * 1.3)
+
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
+        ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
+        ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
+        ax.set_title(classification, fontsize=TITLE_FONT_SIZE)
+        ax.tick_params(axis="both", labelsize=XY_TICK_FONT_SIZE)
+        ax.tick_params(axis="x", rotation=45)
+
+        if ax.get_legend() is not None:
+            ax.get_legend().remove()
+
+        for container in ax.containers:
+            if isinstance(container, BarContainer):
+                ax.bar_label(
+                    container,
+                    fmt="{:,.0f}",
+                    padding=3,
+                    fontsize=OTHER_FONT_SIZE,
+                )
+
+        ax.text(
+            0.02,
+            0.98,
+            panel_labels[index],
+            transform=ax.transAxes,
+            ha="left",
+            va="top",
+            fontsize=TITLE_FONT_SIZE,
+            fontweight="bold",
+        )
+
+    fig.suptitle(
         "PTM Reuse Pattern Counts per Year",
-        fontsize=TITLE_FONT_SIZE,
+        fontsize=SUPTITLE_FONT_SIZE,
     )
-    ax.tick_params(axis="both", labelsize=XY_TICK_FONT_SIZE)
-    ax.tick_params(axis="x", rotation=45)
-    ax.legend(
-        title="Reuse Classification",
-        fontsize=OTHER_FONT_SIZE,
-        title_fontsize=OTHER_FONT_SIZE,
-        frameon=True,
-    )
-
-    for container in ax.containers:
-        if isinstance(container, BarContainer):
-            ax.bar_label(
-                container,
-                fmt="{:,.0f}",
-                padding=3,
-                fontsize=OTHER_FONT_SIZE,
-            )
-
     fig.tight_layout()
     fig.savefig(output_path)
     plt.close(fig)
