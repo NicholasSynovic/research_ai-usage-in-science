@@ -90,7 +90,7 @@ class Argparse(CLI):  # noqa: D101
         )
 
         parser.add_argument(
-            "--journal",
+            "--megajournal",
             default=next(iter(MEGAJOURNAL_MAPPING.keys())),
             type=str,
             choices=list(MEGAJOURNAL_MAPPING.keys()),
