@@ -19,6 +19,7 @@ class PLOS(MegaJournal):
         super().__init__(logger=logger, db=db)
 
         self.megajournal: str = "PLOS"
+        self.name = self.megajournal
         self.search_url_template: Template = Template(
             template="https://journals.plos.org/plosone/dynamicSearch?filterArticleTypes=Research Article&sortOrder=DATE_NEWEST_FIRST&resultsPerPage=100&q=${search_keyword}&filterStartDate=${year}-01-01&filterEndDate=${year}-12-31&page=${page}"
         )
