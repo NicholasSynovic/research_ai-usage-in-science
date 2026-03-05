@@ -43,7 +43,7 @@ class COSTAR_SystemPrompt(BaseModel):  # noqa: D101, N801
         return mdformat.text(
             options={"wrap": 80},
             md=f"""
-## Context:
+## Context
 {self.context}
 
 ## Objective
@@ -70,7 +70,7 @@ __model_json_object: str = """```json
     "vision_models": ["Aimv2", "BEiT", "BiT", "Conditional DETR", "ConvNeXT", "ConvNeXTV2", "CvT", "D-FINE", "DAB-DETR", "Deformable DETR", "DeiT", "Depth Anything", "Depth Anything V2", "DepthPro", "DETA", "DETR", "DiNAT", "DINOV2", "DINOv2 with Registers", "DINOv3", "DiT", "DPT", "EfficientFormer", "EfficientLoFTR", "EfficientNet", "EoMT", "FocalNet", "GLPN", "HGNet-V2", "Hiera", "I-JEPA", "ImageGPT", "LeViT", "LightGlue", "Mask2Former", "MaskFormer", "MLCD", "MobileNetV1", "MobileNetV2", "MobileViT", "MobileViTV2", "NAT", "PoolFormer", "Prompt Depth Anything", "Pyramid Vision Transformer (PVT)", "Pyramid Vision Transformer v2 (PVTv2)", "RegNet", "ResNet", "RT-DETR", "RT-DETRv2", "SAM2", "SegFormer", "SegGpt", "Segment Anything", "Segment Anything High Quality", "SuperGlue", "SuperPoint", "SwiftFormer", "Swin Transformer", "Swin Transformer V2", "Swin2SR", "Table Transformer", "TextNet", "Timm Wrapper", "UperNet", "VAN", "Vision Transformer (ViT)", "ViT Hybrid", "ViTDet", "ViTMAE", "ViTMatte", "ViTMSN", "ViTPose", "YOLOS", "ZoeDepth"],
     "audio_models": ["Audio Spectrogram Transformer", "Bark", "CLAP", "CSM", "dac", "Dia", "EnCodec", "FastSpeech2Conformer", "GraniteSpeech", "Hubert", "Kyutai Speech-To-Text", "MCTCT", "Mimi", "MMS", "Moonshine", "Moshi", "MusicGen", "MusicGen Melody", "Parakeet", "Pop2Piano", "Seamless-M4T", "SeamlessM4T-v2", "SEW", "SEW-D", "Speech2Text", "Speech2Text2", "SpeechT5", "UniSpeech", "UniSpeech-SAT", "UnivNet", "VITS", "Wav2Vec2", "Wav2Vec2-BERT", "Wav2Vec2-Conformer", "Wav2Vec2Phoneme", "WavLM", "Whisper", "X-Codec", "XLS-R", "XLSR-Wav2Vec2"],
     "video_models": ["SAM2 Video", "TimeSformer", "V-JEPA 2", "VideoMAE", "ViViT"],
-    "multimodal_models": ["ALIGN", "AltCLIP", "Aria", "AyaVision", "BLIP", "BLIP-2", "BridgeTower", "BROS", "Chameleon", "Chinese-CLIP", "CLIP", "CLIPSeg", "CLVP", "Cohere2Vision", "ColPali", "ColQwen2", "Data2Vec", "DeepseekVL", "DeepseekVLHybrid", "DePlot", "Donut", "EdgeTAM", "EdgeTamVideo", "Emu3", "Evolla", "FLAVA", "Florence2", "Gemma3", "Gemma3n", "GIT", "glm4v", "glm4v_moe", "GOT-OCR2", "GraniteVision", "Grounding", "DINO", "GroupViT", "IDEFICS", "Idefics2", "Idefics3", "InstructBLIP", "InstructBlipVideo", "InternVL", "Janus", "KOSMOS-2", "KOSMOS-2.5", "LayoutLM", "LayoutLMV2", "LayoutLMV3", "LayoutXLM", "LFM2-VL", "LiLT", "Llama4", "LLaVA", "LLaVA-NeXT", "LLaVa-NeXT-Video", "LLaVA-Onevision", "LXMERT", "MatCha", "MetaCLIP 2", "MGP-STR", "Mistral3", "mllama", "MM Grounding DINO", "Nougat", "OmDet-Turbo", "OneFormer", "Ovis2", "OWL-ViT", "OWLv2", "PaliGemma", "Perceiver", "PerceptionLM", "Phi4", "Multimodal", "Pix2Struct", "Pixtral", "Qwen2.5-Omni", "Qwen2.5-VL", "Qwen2Audio", "Qwen2VL", "Qwen3-Omni-MoE", "Qwen3VL", "Qwen3VLMoe", "ShieldGemma2", "SigLIP", "SigLIP2", "SmolLM3", "SmolVLM", "Speech Encoder Decoder Models", "TAPAS", "TrOCR", "TVLT", "TVP", "UDOP", "VideoLlava", "ViLT", "VipLlava", "Vision Encoder Decoder Models", "Vision Text Dual Encoder", "VisualBERT", "Voxtral", "X-CLIP"]
+    "multimodal_models": ["ALIGN", "AltCLIP", "Aria", "AyaVision", "BLIP", "BLIP-2", "BridgeTower", "BROS", "Chameleon", "Chinese-CLIP", "CLIP", "CLIPSeg", "CLVP", "Cohere2Vision", "ColPali", "ColQwen2", "Data2Vec", "DeepseekVL", "DeepseekVLHybrid", "DePlot", "Donut", "EdgeTAM", "EdgeTamVideo", "Emu3", "Evolla", "FLAVA", "Florence2", "Gemma3", "Gemma3n", "GIT", "glm4v", "glm4v_moe", "GOT-OCR2", "GraniteVision", "Grounding DINO", "GroupViT", "IDEFICS", "Idefics2", "Idefics3", "InstructBLIP", "InstructBlipVideo", "InternVL", "Janus", "KOSMOS-2", "KOSMOS-2.5", "LayoutLM", "LayoutLMV2", "LayoutLMV3", "LayoutXLM", "LFM2-VL", "LiLT", "Llama4", "LLaVA", "LLaVA-NeXT", "LLaVa-NeXT-Video", "LLaVA-Onevision", "LXMERT", "MatCha", "MetaCLIP 2", "MGP-STR", "Mistral3", "mllama", "MM Grounding DINO", "Nougat", "OmDet-Turbo", "OneFormer", "Ovis2", "OWL-ViT", "OWLv2", "PaliGemma", "Perceiver", "PerceptionLM", "Phi4 Multimodal", "Pix2Struct", "Pixtral", "Qwen2.5-Omni", "Qwen2.5-VL", "Qwen2Audio", "Qwen2VL", "Qwen3-Omni-MoE", "Qwen3VL", "Qwen3VLMoe", "ShieldGemma2", "SigLIP", "SigLIP2", "SmolLM3", "SmolVLM", "Speech Encoder Decoder Models", "TAPAS", "TrOCR", "TVLT", "TVP", "UDOP", "VideoLlava", "ViLT", "VipLlava", "Vision Encoder Decoder Models", "Vision Text Dual Encoder", "VisualBERT", "Voxtral", "X-CLIP"],
     "reinforcement_learning_models": ["Decision Transformer", "Trajectory Transformer"],
     "time_series_models": ["Autoformer", "Informer", "PatchTSMixer", "PatchTST", "Time Series Transformer", "TimesFM"],
     "graph_models": ["Graphormer"],
@@ -89,11 +89,11 @@ __reuse_key_words: str = """
 
 USES_DL_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
     tag="uses_dl",
-    context="You are an AI model integrated into an automated pipeline that processes academic computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper’s content and determine whether the author uses deep learning models or methods in their methodology. Your response will be consumed by downstream systems that require structured JSON.",
+    context="You are an AI model integrated into an automated pipeline that processes academic natural science papers into a machine-readable format. Your sole responsibility is to evaluate the paper’s content and determine whether the author uses deep learning models or methods. Your response will be consumed by downstream systems that require structured JSON.",
     objective="""Your task is to output only a JSON object containing key-value pairs, where:
 
-- The key “result” value is a boolean (true or false) based on whether the input text uses deep learning models or methods in its methodology, and
-- The key “prose” value is the most salient excerpt from the paper that shows concrete evidence of deep learning usage in the paper, or empty if no deep learning methods are used.
+- The value for the "result" key is a boolean based on whether the input text uses deep learning models or methods, and
+- The key "prose" value is the most salient excerpt from the paper that shows concrete evidence of deep learning usage, or `null` if no deep learning methods are used.
 
 No explanations or extra output are allowed.""",  # noqa: E501
     response="""Return only a JSON object of the form:
@@ -110,11 +110,11 @@ Nothing else should ever be returned.""",
 
 USES_PTMS_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
     tag="uses_ptms",
-    context="You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine whether the authors use pre-trained deep learning models (PTMs) in their methodology. Your response will be consumed by downstream systems that require a structured JSON format.",  # noqa: E501
+    context="You are an AI model integrated into an automated pipeline that processes academic natural science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine whether the authors use pre-trained deep learning models (PTMs). Your response will be consumed by downstream systems that require a structured JSON format.",  # noqa: E501
     objective="""Your task is to output only a JSON object containing key-value pairs, where:
 
-- The key "result" value is a boolean (true or false) based on whether the input text indicates the use of pre-trained deep learning models (PTMs) in the methodology, and
-- The key "prose" value is the most salient excerpt from the paper that shows concrete evidence of pre-trained model usage, or an empty string if no PTMs are used.
+- The value for the "result" key is a boolean based on whether the input text indicates the use of pre-trained deep learning models, and
+- The key "prose" value is the most salient excerpt from the paper that shows concrete evidence of pre-trained model usage, or an `null` if no pre-trained deep learning models are used.
 
 No explanations or extra output are allowed.""",  # noqa: E501
     response="""Return only a JSON object of the form:
@@ -131,9 +131,9 @@ Nothing else should ever be returned.""",
 
 IDENTIFY_PTMS_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
     tag="identify_ptms",
-    context=f"""You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine what pre-trained deep learning models the authors use in their methodology. Your response will be consumed by downstream systems that require a structured JSON format.
+    context=f"""You are an AI model integrated into an automated pipeline that processes academic natural science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine what pre-trained deep learning models the authors use. Your response will be consumed by downstream systems that require a structured JSON format.
 
-Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can reference in your analysis:
+The following JSON object contains a reference list of known pre-trained deep learning models categorized by modality. Use this as a guide, but identify any PTM mentioned in the paper even if it does not appear on this list:
 
 {__model_json_object}
 
@@ -141,7 +141,7 @@ However, not all papers use these models. In the event that the paper does not u
 """,  # noqa: E501
     objective="""Your task is to output only an array of JSON objects containing key-value pairs, where:
 
-- The key "model" value is a string of the pre-trained deep learning model's name as stated in the prose, and
+- The key "model" value is a string of the pre-trained deep learning model's name as it appears in the source text, and
 - The key "prose" value is the most salient excerpt from the paper that shows concrete evidence of the pre-trained model's usage.
 
 No explanations or extra output are allowed.""",  # noqa: E501
@@ -163,29 +163,27 @@ Nothing else should ever be returned.""",
 
 IDENTIFY_PTM_REUSE_PROMPT: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
     tag="identify_ptm_reuse",
-    context=f"""You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine the form and classification of pre-trained deep learning reuse models that the authors use in their methodology. Your response will be consumed by downstream systems that require a structured JSON format.
+    context=f"""You are an AI model integrated into an automated pipeline that processes academic natural science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine the form and classification of reuse of pre-trained deep learning models that the authors use in their methodology. Your response will be consumed by downstream systems that require a structured JSON format.
 
-Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can reference in your analysis:
+The following JSON object contains a reference list of known pre-trained deep learning models categorized by modality. Use this as a guide, but identify any PTM mentioned in the paper even if it does not appear on this list:
 
 {__model_json_object}
 
-However, not all papers use these models. In the event that the paper does not use one of these PTMs, identify the PTM.
-
-Pre-trained deep learning reuse methods can be classified as one of the following:
+Pre-trained deep learning reuse methods can be classified as one of the following patterns:
 
 - Conceptual Reuse: Replicate and reengineer the algorithms, model architectures, or other concepts described in academic literature and similar sources, integrating the replication into new projects. An engineer might do this because of licensing issues or if they are required to use a particular deep learning framework, but are reusing ideas previously realized in another deep learning framework. This paradigm is related to Sommerville's notion of abstraction reuse, where an engineer reuses knowledge but not code directly. This paradigm is also related to reproducibility in the scientific sense, since an engineer independently confirms the reported results of a proposed technique.
-- Adaptation Reuse: Leverage existing DNN models and adapt them to solve different learning tasks. An engineer might do this using several techniques, such as transfer learning or knowledge distillation. This form of reuse is suitable if a publicly available implementation of an appropriate model (such as a pre-trained deep learning model) is available. This paradigm is related to Sommerville's notion of object/component reuse, since an engineer must identify existing models suited for a purpose and then customize them for a different task.
-- Deployment Reuse: Convert and deploy pre-trained DNN models in different computational environments and frameworks. This form of reuse is suitable if there is a perfect fit for the engineer's needs, viz., a DNN trained on the engineer's desired task (e.g., demonstrating proof of concept in a hackathon). This paradigm is related to Sommerville's notion of system reuse, since an engineer is reusing an entire model (including its training) and deploying it in the appropriate context. Deployment often requires the conversion of a DNN from one representation to another, followed by compilation to optimize it for hardware.
+- Adaptation Reuse: Leverage existing pre-trained deep learning models and adapt them to solve different learning tasks. An engineer might do this using several techniques, such as transfer learning or knowledge distillation. This form of reuse is suitable if a publicly available implementation of an appropriate model (such as a pre-trained deep learning model) is available. This paradigm is related to Sommerville's notion of object/component reuse, since an engineer must identify existing models suited for a purpose and then customize them for a different task.
+- Deployment Reuse: Convert and deploy pre-trained deep learning models in different computational environments and frameworks. This pattern of reuse is suitable if there is a perfect fit for the engineer's needs, viz., a pre-trained deep learning model trained on the engineer's desired task (e.g., demonstrating proof of concept in a hackathon). This paradigm is related to Sommerville's notion of system reuse, since an engineer is reusing an entire model (including its training) and deploying it in the appropriate context. Deployment often requires the conversion of a pre-trained deep learning model from one representation to another, followed by compilation to optimize it for hardware.
 
-Reusing pre-trained deep learning models can take many forms, but the following are some key words commonly associated with each reuse classification that you can reference in your analysis:
+Reusing pre-trained deep learning models can be implemented with many methods, but the following are some key words commonly associated with each reuse classification that you can reference in your analysis:
 
 {__reuse_key_words}""",  # noqa: E501
     objective="""Your task is to output only an array of JSON objects containing key-value pairs, where:
 
 - The key "model" value is a string of the pre-trained deep learning model's name as stated in the prose,
-- The key "form" value is a string of the pre-training deep learning model reuse form,
-- The key "classification" value is a string of either "conceptual_reuse", "adaptation_reuse", or "deployment_reuse" that best classifies the pre-training deep learning model reuse form, and
-- The key "prose" value is the most salient excerpt from the paper that shows concrete evidence of the pre-trained model's reuse form.
+- The key "form" value is a string of a brief description of the specific reuse action (e.g., "Fine-tuned on 10k protein sequences"),
+- The key "classification" value is a string of either "conceptual_reuse", "adaptation_reuse", or "deployment_reuse" that best classifies the pre-trained deep learning model reuse form, and
+- The key "prose" value is the most salient excerpt from the paper providing concrete evidence of this specific reuse pattern.
 
 No explanations or extra output are allowed.""",  # noqa: E501
     response="""Return only an array of JSON objects of the form:
@@ -208,13 +206,11 @@ Nothing else should ever be returned.""",
 
 IDENTIFY_PTM_IMPACT_IN_SCIENTIFIC_PROCESS: COSTAR_SystemPrompt = COSTAR_SystemPrompt(
     tag="identify_ptm_impact",
-    context=f"""You are an AI model integrated into an automated pipeline that processes academic Computational Natural Science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine where in the scientific method a pre-trained deep learning model was leveraged. Your response will be consumed by downstream systems that require a structured JSON format.
+    context=f"""You are an AI model integrated into an automated pipeline that processes academic natural science papers into a machine-readable format. Your sole responsibility is to evaluate the paper's content and determine which step of the scientific method they serve. Your response will be consumed by downstream systems that require a structured JSON format.
 
-Pre-trained deep learning models have many different names. The following is a list of pre-trained deep learning model names and their data modality that you can reference in your analysis:
+Use this as a guide, but identify any PTM mentioned in the paper even if it does not appear on this list:
 
 {__model_json_object}
-
-However, not all papers use these models. In the event that the paper does not use one of these PTMs, identify the PTM.
 
 The scientific method is made up of several steps. These include:
 
@@ -226,7 +222,7 @@ The scientific method is made up of several steps. These include:
 - "Conclusion": The sixth step is reporting the results of the experiment and if the results support or reject your hypothesis""",  # noqa: E501
     objective="""Your task is to output only an array of JSON objects containing key-value pairs, where:
 
-- The key "method" value is a string of the pre-trained deep learning model's name as stated in the prose,
+- The key "model" value is a string of the pre-trained deep learning model's name as stated in the prose,
 - The key "step" value is the most probable step in the scientific process that the pre-trained deep learning model is written for, and
 - The key "prose" value is the most salient excerpt from the paper that shows concrete evidence of the pre-trained model's usage.
 
@@ -238,7 +234,7 @@ No explanations or extra output are allowed.""",  # noqa: E501
     {
         "model": string,
         "step": string,
-        "prose": string,
+        "prose": string
     },
     ...
 ]

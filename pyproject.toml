@@ -26,7 +26,7 @@ dependencies = [
     "seaborn>=0.13.2,<0.14",
     "sqlalchemy>=2.0.43",
     "pypdf>=6.0.0",
-    "pyarrow>=21.0.0",
+#     "pyarrow>=21.0.0",
     "upsetplot>=0.9.0",
     "click>=8.3.0",
     "mdformat>=0.7.22",
@@ -36,7 +36,7 @@ dependencies = [
     "openai>=2.6.1",
     "beautifulsoup4>=4.14.3",
     "lxml>=6.0.2",
-    "fastparquet>=2024.11.0",
+#     "fastparquet>=2024.11.0",
 ]
 
 [project.urls]
