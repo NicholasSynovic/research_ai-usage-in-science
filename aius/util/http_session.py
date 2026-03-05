@@ -61,6 +61,12 @@ class HTTPSession:
                 ),
             ),
         )
+        self.session.headers.update(
+            {
+                "User-Agent": "AIUsageInScience/1.5.4",
+                "Accept": "text/html,application/xhtml+xml,application/json,application/xml;q=0.9,*/*;q=0.8",
+            }
+        )
 
     def resolve_doi(self, doi_id: str) -> str:
         """Resolve a Digital Object Identifier (DOI) to its target URL.
