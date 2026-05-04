@@ -230,18 +230,9 @@ class DB:  # noqa: D101
             WHERE
                 oa.cited_by_count > 0
                 AND (
-                    (
-                        oa.topic_0 IN field_values
-                        AND oa.topic_1 IN field_values
-                    )
-                    OR (
-                        oa.topic_0 IN field_values
-                        AND oa.topic_2 IN field_values
-                    )
-                    OR (
-                        oa.topic_1 IN field_values
-                        AND oa.topic_2 IN field_values
-                    )
+                    oa.topic_0 IN (SELECT field FROM field_values)
+                    OR oa.topic_1 IN (SELECT field FROM field_values)
+                    OR oa.topic_2 IN (SELECT field FROM field_values)
                 )
             ;
             """

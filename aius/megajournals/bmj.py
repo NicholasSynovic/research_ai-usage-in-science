@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from itertools import product
-from json import loads
 from logging import Logger
 from math import ceil
 from string import Template
@@ -9,6 +8,7 @@ from bs4 import BeautifulSoup, ResultSet, Tag
 from pandas import DataFrame, Series
 from progress.bar import Bar
 from requests import HTTPError, Response, get
+from requests.exceptions import RetryError
 
 from aius.db import DB
 from aius.megajournals.megajournal import MegaJournal
@@ -211,7 +211,15 @@ class BMJ(MegaJournal):
             row: Series
             for _, row in df.iterrows():
                 doi: str = row["doi"]
-                resolved_url: str = self.session_util.resolve_doi(doi_id=doi)
+                try:
+                    resolved_url: str = self.session_util.resolve_doi(doi_id=doi)
+                except RetryError:
+                    self.logger.error(
+                        "requests.exceptions.RetryError while resolving DOI: %s", doi
+                    )
+                    bar.next()
+                    continue
+
                 xml_url: str = resolved_url + ".download.xml"
 
                 self.logger.info("Getting JATS XML from: %s ...", xml_url)
