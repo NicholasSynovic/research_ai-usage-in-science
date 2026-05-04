@@ -1,157 +1,44 @@
-# AIUS Agent Guidelines
+# AIUS Agent Notes
 
-Guidance for agentic coding assistants working in this repository. Keep changes
-aligned with the research workflow, data integrity, and reproducibility goals.
+## Source Of Truth
 
-## Quick Facts
+- Trust `pyproject.toml`, `Makefile`, `.pre-commit-config.yaml`, `ruff.toml`, and `.github/workflows/*` over `README.md`; the README still has stale placeholders and commands.
+- Project package is `aius`; CLI entrypoint is `aius` -> `aius.main:main`.
+- Python requirement is `~=3.13`; use Python 3.13 locally even though the GitHub workflow files still show Python 3.10.
 
-- Package: `aius`
-- Python: 3.13 (project requires `~=3.13`)
-- Build backend: `hatchling`
-- Package manager: `uv`
-- CLI entrypoint: `aius` -> `aius.main:main`
-
-## Build, Lint, Test
-
-### Environment setup
+## Common Commands
 
 ```bash
-make create-dev   # pre-commit install + uv sync
-uv sync           # install deps from lock
+make create-dev   # pre-commit install + pre-commit autoupdate + rm -rf env + uv sync
+make build        # rm -rf dist + uv version <latest git tag> + uv build + uv pip install dist/*.tar.gz
+uv sync
+uv build
+ruff check aius/
+ruff format aius/
+pytest
 ```
 
-### Build/install
+- `ruff format` is the formatter to use. `ruff.toml` is authoritative for line length and linting; do not follow the Black 79-char setting in `pyproject.toml`.
+- If you need a focused test run, search for `test_*.py` first. There is no active top-level `tests/` package in the current tree.
 
-```bash
-make build        # uv build + install sdist
-uv build          # build artifacts
-```
+## Repo Shape
 
-### Lint/format
+- `aius/` is the package code.
+- `scripts/`, `figures/`, and `statistics/` are analysis/plotting utilities.
+- `scripts/_old/` and `figures/_old/` are archival.
 
-```bash
-ruff check aius/        # lint (see ruff.toml)
-ruff format aius/       # format (ruff formatter)
-```
+## Runtime Flow
 
-Notes:
-
-- `ruff.toml` defines formatting (double quotes, magic trailing commas) and lint
-  rules. Black is configured in `pyproject.toml` with line-length 79 but Ruff
-  uses 88 by default; prefer Ruff formatter for consistency.
-
-### Tests
-
-```bash
-pytest                         # all tests
-pytest tests/test_file.py       # single test file
-pytest -k "name_substring"      # subset by name
-pytest tests/test_file.py::TestClass::test_name
-```
-
-If tests are not under `tests/`, search for `test_*.py` before running.
-
-## Code Style
-
-### Imports
-
-- Group in three blocks: standard library, third-party, local.
-- Alphabetize within each block.
-- Prefer explicit imports; avoid wildcard imports.
-
-Example:
-
-```python
-from datetime import datetime
-from pathlib import Path
-
-import pandas as pd
-
-from aius.db import DB
-```
-
-### Formatting
-
-- Indent with 4 spaces.
-- Use double quotes for strings (Ruff format).
-- Line length: 88 for Ruff formatter. Be aware Black is set to 79.
-- Use trailing commas in multiline literals/args.
-- Use `Path` for file paths when practical.
-
-### Types
-
-- Add type hints for function params and return values.
-- Prefer `X | None` over `Optional[X]` in new code.
-- Use concrete types in public APIs (e.g., `list[str]`, `dict[str, int]`).
-- Keep `Path` and `str` usage consistent at boundaries (convert early).
-
-### Naming
-
-- Classes: `PascalCase`.
-- Functions/vars: `snake_case`.
-- Constants: `UPPER_SNAKE_CASE`.
-- Private members: leading underscore.
-- Use descriptive names for domain concepts (e.g., `megajournal_name`).
-
-### Docstrings
-
-- Use concise docstrings for public classes/functions.
-- Ruff docstring rules are enabled; keep summaries brief and imperative.
-- Longer modules use file headers and module docstrings.
-
-### Error handling
-
-- Prefer explicit exceptions with logging where failures are expected.
-- Use `logger.error` for recoverable failures; return status codes when needed.
-- Avoid bare `except:`; catch specific exceptions (e.g., `OperationalError`).
-- Use `contextlib.suppress` sparingly for tight, well-known cases.
-
-Example:
-
-```python
-try:
-    db = DB(logger=logger, db_path=db_path)
-except OperationalError:
-    logger.error("Unable to connect to SQLite3 database: %s", db_path)
-    return -1
-```
-
-### Logging
-
-- Use the provided `logger` (see `aius.main` setup).
-- Prefer structured messages with `%s` placeholders.
-- Log data access boundaries (read/write) and major pipeline steps.
-
-## Architecture and Patterns
-
-- Runner pattern: CLI selects a runner via `runner_factory`.
-- Each runner returns an `int` status; `0` is success.
+- `aius/main.py` builds logging, parses CLI args, then dispatches through `runner_factory`.
+- The CLI subcommands are `init`, `search`, `openalex`, `jats`, `pandoc`, and `analyze`.
+- `runner_factory` expects a matching `--db` option for each subcommand and routes to the corresponding runner class.
+- Runners return an `int`; `0` means success.
+- `openalex` requires `--email`; `analyze` requires `--backend` and `--model-name`.
 - Database access is centralized in `aius.db.DB`.
-- Keep CLI arguments in `aius/cli/argparse.py` and map to runner kwargs.
 
-## File/Module Conventions
+## Style And Safety
 
-- `aius/` is the main package.
-- `scripts/` and `figures/` contain analysis utilities and plotting scripts.
-- Historical scripts live in `scripts/_old` and `figures/_old`.
-
-## Headers
-
-Python files commonly include a header:
-
-```python
-# Copyright 2025 (C) Nicholas M. Synovic
-```
-
-Follow existing file headers when adding new modules.
-
-## Security and Data Integrity
-
-- Do not commit secrets or API keys.
-- Use environment variables or CLI args for credentials.
-- Avoid destructive operations on the database; prefer append/update semantics.
-
-## Cursor/Copilot Rules
-
-- No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` were
-  found in this repository. If they are added later, mirror their guidance here.
+- Keep imports in standard-library / third-party / local groups.
+- Use 4-space indentation, double quotes, type hints, and `Path` for filesystem paths when practical.
+- Use the existing file header style when adding Python files.
+- Do not commit secrets or API keys; prefer environment variables or CLI args.
