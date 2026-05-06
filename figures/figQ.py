@@ -16,13 +16,32 @@ OTHER_FONT_SIZE: int = 18
 
 
 def get_papers_per_journal(db: Engine) -> DataFrame:
-    sql: str = "SELECT doi, megajournal FROM articles"
+    sql: str = """
+SELECT DISTINCT
+    a.doi, a.megajournal
+FROM
+    articles a
+    """
+    return pd.read_sql(sql=sql, con=db)
+
+
+def get_openalex_papers_per_journal(db: Engine) -> DataFrame:
+    sql: str = """
+SELECT DISTINCT
+    oa.doi, a.megajournal
+FROM
+    articles a
+JOIN
+    openalex oa
+ON
+    oa.doi == a.doi
+    """
     return pd.read_sql(sql=sql, con=db)
 
 
 def get_papers_with_citations_per_journal(db: Engine) -> DataFrame:
     sql: str = """
-SELECT
+SELECT DISTINCT
     oa.doi, a.megajournal
 FROM
     articles a
@@ -38,7 +57,7 @@ WHERE
 
 def get_natural_science_papers_per_journal(db: Engine) -> DataFrame:
     sql: str = """
-SELECT
+SELECT DISTINCT
     ns.doi, a.megajournal
 FROM
     articles a
@@ -52,26 +71,28 @@ ON
 
 def get_jats_per_journal(db: Engine) -> DataFrame:
     sql: str = """
-    SELECT
-    a.doi,
-    a.megajournal
+SELECT DISTINCT
+    j.doi, a.megajournal
 FROM
     articles a
 JOIN
-    jats j ON a.doi = j.doi;
+    jats j
+ON
+    a.doi = j.doi;
 """
     return pd.read_sql(sql=sql, con=db)
 
 
 def create_data(
-    df1: DataFrame, df2: DataFrame, df3: DataFrame, df4: DataFrame
+    df1: DataFrame, df2: DataFrame, df3: DataFrame, df4: DataFrame, df5: DataFrame
 ) -> DataFrame:
     data: dict[str, list[str | int]] = {
         "journal": ["BMJ", "F1000", "FrontiersIn", "PLOS"],
         "Total Papers": [],
+        "OpenAlex Indexed Papers": [],
         "Papers With Citations": [],
         "Natural Science Papers": [],
-        "JATS XML Papers": [],
+        "JATS XML Documents": [],
     }
 
     def _run(key: str, df: DataFrame) -> None:
@@ -82,9 +103,10 @@ def create_data(
         data[key].append(counts["PLOS"])
 
     _run("Total Papers", df1)
-    _run("Papers With Citations", df2)
-    _run("Natural Science Papers", df3)
-    _run("JATS XML Papers", df4)
+    _run("OpenAlex Indexed Papers", df2)
+    _run("Papers With Citations", df3)
+    _run("Natural Science Papers", df4)
+    _run("JATS XML Documents", df5)
 
     return DataFrame(data=data)
 
@@ -95,9 +117,10 @@ def plot(df: DataFrame, output_path: Path) -> None:
         id_vars="journal",
         value_vars=[
             "Total Papers",
+            "OpenAlex Indexed Papers",
             "Papers With Citations",
             "Natural Science Papers",
-            # "JATS XML Papers",
+            "JATS XML Documents",
         ],
         var_name="category",
         value_name="count",
@@ -117,16 +140,12 @@ def plot(df: DataFrame, output_path: Path) -> None:
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
     ax.set_ylim(0, df_long["count"].max() * 1.15)  # 15% headroom
 
-    plt.suptitle(t="Paper Counts by Megajournal", fontsize=SUPTITLE_FONT_SIZE)
-    plt.title(
-        label="18,091 papers; 14,998 cited; 7,218 natural science; 6,962 JATS XML",
-        fontsize=TITLE_FONT_SIZE,
-    )
+    plt.title(label="Paper Counts by Megajournal", fontsize=TITLE_FONT_SIZE)
     plt.xlabel("Megajournal", fontsize=XY_LABEL_FONT_SIZE)
     plt.ylabel("Paper Count", fontsize=XY_LABEL_FONT_SIZE)
     plt.yticks(fontsize=XY_TICK_FONT_SIZE)
     plt.xticks(fontsize=XY_TICK_FONT_SIZE)
-    plt.legend(title="", fontsize=OTHER_FONT_SIZE)
+    plt.legend(title="", fontsize=18)
 
     # ---- ADD VALUE LABELS ----
     for container in ax.containers:
@@ -135,6 +154,7 @@ def plot(df: DataFrame, output_path: Path) -> None:
             fmt="{:,.0f}",
             padding=3,
             fontsize=OTHER_FONT_SIZE,
+            rotation=60,
         )
 
     plt.tight_layout()
@@ -164,18 +184,22 @@ def main(db_path: Path, output_path: Path) -> None:
     db: Engine = create_engine(url=f"sqlite:///{db_path}")
 
     papers: DataFrame = get_papers_per_journal(db=db)
+    openalex_papers: DataFrame = get_openalex_papers_per_journal(db=db)
     papers_with_citations: DataFrame = get_papers_with_citations_per_journal(db=db)
     natural_science_papers: DataFrame = get_natural_science_papers_per_journal(db=db)
     jats_papers: DataFrame = get_jats_per_journal(db=db)
 
     df: DataFrame = create_data(
         df1=papers,
-        df2=papers_with_citations,
-        df3=natural_science_papers,
-        df4=jats_papers,
+        df2=openalex_papers,
+        df3=papers_with_citations,
+        df4=natural_science_papers,
+        df5=jats_papers,
     )
 
     plot(df=df, output_path=output_path)
+
+    print(df.sum())
 
 
 if __name__ == "__main__":

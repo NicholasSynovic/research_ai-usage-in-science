@@ -22,14 +22,18 @@ MEGAJOURNALS: list[str] = ["BMJ", "F1000", "FrontiersIn", "PLOS"]
 def get_keyword_counts_per_journal(db: Engine) -> DataFrame:
     sql: str = """
     SELECT
-        megajournal,
-        search_keyword,
-        COUNT(*) AS count
+        s.megajournal,
+        s.search_keyword,
+        COUNT(a._id) AS count
     FROM
-        searches
+        searches s
+    LEFT JOIN
+        articles a
+    ON
+        s._id = a.search_id
     GROUP BY
-        megajournal,
-        search_keyword
+        s.megajournal,
+        s.search_keyword
     ;
     """
     return pd.read_sql(sql=sql, con=db)
