@@ -107,15 +107,6 @@ class SearchRunner(Runner):  # noqa: D101
         )
         self.logger.debug("Data: %s", articles_df)
 
-        # Only keep unique articles by DOI
-        self.logger.info(msg="Dropping duplicate DOI entries")
-        articles_df = articles_df.drop_duplicates(
-            subset="doi",
-            keep="first",
-            ignore_index=True,
-        )
-        articles_df = articles_df.drop(columns=["search_id"])
-
         # Update unique article IDs
         self._update_df_index(table_row_count=row_count, df=articles_df)
 
