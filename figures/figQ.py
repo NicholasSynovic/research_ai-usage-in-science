@@ -49,7 +49,8 @@ ON
 """
     return pd.read_sql(sql=sql, con=db)
 
-def get_jats_per_journal(db: Engine)    ->  DataFrame:
+
+def get_jats_per_journal(db: Engine) -> DataFrame:
     sql: str = """
     SELECT
     a.doi,
@@ -62,13 +63,15 @@ JOIN
     return pd.read_sql(sql=sql, con=db)
 
 
-def create_data(df1: DataFrame, df2: DataFrame, df3: DataFrame, df4: DataFrame) -> DataFrame:
+def create_data(
+    df1: DataFrame, df2: DataFrame, df3: DataFrame, df4: DataFrame
+) -> DataFrame:
     data: dict[str, list[str | int]] = {
         "journal": ["BMJ", "F1000", "FrontiersIn", "PLOS"],
         "Total Papers": [],
         "Papers With Citations": [],
         "Natural Science Papers": [],
-        "JATS XML Papers": []
+        "JATS XML Papers": [],
     }
 
     def _run(key: str, df: DataFrame) -> None:
