@@ -12,7 +12,7 @@ SUPTITLE_FONT_SIZE: int = 24
 TITLE_FONT_SIZE: int = 22
 XY_LABEL_FONT_SIZE: int = 20
 XY_TICK_FONT_SIZE: int = 18
-OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
+OTHER_FONT_SIZE: int = 18
 
 
 def get_papers_per_journal(db: Engine) -> DataFrame:
@@ -31,7 +31,7 @@ JOIN
 ON
     oa.doi == a.doi
 WHERE
-    json_extract(oa.json_data, '$.cited_by_count') > 0;
+    oa.cited_by_count > 0;
 """
     return pd.read_sql(sql=sql, con=db)
 
@@ -49,13 +49,26 @@ ON
 """
     return pd.read_sql(sql=sql, con=db)
 
+def get_jats_per_journal(db: Engine)    ->  DataFrame:
+    sql: str = """
+    SELECT
+    a.doi,
+    a.megajournal
+FROM
+    articles a
+JOIN
+    jats j ON a.doi = j.doi;
+"""
+    return pd.read_sql(sql=sql, con=db)
 
-def create_data(df1: DataFrame, df2: DataFrame, df3: DataFrame) -> DataFrame:
+
+def create_data(df1: DataFrame, df2: DataFrame, df3: DataFrame, df4: DataFrame) -> DataFrame:
     data: dict[str, list[str | int]] = {
         "journal": ["BMJ", "F1000", "FrontiersIn", "PLOS"],
         "Total Papers": [],
         "Papers With Citations": [],
         "Natural Science Papers": [],
+        "JATS XML Papers": []
     }
 
     def _run(key: str, df: DataFrame) -> None:
@@ -68,6 +81,7 @@ def create_data(df1: DataFrame, df2: DataFrame, df3: DataFrame) -> DataFrame:
     _run("Total Papers", df1)
     _run("Papers With Citations", df2)
     _run("Natural Science Papers", df3)
+    _run("JATS XML Papers", df4)
 
     return DataFrame(data=data)
 
@@ -80,6 +94,7 @@ def plot(df: DataFrame, output_path: Path) -> None:
             "Total Papers",
             "Papers With Citations",
             "Natural Science Papers",
+            # "JATS XML Papers",
         ],
         var_name="category",
         value_name="count",
@@ -101,7 +116,7 @@ def plot(df: DataFrame, output_path: Path) -> None:
 
     plt.suptitle(t="Paper Counts by Megajournal", fontsize=SUPTITLE_FONT_SIZE)
     plt.title(
-        label="17,511 papers; 13,815 with citations; 4,384 natural science",
+        label="18,091 papers; 14,998 cited; 7,218 natural science; 6,962 JATS XML",
         fontsize=TITLE_FONT_SIZE,
     )
     plt.xlabel("Megajournal", fontsize=XY_LABEL_FONT_SIZE)
@@ -127,7 +142,7 @@ def plot(df: DataFrame, output_path: Path) -> None:
 @click.option(
     "--db",
     "db_path",
-    default=Path("../data/aius_12-17-2025.db").resolve(),
+    default=Path("../data/aius.3-18-2026.db").resolve(),
     type=click.Path(path_type=Path),
     show_default=True,
     help="Path to the SQLite database.",
@@ -148,11 +163,13 @@ def main(db_path: Path, output_path: Path) -> None:
     papers: DataFrame = get_papers_per_journal(db=db)
     papers_with_citations: DataFrame = get_papers_with_citations_per_journal(db=db)
     natural_science_papers: DataFrame = get_natural_science_papers_per_journal(db=db)
+    jats_papers: DataFrame = get_jats_per_journal(db=db)
 
     df: DataFrame = create_data(
         df1=papers,
         df2=papers_with_citations,
         df3=natural_science_papers,
+        df4=jats_papers,
     )
 
     plot(df=df, output_path=output_path)
