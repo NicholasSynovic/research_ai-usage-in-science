@@ -13,6 +13,8 @@ class Backend(ABC):
         name: str,
         logger: Logger,
         model_name: str,
+        max_retries: int = 100,
+        timeout: int = 3600,
         **kwargs,
     ) -> None:
         self.name: str = name
@@ -20,9 +22,14 @@ class Backend(ABC):
         self.model_name: str = model_name
 
         session_util: HTTPSession = HTTPSession()
-        self.timeout: int = session_util.timeout
+
+        self.timeout: int = timeout
+        session_util.timeout = self.timeout
+
+        self.max_retries: int = max_retries
+        session_util.max_retries = self.max_retries
+
         self.session: Session = session_util.session
-        self.max_retries: int = session_util.max_retries
 
     @abstractmethod
     def inference_document(

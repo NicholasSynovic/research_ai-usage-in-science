@@ -2,7 +2,7 @@ from logging import Logger
 from time import time
 
 import pandas as pd
-from openai import InternalServerError, OpenAI
+from openai import InternalServerError, OpenAI, PermissionDeniedError
 from openai.types.chat.chat_completion import ChatCompletion
 from progress.bar import Bar
 
@@ -54,8 +54,12 @@ class Metis(Backend):
                     {"role": "user", "content": document.content},
                 ],
             )
-        except InternalServerError:
-            self.logger.error("Internal server error raised with DOI: %s", document.doi)
+        except (InternalServerError, PermissionDeniedError) as error:
+            self.logger.error(
+                "OpenAI request failed for DOI %s: %s",
+                document.doi,
+                error,
+            )
             end_time: float = time()
 
             return ModelResponse(

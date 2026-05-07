@@ -1,7 +1,7 @@
 from logging import Logger
 from time import time
 
-from openai import InternalServerError, OpenAI
+from openai import InternalServerError, OpenAI, PermissionDeniedError
 from openai.types.chat.chat_completion import ChatCompletion
 from progress.bar import Bar
 
@@ -14,7 +14,7 @@ class Sophia(Backend):
         self,
         logger: Logger,
         auth_key: str = "",
-        model_name: str = "openai/gpt-oss-20b",
+        model_name: str = "openai/gpt-oss-120b",
         **kwargs,
     ) -> None:
         super().__init__(
@@ -55,8 +55,12 @@ class Sophia(Backend):
                     {"role": "user", "content": document.content},
                 ],
             )
-        except InternalServerError:
-            self.logger.error("Internal server error raised with DOI: %s", document.doi)
+        except (InternalServerError, PermissionDeniedError) as error:
+            self.logger.error(
+                "OpenAI request failed for DOI %s: %s",
+                document.doi,
+                error,
+            )
             end_time: float = time()
 
             return ModelResponse(
