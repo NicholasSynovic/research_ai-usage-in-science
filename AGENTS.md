@@ -3,14 +3,14 @@
 ## Source Of Truth
 
 - Trust `pyproject.toml`, `Makefile`, `.pre-commit-config.yaml`, `ruff.toml`, and `.github/workflows/*` over `README.md`.
-- Project package is `aius`; the CLI entrypoint is `aius` -> `aius.main:main`.
-- Python target is `~=3.13`; use Python 3.13 locally even though the build workflow still says 3.10.
+- The package is `aius`; the CLI entrypoint is `aius` -> `aius.main:main`.
+- The repo targets Python 3.13 locally (`requires-python = "~=3.13"` and pre-commit uses `python3.13`), even though the GitHub workflows still say 3.10.
 
 ## Commands
 
 ```bash
-make create-dev   # pre-commit install + pre-commit autoupdate + rm -rf env + uv sync
-make build        # rm -rf dist + uv version <latest git tag> + uv build + uv pip install dist/*.tar.gz
+make create-dev   # installs hooks, refreshes hook versions, removes env/, runs uv sync
+make build        # removes dist/, bumps version from latest git tag, builds, installs the tarball
 uv sync
 uv build
 ruff format aius/
@@ -18,31 +18,25 @@ ruff check aius/
 pytest
 ```
 
-- `ruff format` is the formatter; `ruff.toml` is authoritative for linting and line length.
-- For focused tests, look for `test_*.py` and run the specific file directly; there is no active top-level `tests/` package.
+- `make create-dev` deletes the local `env/` directory.
+- `ruff format` is the formatter; `ruff.toml` is the lint/format source of truth.
+- For focused tests, run the specific `test_*.py` file directly when one exists; this repo does not have an active top-level `tests/` package.
 
 ## Repo Shape
 
-- `aius/` is the package code.
-- `scripts/`, `figures/`, and `statistics/` are analysis utilities.
+- `aius/` contains the application code and CLI flow.
+- `scripts/`, `figures/`, and `statistics/` are analysis/reproduction utilities.
 - `scripts/_old/` and `figures/_old/` are archival.
 
 ## Runtime Flow
 
-- `aius/main.py` builds logging, parses CLI args, then dispatches through `runner_factory`.
-- CLI subcommands: `init`, `search`, `openalex`, `jats`, `pandoc`, `analyze`.
-- `runner_factory` expects a matching `--db` option for each subcommand.
-- `openalex` requires `--email`; `analyze` requires `--backend` and `--model-name`.
-- Database access is centralized in `aius.db.DB`; its constructor creates tables and the `natural_science_article_dois` view.
-
-## Conventions
-
-- Keep imports grouped as standard library / third-party / local.
-- Use 4-space indentation, double quotes, type hints, and `Path` for filesystem paths when practical.
-- Preserve the existing file header style when adding Python files.
-- Do not commit secrets or API keys; prefer environment variables or CLI args.
+- `aius/main.py` sets up logging, parses CLI args, then dispatches through `runner_factory`.
+- CLI subcommands are `init`, `search`, `openalex`, `jats`, `pandoc`, and `analyze`.
+- Each subcommand expects its own `--db` option; `openalex` also requires `--email`, and `analyze` requires `--backend` and `--model-name`.
+- `aius.db.DB` creates the SQLite tables and the `natural_science_article_dois` view on init.
 
 ## Gotchas
 
-- `make create-dev` removes the local `env/` directory.
+- The GitHub build workflow is stale: it still references Python 3.10 and calls `make package`, but the Makefile only defines `build` and `create-dev`.
 - `pandas.read_sql_table` can mis-handle SQLite timestamp columns here; use a raw SQL query when that happens.
+- Do not commit secrets or API keys; use environment variables or CLI args.
