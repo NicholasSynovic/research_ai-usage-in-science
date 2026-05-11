@@ -22,8 +22,10 @@ seq 0 19 | parallel \
   --line-buffer \
   --tagstring '{#}/20 index={}' \
   aius analyze \
-    --db "${DB_PATH}" \
+    --auth-key $1   \
     --backend "${BACKEND}" \
-    --model-name "${MODEL_NAME}" \
+    --db "${DB_PATH}" \
     --index {} \
+    --model-name "${MODEL_NAME}" \
     --stride "${STRIDE}"
+    --system-prompt-id "uses_dl"
