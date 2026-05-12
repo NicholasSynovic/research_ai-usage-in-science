@@ -21,12 +21,11 @@ def get_batch_file_ids(limit: int = 60) -> list[Batch]:
 
     client = OpenAI(api_key=api_key)
 
-    # Today at 11:00 AM local time
     now = datetime.now(LOCAL_TZ)
 
     cutoff = datetime.combine(
         now.date(),
-        time(hour=11, minute=0),
+        time(hour=16, minute=0),
         tzinfo=LOCAL_TZ,
     )
 

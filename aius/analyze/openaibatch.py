@@ -49,7 +49,7 @@ class OpenAIBatchBackend(Backend):
 
         filenames: list[str] = []
 
-        doc_map: dict[str, Document] = {}
+        doc_map: dict[str, str] = {}
 
         current_file = tempfile.NamedTemporaryFile(
             mode="w",
@@ -63,7 +63,7 @@ class OpenAIBatchBackend(Backend):
         for index, document in enumerate(documents):
             custom_id = f"doc-{index}"
 
-            doc_map[custom_id] = document
+            doc_map[custom_id] = document.doi
 
             request = {
                 "custom_id": custom_id,
@@ -142,6 +142,9 @@ class OpenAIBatchBackend(Backend):
             current_file.name,
         )
 
+        with open("doc_map.txt", "w") as fp:
+            json.dump(obj=doc_map, fp=fp, indent=4)
+
         return filenames, doc_map
 
     def inference_document(
@@ -176,6 +179,8 @@ class OpenAIBatchBackend(Backend):
 
         # Upload batch input file
         self.logger.info("Uploading batch input files...")
+
+        print(input_filenames)
 
         with Bar("Uploading batch input files...", max=len(input_filenames)) as bar:
             fn: str

@@ -1,6 +1,7 @@
 import argparse
 import json
-from json import dumps, loads
+from collections import defaultdict
+from json import dumps, load, loads
 from pathlib import Path
 from sqlite3 import Connection, connect
 
@@ -8,6 +9,10 @@ import pandas as pd
 from progress.bar import Bar
 
 from aius.analyze.data_models import Document, ModelResponse
+
+
+def load_doc_map(fp: str) -> dict[str, str]:
+    return load(open(fp))
 
 
 def process_jsonl_files(input_dir) -> list[dict]:
@@ -47,7 +52,7 @@ def records_to_model(records: list[dict]) -> list[ModelResponse]:
 
     with Bar("Loading records into ModelResponses...", max=len(records)) as bar:
         for record in records:
-            doi: str = str(int(record["custom_id"].replace("doc-", "")))
+            doi: str = record["custom_id"]
 
             try:
                 model_reasoning: str = dumps(
@@ -85,24 +90,42 @@ def records_to_model(records: list[dict]) -> list[ModelResponse]:
     return data
 
 
-def convert(db_conn: Connection, models: list[ModelResponse]) -> pd.DataFrame:
+def add_model_doi(
+    doc_map: dict[str, str], models: list[ModelResponse]
+) -> list[ModelResponse]:
+    data: list[ModelResponse] = []
+
+    model: ModelResponse
+    for model in models:
+        model.doi = doc_map[model.doi]
+        data.append(model)
+
+    return data
+
+
+def add_model_user_prompt(
+    db: Connection,
+    models: list[ModelResponse],
+) -> list[ModelResponse]:
+    data: list[ModelResponse] = []
+
     markdown_df: pd.DataFrame = pd.read_sql_query(
-        sql="SELECT _id, doi FROM markdown",
-        con=db_conn,
-        index_col="_id",
+        sql="SELECT doi, markdown FROM markdown",
+        con=db,
     )
 
-    df: pd.DataFrame = pd.concat(objs=[model.to_df for model in models])
-    df["doi"] = df["doi"].map(int)
-    df = df.sort_values(by="doi", ignore_index=True)
+    model: ModelResponse
+    for model in models:
+        model.user_prompt = markdown_df[markdown_df["doi"] == model.doi][
+            "markdown"
+        ].tolist()[0]
+        data.append(model)
 
-    temp: pd.DataFrame = markdown_df.merge(
-        right=df,
-        how="outer",
-        left_index=True,
-        right_on="doi",
-    )
-    return temp.drop(columns=["doi", "doi_y"]).rename(columns={"doi_x": "doi"})
+    return data
+
+
+def convert(models: list[ModelResponse]) -> pd.DataFrame:
+    return pd.concat(objs=[model.to_df for model in models])
 
 
 def main():
@@ -116,22 +139,41 @@ def main():
         "input_dir", type=str, help="Path to the directory containing .jsonl files"
     )
     parser.add_argument(
+        "--doc",
+        type=str,
+        help="Path to the doc map",
+        required=True,
+    )
+    parser.add_argument(
         "--db",
         type=str,
-        help="Path to the database",
+        help="Path to the db",
         required=True,
     )
 
     # 3. Parse the arguments
     args = parser.parse_args()
 
-    # 4. Execute logic
+    db: Connection = connect(database=args.db)
+
+    # 4. Load the document map
+    doc_map: dict[str, str] = load_doc_map(fp=args.doc)
+
+    # 5. Load the JSONL files
     records = process_jsonl_files(args.input_dir)
 
+    # 6. Convert records to models
     models: list[ModelResponse] = records_to_model(records=records)
 
-    db: Connection = connect(database=args.db)
-    df: pd.DataFrame = convert(db_conn=db, models=models)
+    # 7. Fix metadata with the doc_map
+    models = add_model_doi(doc_map=doc_map, models=models)
+
+    # 8. Add content from the server
+    models = add_model_user_prompt(db=db, models=models)
+
+    # 9. Convert to DataFrame
+    df: pd.DataFrame = convert(models=models)
+
     df.to_parquet(path="jsonl.parquet", engine="auto")
     db.close()
 
