@@ -3,8 +3,8 @@ import time
 
 import globus_sdk
 from globus_sdk.login_flows import (
-    LocalServerLoginFlowManager,  # Needed to access globus_sdk.gare
-)
+    LocalServerLoginFlowManager,
+)  # Needed to access globus_sdk.gare
 
 # Globus UserApp name
 APP_NAME = "inference_app"

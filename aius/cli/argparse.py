@@ -186,7 +186,7 @@ class Argparse(CLI):  # noqa: D101
             type=str,
             required=False,
             default="",
-            help="Inference serve auth key (required for sophia and metis backends)",
+            help="Inference serve auth key (required for metis, openai, and sophia backends)",
             dest="analyze.auth_key",
         )
 
@@ -194,7 +194,7 @@ class Argparse(CLI):  # noqa: D101
             "--backend",
             type=str,
             required=True,
-            choices=["metis", "ollama", "sophia"],
+            choices=["metis", "ollama", "openai", "sophia"],
             help="LLM inferencing backend",
             dest="analyze.backend",
         )

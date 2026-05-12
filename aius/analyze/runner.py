@@ -30,7 +30,7 @@ class AnalysisRunner(Runner):  # noqa: D101
         stride: int,
         system_prompt_id: str,
         auth_key: str = "",
-        backend: Literal["metis", "ollama", "sophia"] = "sophia",
+        backend: Literal["metis", "ollama", "openai", "sophia"] = "sophia",
         max_context_tokens: int = 100000,
         max_predict_tokens: int = 10000,
         ollama_endpoint: str = "",
