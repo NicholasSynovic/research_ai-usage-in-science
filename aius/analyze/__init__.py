@@ -18,11 +18,13 @@ from aius.analyze.data_models import (
 from aius.analyze.metis import Metis
 from aius.analyze.ollama import Ollama
 from aius.analyze.openai import OpenAIBackend
+from aius.analyze.openaibatch import OpenAIBatchBackend
 from aius.analyze.sophia import Sophia
 
 BACKEND_MAPPING: dict[str, type] = {
     "metis": Metis,
     "openai": OpenAIBackend,
+    "openai-batch": OpenAIBatchBackend,
     "ollama": Ollama,
     "sophia": Sophia,
 }

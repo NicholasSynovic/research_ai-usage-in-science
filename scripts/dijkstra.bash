@@ -1,5 +1,5 @@
 seq 0 999 | parallel \
-  --bar
+  --bar \
   aius analyze \
     --auth-key $1   \
     --backend openai \
