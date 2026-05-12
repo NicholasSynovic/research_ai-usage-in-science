@@ -2,7 +2,6 @@ from logging import Logger
 from time import time
 
 from openai import OpenAI
-from openai.types.chat.chat_completion import ChatCompletion
 from openai.types.responses.response import Response
 from progress.bar import Bar
 
@@ -15,7 +14,7 @@ class OpenAIBackend(Backend):
         self,
         logger: Logger,
         auth_key: str,
-        model_name: str = "gpt-5.5",
+        model_name: str = "gpt-5.4-nano-2026-03-17",
         **kwargs,
     ) -> None:
         super().__init__(name="openai", logger=logger, model_name=model_name)
