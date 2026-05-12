@@ -1,31 +1,10 @@
-#!/usr/bin/env bash
-
-set -uo pipefail
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-
-DB_PATH="${DB_PATH:-${REPO_ROOT}/aius.sqlite3}"
-BACKEND="${BACKEND:-sophia}"
-MODEL_NAME="${MODEL_NAME:-openai/gpt-oss-120b}"
-STRIDE="${STRIDE:-20}"
-JOBS="${JOBS:-20}"
-JOBLOG="${JOBLOG:-${SCRIPT_DIR}/dijkstra.joblog.tsv}"
-RESULTS_DIR="${RESULTS_DIR:-${SCRIPT_DIR}/dijkstra.results}"
-
-mkdir -p "${RESULTS_DIR}"
-
-seq 0 19 | parallel \
-  --jobs "${JOBS}" \
-  --joblog "${JOBLOG}" \
-  --results "${RESULTS_DIR}" \
-  --line-buffer \
-  --tagstring '{#}/20 index={}' \
+seq 0 999 | parallel \
+  --bar
   aius analyze \
     --auth-key $1   \
-    --backend "${BACKEND}" \
-    --db "${DB_PATH}" \
+    --backend openai \
+    --db $2 \
     --index {} \
-    --model-name "${MODEL_NAME}" \
-    --stride "${STRIDE}"
+    --model-name "gpt-5.4-nano-2026-03-17" \
+    --stride 1000 \
     --system-prompt-id "uses_dl"
