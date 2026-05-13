@@ -25,7 +25,7 @@ def get_batch_file_ids(limit: int = 60) -> list[Batch]:
 
     cutoff = datetime.combine(
         now.date(),
-        time(hour=16, minute=0),
+        time(hour=18, minute=0),
         tzinfo=LOCAL_TZ,
     )
 
