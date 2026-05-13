@@ -4,7 +4,6 @@ from pathlib import Path
 
 import click
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
@@ -38,7 +37,8 @@ def get_papers_per_journal(db: Engine) -> DataFrame:
 def get_papers(db: Engine) -> DataFrame:
     sql: str = """
 SELECT
-    udl.doi, oa.topic_0, oa.topic_1, oa.topic_2, oa.json_data
+    udl.doi, oa.topic_0, oa.topic_1, oa.topic_2,
+    CAST(json_extract(oa.json_data, '$.publication_year') AS INTEGER) AS publication_year
 FROM
     uses_dl_analysis udl
 JOIN
@@ -59,11 +59,9 @@ def create_data(df: DataFrame) -> DataFrame:
             str(row["topic_1"]),
             str(row["topic_2"]),
         ]
-        json: dict = loads(str(row["json_data"]))
         for topic in topics:
-            if json["publication_year"] > 2016:
-                data["year"].append(json["publication_year"])
-                data["field"].append(topic)
+            data["year"].append(row["publication_year"])
+            data["field"].append(topic)
 
     data_df = DataFrame(data=data)
     data_df = data_df[data_df["field"].isin(FIELD)]
