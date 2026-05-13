@@ -91,7 +91,9 @@ def create_field_dataframes(df: DataFrame) -> dict[str, DataFrame]:
 
     data_df = DataFrame(data=data)
     if data_df.empty:
-        return {field: DataFrame(columns=["year", "dl_using", "no_dl"]) for field in FIELD}
+        return {
+            field: DataFrame(columns=["year", "dl_using", "no_dl"]) for field in FIELD
+        }
 
     min_year = int(data_df["year"].min())
     max_year = int(data_df["year"].max())
@@ -112,7 +114,9 @@ def create_field_dataframes(df: DataFrame) -> dict[str, DataFrame]:
             .reset_index()
             .rename(columns={"index": "year"})
         )
-        field_counts[["dl_using", "no_dl"]] = field_counts[["dl_using", "no_dl"]].astype(int)
+        field_counts[["dl_using", "no_dl"]] = field_counts[
+            ["dl_using", "no_dl"]
+        ].astype(int)
         field_dataframes[field] = field_counts
 
     return field_dataframes
