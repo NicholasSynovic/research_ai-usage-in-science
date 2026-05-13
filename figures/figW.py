@@ -15,8 +15,8 @@ TITLE_FONT_SIZE: int = 22
 XY_LABEL_FONT_SIZE: int = 20
 XY_TICK_FONT_SIZE: int = 18
 OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
-DL_LABEL: str = "DL Usage"
-NO_DL_LABEL: str = "No DL Usage"
+DL_LABEL: str = "PTM Reuse"
+NO_DL_LABEL: str = "No PTM Reuse"
 
 
 def load_dl_rows(db: Engine) -> DataFrame:
@@ -26,7 +26,7 @@ SELECT
     CAST(json_extract(oa.json_data, '$.publication_year') AS INTEGER) AS publication_year,
     udl.model_response
 FROM
-    uses_dl_analysis udl
+    uses_ptms_analysis udl
 JOIN
     openalex oa
 ON
@@ -153,9 +153,9 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
     ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
     ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
     ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
-    plt.suptitle("Papers Using Deep Learning per Year", fontsize=SUPTITLE_FONT_SIZE)
+    plt.suptitle("Papers Reusing PTMs per Year", fontsize=SUPTITLE_FONT_SIZE)
     plt.title(
-        label=fill("6,692 Candidate Papers; 4,662 Use Deep Learning"),
+        label=fill("4,662 Candidate Papers; 1,837 Use Deep Learning"),
         fontsize=TITLE_FONT_SIZE,
     )
     ax.set_xticks(years)
@@ -197,7 +197,7 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
 @click.option(
     "--output",
     "output_path",
-    default=Path("papers_using_dl_ptms.pdf").absolute(),
+    default=Path("figW.pdf").absolute(),
     type=click.Path(path_type=Path),
     show_default=True,
     help="Output path for the stacked paper counts plot.",

@@ -67,6 +67,7 @@ def parse_json(value: str) -> dict[str, Any] | list[Any] | None:
 
 
 def create_field_dataframes(df: DataFrame) -> dict[str, DataFrame]:
+    count: int = 0
     data: dict[str, list[str | int]] = {
         "year": [],
         "field": [],
@@ -81,6 +82,7 @@ def create_field_dataframes(df: DataFrame) -> dict[str, DataFrame]:
 
         result = parsed_response.get("result")
         if result is True:
+            count += 1
             dl_using = 1
             no_dl = 0
         elif result is False:
@@ -135,6 +137,7 @@ def create_field_dataframes(df: DataFrame) -> dict[str, DataFrame]:
         ].astype(int)
         field_dataframes[field] = field_counts
 
+    print("DL using papers", count)
     return field_dataframes
 
 
