@@ -155,7 +155,7 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
     ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
     plt.suptitle("Papers Reusing PTMs per Year", fontsize=SUPTITLE_FONT_SIZE)
     plt.title(
-        label=fill("4,662 Candidate Papers; 1,837 Use Deep Learning"),
+        label=fill("4,662 Candidate Papers; 1,837 Reuse PTMs"),
         fontsize=TITLE_FONT_SIZE,
     )
     ax.set_xticks(years)

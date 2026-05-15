@@ -68,7 +68,7 @@ def load_model_responses(
 
 
 def main() -> None:
-    db_path: Path = Path("../data/aius_12-17-2025.db").absolute()
+    db_path: Path = Path("../data/aius.3-18-2026.db").absolute()
 
     model_responses: list[dict] = load_model_responses(
         db_path=db_path,
