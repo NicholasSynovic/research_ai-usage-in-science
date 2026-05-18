@@ -23,13 +23,17 @@ def setup_logging() -> None:  # noqa: D103
     log_file: Path = Path(f"{MODULE_NAME}_{timestamp}.log").resolve()
 
     # Setup the logger
-    logging.getLogger()
     logging.basicConfig(
-        filename=log_file,
-        filemode="w",
-        encoding="UTF-8",
         level=logging.DEBUG,
         format="%(asctime)s %(levelname)s:%(message)s",
+        handlers=[
+            logging.FileHandler(
+                filename=log_file,
+                mode="w",
+                encoding="UTF-8",
+            ),
+            logging.StreamHandler(stream=sys.stderr),
+        ],
     )
 
 
