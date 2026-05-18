@@ -6,8 +6,7 @@ from typing import Any
 import click
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
-from matplotlib.container import BarContainer
+from matplotlib.patches import Patch
 from matplotlib.ticker import FuncFormatter
 from pandas import DataFrame
 
@@ -18,124 +17,167 @@ XY_TICK_FONT_SIZE: int = 18
 OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
 
 
-def plot(df: DataFrame, output_path: Path, log_scale: bool = False) -> None:
-    # Aggregate counts per year and classification
-    counts = df.groupby(["publication_year", "classification"]).size().reset_index()
-    counts.columns = ["publication_year", "classification", "count"]
+def plot(df: DataFrame, output_path: Path) -> None:
+    df = df.loc[df["publication_year"] >= 2012].copy()
 
-    counts["classification"] = counts["classification"].replace(
-        to_replace="adaptation_reuse", value="Adaptation Reuse"
-    )
-    counts["classification"] = counts["classification"].replace(
-        to_replace="conceptual_reuse", value="Conceptual Reuse"
-    )
-    counts["classification"] = counts["classification"].replace(
-        to_replace="deployment_reuse", value="Deployment Reuse"
-    )
-
-    ymax: int = counts[counts["classification"] == "Adaptation Reuse"]["count"].max()
-
+    classification_labels = {
+        "adaptation_reuse": "Adaptation Reuse",
+        "conceptual_reuse": "Conceptual Reuse",
+        "deployment_reuse": "Deployment Reuse",
+    }
     classifications = [
         "Adaptation Reuse",
-        "Deployment Reuse",
         "Conceptual Reuse",
+        "Deployment Reuse",
     ]
-    panel_labels = ["(A)", "(B)", "(C)"]
 
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(24, 8), sharey=True)
-    for index, classification in enumerate(classifications):
-        ax = axes[index]
-        panel_data = counts.loc[counts["classification"] == classification]
-
-        sns.barplot(
-            data=panel_data,
-            x="publication_year",
-            y="count",
-            ax=ax,
-        )
-
-        if log_scale:
-            ax.set_yscale("log")
-        else:
-            ax.set_ylim(0, ymax * 1.3)
-
-        ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
-        ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
-        ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
-        ax.set_title(classification, fontsize=TITLE_FONT_SIZE)
-        ax.tick_params(axis="both", labelsize=XY_TICK_FONT_SIZE)
-        ax.tick_params(axis="x", rotation=45)
-
-        if ax.get_legend() is not None:
-            ax.get_legend().remove()
-
-        for container in ax.containers:
-            if isinstance(container, BarContainer):
-                ax.bar_label(
-                    container,
-                    fmt="{:,.0f}",
-                    padding=3,
-                    fontsize=OTHER_FONT_SIZE,
-                )
-
-        ax.text(
-            0.02,
-            0.98,
-            panel_labels[index],
-            transform=ax.transAxes,
-            ha="left",
-            va="top",
-            fontsize=TITLE_FONT_SIZE,
-            fontweight="bold",
-        )
-
-    fig.suptitle(
-        "PTM Reuse Pattern Counts per Year",
-        fontsize=SUPTITLE_FONT_SIZE,
+    counts = (
+        df.groupby(["publication_year", "classification"], as_index=False)
+        .size()
+        .rename(columns={"size": "count"})
     )
-    fig.tight_layout()
+    counts["classification"] = counts["classification"].replace(classification_labels)
+    counts = counts.loc[counts["classification"].isin(classifications)].copy()
+
+    if counts.empty:
+        click.echo("No valid classification rows found; skipping plot.")
+        return
+
+    year_min = 2012
+    year_max = int(counts["publication_year"].max())
+    years = list(range(year_min, year_max + 1))
+
+    pivot = (
+        counts.pivot_table(
+            index="publication_year",
+            columns="classification",
+            values="count",
+            aggfunc="sum",
+            fill_value=0,
+        )
+        .reindex(years, fill_value=0)
+        .reset_index()
+    )
+
+    for classification in classifications:
+        if classification not in pivot.columns:
+            pivot[classification] = 0
+
+    pivot = pivot[["publication_year"] + classifications]
+    pivot[classifications] = pivot[classifications].astype(int)
+
+    totals = {
+        classification: int(pivot[classification].sum())
+        for classification in classifications
+    }
+    ymax = int(pivot[classifications].sum(axis=1).max())
+
+    fig, ax = plt.subplots(figsize=(14, 8))
+
+    colors = {
+        "Adaptation Reuse": "#4C78A8",
+        "Conceptual Reuse": "#54A24B",
+        "Deployment Reuse": "#C44E52",
+    }
+
+    bottom = pd.Series(0, index=pivot.index)
+    for classification in classifications:
+        ax.bar(
+            pivot["publication_year"],
+            pivot[classification],
+            bottom=bottom,
+            color=colors[classification],
+            label=classification,
+        )
+        bottom = bottom + pivot[classification]
+
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(x):,}"))
+    ax.set_xlabel("Year", fontsize=XY_LABEL_FONT_SIZE)
+    ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
+    ax.set_title(
+        "PTM Reuse Pattern Counts per Year",
+        fontsize=TITLE_FONT_SIZE,
+        pad=12,
+    )
+    ax.set_ylim(0, max(ymax * 1.3, 1))
+    ax.tick_params(axis="both", labelsize=XY_TICK_FONT_SIZE)
+    ax.tick_params(axis="x", rotation=45)
+
+    xtick_labels = [
+        str(year) if position % 2 == 0 else "" for position, year in enumerate(years)
+    ]
+    ax.set_xticks(years)
+    ax.set_xticklabels(xtick_labels)
+
+    ax.legend(
+        handles=[
+            Patch(color=colors[classification], label=classification)
+            for classification in classifications
+        ],
+        frameon=True,
+        fontsize=OTHER_FONT_SIZE,
+        title="",
+    )
+
+    fig.text(
+        0.5,
+        0.955,
+        f"{totals['Adaptation Reuse']:,} Adaptation Reuse; {totals['Conceptual Reuse']:,} Conceptual Reuse; {totals['Deployment Reuse']:,} Deployment Reuse",
+        ha="center",
+        va="top",
+        fontsize=TITLE_FONT_SIZE,
+    )
+
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
     fig.savefig(output_path)
     plt.close(fig)
 
 
-def extract_classification(obj: Any) -> list[Any]:
-    """
-    Extract classification values from:
-      - a dict
-      - a list of dicts
-
-    Always returns a list (possibly empty).
-    """
+def extract_classification(obj: Any) -> str | None:
     if isinstance(obj, dict):
-        return [obj["classification"]] if "classification" in obj else []
+        value = obj.get("classification")
+        return value if isinstance(value, str) and value else None
 
-    if isinstance(obj, list):
-        return [
-            item["classification"]
-            for item in obj
-            if isinstance(item, dict) and "classification" in item
-        ]
-
-    return []
+    return None
 
 
 def normalize_data(df: DataFrame) -> DataFrame:
-    # 1. Drop NULL and empty / whitespace-only strings
-    df = df.dropna(subset=["model_response"])
-    df = df.loc[df["model_response"].str.strip() != ""]
+    total_rows = len(df)
 
-    # 2. Parse JSON safely
-    def parse_json(s: str) -> dict[str, Any] | None:
+    # 1. Drop NULL and empty / whitespace-only strings.
+    df = df.copy()
+    null_rows = int(df["model_response"].isna().sum())
+    df = df.dropna(subset=["model_response"]).copy()
+    empty_rows = int(df["model_response"].astype(str).str.strip().eq("").sum())
+    df = df.loc[df["model_response"].astype(str).str.strip() != ""].copy()
+
+    # 2. Parse JSON safely and keep dicts only.
+    def parse_json(s: str) -> tuple[dict[str, Any] | None, str]:
         try:
             obj = loads(s)
-            return obj if isinstance(obj, dict) and obj else None
+            if isinstance(obj, dict) and obj:
+                return obj, "ok"
+            return None, "non_dict"
         except Exception:
-            return None
+            return None, "invalid_json"
 
-    df["model_response"] = df["model_response"].map(parse_json)
+    parsed = df["model_response"].map(parse_json)
+    df["model_response"] = parsed.map(lambda item: item[0])
+    status = parsed.map(lambda item: item[1])
 
-    # 3. Drop malformed JSON or empty dicts
-    df = df.dropna(subset=["model_response"])
+    invalid_json_rows = int((status == "invalid_json").sum())
+    non_dict_rows = int((status == "non_dict").sum())
+    df = df.loc[status == "ok"].copy()
+
+    kept_rows = len(df)
+    dropped_rows = total_rows - kept_rows
+    click.echo(
+        "model_response summary: "
+        f"kept {kept_rows}/{total_rows} rows; "
+        f"dropped {dropped_rows} "
+        f"(null={null_rows}, empty={empty_rows}, "
+        f"invalid_json={invalid_json_rows}, non_dict={non_dict_rows})"
+    )
 
     return df
 
@@ -157,6 +199,10 @@ FROM
     with sqlite3.connect(db_path) as conn:
         df: DataFrame = pd.read_sql(query, conn)
 
+    df["publication_year"] = pd.to_numeric(df["publication_year"], errors="coerce")
+    df = df.dropna(subset=["publication_year"]).copy()
+    df["publication_year"] = df["publication_year"].astype(int)
+
     return df.sort_values(by="publication_year")
 
 
@@ -177,15 +223,7 @@ FROM
     show_default=True,
     help="Output path for the plot.",
 )
-@click.option(
-    "--log-scale",
-    "log_scale",
-    default=False,
-    type=bool,
-    show_default=True,
-    help="Use log-scaling on the Y-axis.",
-)
-def main(db_path: Path, output_path: Path, log_scale: bool) -> None:
+def main(db_path: Path, output_path: Path) -> None:
     db_path = db_path.absolute()
     output_path = output_path.absolute()
 
@@ -195,9 +233,36 @@ def main(db_path: Path, output_path: Path, log_scale: bool) -> None:
 
     df["classification"] = df["model_response"].map(extract_classification)
 
-    df = df.explode(column="classification")
+    missing_classification_rows = int(df["classification"].isna().sum())
+    if missing_classification_rows:
+        click.echo(
+            "classification summary: "
+            f"dropped {missing_classification_rows} rows with no classification key"
+        )
 
-    plot(df, output_path=output_path, log_scale=log_scale)
+    df = df.dropna(subset=["classification"]).copy()
+
+    df = df.loc[df["publication_year"] >= 2012].copy()
+
+    class_totals = (
+        df.loc[
+            df["classification"].isin(
+                ["adaptation_reuse", "deployment_reuse", "conceptual_reuse"]
+            )
+        ]
+        .groupby("classification")
+        .size()
+        .to_dict()
+    )
+
+    plot(df, output_path=output_path)
+
+    print(
+        "reuse totals: ",
+        f"adaptation={class_totals.get('adaptation_reuse', 0)}, ",
+        f"deployment={class_totals.get('deployment_reuse', 0)}, ",
+        f"conceptual={class_totals.get('conceptual_reuse', 0)}",
+    )
 
 
 if __name__ == "__main__":
