@@ -170,21 +170,6 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
     ax.grid(False)
     ax.set_axisbelow(True)
 
-    # ax.bar_label(blue_bars, fmt="{:,.0f}", padding=3, fontsize=OTHER_FONT_SIZE)
-    # ax.bar_label(red_bars, fmt="{:,.0f}", padding=3, fontsize=OTHER_FONT_SIZE)
-
-    # totals = blue_counts.add(red_counts)
-    # for x_value, total in zip(years, totals, strict=True):
-    #     if total > 0:
-    #         ax.text(
-    #             x_value,
-    #             total + 0.5,
-    #             f"{int(total):,}",
-    #             ha="center",
-    #             va="bottom",
-    #             fontsize=OTHER_FONT_SIZE,
-    #         )
-
     fig.tight_layout()
     fig.savefig(output_path)
     plt.close(fig)
