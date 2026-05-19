@@ -17,6 +17,7 @@ XY_TICK_FONT_SIZE: int = 18
 OTHER_FONT_SIZE: int = XY_TICK_FONT_SIZE
 DL_LABEL: str = "DL Usage"
 NO_DL_LABEL: str = "No DL Usage"
+FIGSIZE: tuple[float, float] = (12.8, 9.6)
 
 
 def load_dl_rows(db: Engine) -> DataFrame:
@@ -35,6 +36,8 @@ INNER JOIN
     natural_science_article_dois ns
 ON
     ns.doi = udl.doi
+WHERE
+    publication_year < 2026;
 """
     return pd.read_sql(sql=sql, con=db)
 
@@ -131,7 +134,7 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
     if pivot.empty:
         raise ValueError("No years with DL papers available for plotting.")
 
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=FIGSIZE)
     zero_counts = pd.Series(0, index=pivot.index)
     blue_counts = pivot.get(DL_LABEL, zero_counts)
     red_counts = pivot.get(NO_DL_LABEL, zero_counts)
@@ -145,7 +148,7 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
     red_bars = ax.bar(
         pivot["publication_year"],
         red_counts,
-        bottom=blue_counts,
+        # bottom=blue_counts,
         color="#C44E52",
         label=NO_DL_LABEL,
     )
@@ -155,11 +158,13 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
     ax.set_ylabel("Count", fontsize=XY_LABEL_FONT_SIZE)
     plt.suptitle("Papers Using Deep Learning per Year", fontsize=SUPTITLE_FONT_SIZE)
     plt.title(
-        label=fill("6,692 Candidate Papers; 4,662 Use Deep Learning"),
+        label=f"{df[df['category'] == 'DL Usage']['count'].sum():,} Use DL; {df[df['category'] == 'No DL Usage']['count'].sum():,} No DL Usage;",
         fontsize=TITLE_FONT_SIZE,
+        loc="center",
     )
-    ax.set_xticks(years)
-    ax.set_xticklabels([str(year) for year in years], rotation=45)
+    xticks: list[int] = years[::2]
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([str(year) for year in xticks], rotation=45)
     ax.tick_params(axis="both", labelsize=XY_TICK_FONT_SIZE)
     ax.legend(title="", fontsize=OTHER_FONT_SIZE)
     ax.grid(False)
@@ -197,7 +202,7 @@ def plot_counts(df: DataFrame, output_path: Path) -> None:
 @click.option(
     "--output",
     "output_path",
-    default=Path("papers_using_dl_ptms.pdf").absolute(),
+    default=Path("figV.pdf").absolute(),
     type=click.Path(path_type=Path),
     show_default=True,
     help="Output path for the stacked paper counts plot.",
@@ -211,6 +216,8 @@ def main(db_path: Path, output_path: Path) -> None:
     dl_df: DataFrame = load_dl_rows(db=db)
 
     counts: DataFrame = create_paper_usage_counts(df=dl_df)
+
+    print(dl_df)
 
     plot_counts(df=counts, output_path=output_path)
 
